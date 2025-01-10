@@ -1,0 +1,27 @@
+version: '3.3'
+
+services:
+  karer_backend:
+    container_name: karer_backend
+    build: ./backend
+    ports:
+      - "8000:8000"
+    command: sh -c "python manage.py runserver 0.0.0.0:8000"
+    restart: always
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend/:/app/
+  
+  karer_db:
+    container_name: karer_db
+    image: postgis/postgis:latest
+    restart: always
+    env_file: 
+      - ./backend/.env
+    volumes:
+      - karer_db:/var/lib/postgresql/data
+
+volumes: 
+  karer_db: 
+    driver: local
