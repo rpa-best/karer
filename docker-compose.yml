@@ -22,6 +22,19 @@ services:
     volumes:
       - karer_db:/var/lib/postgresql/data
 
+  karer_front:
+    container_name: karer_front
+    build:
+      context: ./frontend/
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    command: sh -c "npm run dev"
+    restart: always
+    env_file:
+      - ./frontend/.env
+    volumes:
+      - ./frontend/:/app/
 volumes: 
   karer_db: 
     driver: local
