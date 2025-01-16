@@ -116,7 +116,7 @@ export  default [
 
         {
             path: '/auth/login',
-            name: 'login',
+            name: 'uikit_login',
             component: () => import('@/views/pages/auth/Login.vue')
         },
         {

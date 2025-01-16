@@ -3,6 +3,7 @@ export default {
     name: 'Cars',
     data() {
         return {
+            loading: true,
             cars: [
                 {
                     number: 'K777KKK',
@@ -10,7 +11,23 @@ export default {
                     model: '43118',
                     vin: '435342543n2jn4i2',
                 }
-            ]
+            ],
+            filters: {
+                search: null
+            }
+        }
+    },
+    async mounted() {
+        await this.fetch_data()
+    },
+    methods: {
+        async onFilter() {
+            await this.fetch_data()
+        },
+        async fetch_data() {
+            this.loading = true
+            console.log(this.filters)
+            setTimeout(() => {this.loading = false}, 3000)
         }
     }
 }
@@ -21,15 +38,15 @@ export default {
         <div class="flex justify-content-between align-items-center mb-3">
             <h2 style="font-size: 24px; font-weight: bold">Автомобили</h2>
             <IconField>
+                <InputText placeholder="Поиск" v-model="filters.search" @keydown.enter="onFilter"/>
                 <InputIcon>
-                    <i class="pi pi-search"/>
+                    <i class="pi pi-search cursor-pointer" @click="onFilter"/>
                 </InputIcon>
-                <InputText placeholder="Поиск"/>
             </IconField>
         </div>
         <Card>
             <template #content>
-                <DataTable size="large" :value="cars">
+                <DataTable size="large" :value="cars" lazy :loading="loading">
                     <Column field="number" header="Номер" style="font-weight: 600" header-class="carsHeader"></Column>
                     <Column field="mark" header="Марка" style="font-weight: 600" header-class="carsHeader"></Column>
                     <Column field="model" header="Модель" style="font-weight: 600" header-class="carsHeader"></Column>
