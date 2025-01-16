@@ -2,8 +2,8 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
 import { createI18n } from "vue-i18n";
-import store from "./store";
 import { definePreset } from '@primevue/themes';
+import { createPinia } from 'pinia'
 
 import PrimeVue from "primevue/config";
 import Aura from '@primevue/themes/aura';
@@ -134,6 +134,9 @@ export const i18n = createI18n({
   fallbackWarn: false,
 });
 
+const pinia = createPinia()
+
+app.use(pinia)
 app.use(router);
 app.use(PrimeVue, {
     ripple: true,
@@ -149,7 +152,6 @@ app.use(PrimeVue, {
     }
 });
 
-app.use(store)
 app.use(i18n)
 app.use(ToastService);
 app.use(DialogService);

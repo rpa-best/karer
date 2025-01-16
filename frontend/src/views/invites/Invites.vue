@@ -15,7 +15,6 @@ export default {
                 limit: {label: 'Лимит'},
             },
             loading: true,
-            table_limit: 10,
             orgs: [
                 {
                     id: 1,
@@ -67,7 +66,10 @@ export default {
             ],
             filters: {
                 status: 'all',
-                org: null
+                org: null,
+                limit: 10,
+                offset: 0,
+                search: null,
             },
 
         }
@@ -76,13 +78,17 @@ export default {
         this.loading = false
     },
     methods: {
-        onPage(e) {
-            this.loading = false
-            console.log(e)
-            setTimeout(() => this.loading = false, 5000)
+        async onPage(e) {
+            this.filters.offset = e.first
+            await this.fetch_data()
         },
-        onFilter(e) {
-            console.log(e, this.filters)
+        async onFilter() {
+            await this.fetch_data()
+        },
+        async fetch_data() {
+            this.loading = true
+            console.log(this.filters)
+            setTimeout(() => {this.loading = false}, 3000)
         }
     }
 }
@@ -93,8 +99,16 @@ export default {
         <div class="flex justify-content-between align-items-center mb-3">
             <h2 style="font-size: 24px; font-weight: bold">Заявки</h2>
             <div class="flex flex-row">
+                <div class="mr-3">
+                    <IconField>
+                        <InputText placeholder="Поиск" v-model="filters.search" @keydown.enter="onFilter"/>
+                        <InputIcon>
+                            <i class="pi pi-search cursor-pointer" @click="onFilter"/>
+                        </InputIcon>
+                    </IconField>
+                </div>
                 <Select @value-change="onFilter" show-clear v-model="filters.org" :options="orgs" optionLabel="name" option-value="id" filter placeholder="Выберите организацию" class="w-full" />
-                <Button class="ml-3" label="Создать заявку" style="width: 250px" icon="pi pi-plus" />
+                <Button class="ml-3" label="Создать заявку" style="width: 300px" icon="pi pi-plus" />
             </div>
         </div>
 
@@ -102,7 +116,7 @@ export default {
 
         <Card>
             <template #content>
-                <DataTable size="large" :value="invites.results" paginator :rows="table_limit" lazy
+                <DataTable size="large" :value="invites.results" paginator :rows="filters.limit" lazy
                            @page="onPage($event)"
                            :total-records="invites.count" :loading="loading" responsive-layout="scroll">
                     <Column field="id" header="Номер заявки" style="font-weight: 600"

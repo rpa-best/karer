@@ -1,22 +1,35 @@
-<script setup>
-import { ref } from 'vue';
-
+<script>
 import AppMenuItem from './AppMenuItem.vue';
+import {useUser} from "@/store";
 
-const model = ref([
-    {
-        label: 'Главная',
-        items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
+export default {
+    name: 'AppMenu',
+    components: {AppMenuItem},
+    data() {
+        return {
+            model: [
+                {
+                    label: 'Главная',
+                    items: [{label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/'}]
+                },
+                {
+                    label: 'Карер',
+                    items: [
+                        {label: 'Заявки', icon: 'pi pi-fw pi-book', to: '/invite'}
+                    ]
+                },
+            ]
+        }
     },
-    {
-        label: 'Карер',
-        items: [
-            { label: 'Заявки', icon: 'pi pi-fw pi-book', to: '/invite' },
-            { label: 'Водители', icon: 'pi pi-fw pi-users', to: '/driver' },
-            { label: 'Автомобили', icon: 'pi pi-fw pi-truck', to: '/car' },
-        ]
+    async mounted() {
+        if (useUser().user.role === "logist") {
+            this.model[1].items.push(
+                {label: 'Водители', icon: 'pi pi-fw pi-users', to: '/driver'},
+                {label: 'Автомобили', icon: 'pi pi-fw pi-truck', to: '/car'},
+            )
+        }
     },
-]);
+}
 </script>
 
 <template>
