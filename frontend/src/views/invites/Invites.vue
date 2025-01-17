@@ -1,4 +1,6 @@
 <script>
+import {isManager} from "@/permissions";
+
 export default {
     name: 'Invites',
     data() {
@@ -75,9 +77,10 @@ export default {
         }
     },
     async mounted() {
-        this.loading = false
+        await this.fetch_data()
     },
     methods: {
+        isManager,
         async onPage(e) {
             this.filters.offset = e.first
             await this.fetch_data()
@@ -90,25 +93,25 @@ export default {
             console.log(this.filters)
             setTimeout(() => {this.loading = false}, 3000)
         }
-    }
+    },
 }
 </script>
 
 <template>
     <div>
-        <div class="flex justify-content-between align-items-center mb-3">
-            <h2 style="font-size: 24px; font-weight: bold">Заявки</h2>
-            <div class="flex flex-row">
-                <div class="mr-3">
-                    <IconField>
-                        <InputText placeholder="Поиск" v-model="filters.search" @keydown.enter="onFilter"/>
+        <div class="flex justify-content-between align-items-center flex-wrap">
+            <h2 style="font-size: 24px; font-weight: bold" class="mb-3">Заявки</h2>
+            <div class="flex md:flex-nowrap flex-wrap">
+                <div class="md:mr-3 mb-3 w-full">
+                    <IconField class="w-full">
+                        <InputText placeholder="Поиск" v-model="filters.search" @keydown.enter="onFilter" class="w-full"/>
                         <InputIcon>
                             <i class="pi pi-search cursor-pointer" @click="onFilter"/>
                         </InputIcon>
                     </IconField>
                 </div>
-                <Select @value-change="onFilter" show-clear v-model="filters.org" :options="orgs" optionLabel="name" option-value="id" filter placeholder="Выберите организацию" class="w-full" />
-                <Button class="ml-3" label="Создать заявку" style="width: 300px" icon="pi pi-plus" />
+                <Select @value-change="onFilter" show-clear v-model="filters.org" :options="orgs" optionLabel="name" option-value="id" filter placeholder="Выберите организацию" class="w-full md:mr-3 mb-3" />
+                <Button v-if="isManager()" label="Создать заявку" style="width: 300px" icon="pi pi-plus" class="mb-3 w-full" />
             </div>
         </div>
 
@@ -117,27 +120,26 @@ export default {
         <Card>
             <template #content>
                 <DataTable size="large" :value="invites.results" paginator :rows="filters.limit" lazy
-                           @page="onPage($event)"
+                           @page="onPage($event)" rowHover
                            :total-records="invites.count" :loading="loading" responsive-layout="scroll">
-                    <Column field="id" header="Номер заявки" style="font-weight: 600"
+                    <Column field="id" header="Номер заявки" style="font-weight: 600; text-wrap: nowrap; text-align: center"
                             header-class="carsHeader"></Column>
-                    <Column field="date" header="Дата создания" style="font-weight: 600"
+                    <Column field="date" header="Дата создания" style="font-weight: 600; text-wrap: nowrap; text-align: center"
                             header-class="carsHeader"></Column>
-                    <Column field="date" header="Дата создания" style="font-weight: 600"
+                    <Column field="date" header="Тип" style="font-weight: 600; text-wrap: nowrap; text-align: center"
                             header-class="carsHeader">
                         <template #body="slotProps">
                             {{ types[slotProps.data.type].label }}
                         </template>
                     </Column>
-                    <Column header="Статус" field="status" header-class="carsHeader" style="font-weight: 600">
+                    <Column header="Статус" field="status" header-class="carsHeader" style="font-weight: 600; text-align: center">
                         <template #body="slotProps">
                             <Tag :value="statuses[slotProps.data.status].label"
-                                 :severity="statuses[slotProps.data.status].color"/>
+                                 :severity="statuses[slotProps.data.status].color" class="text-nowrap"/>
                         </template>
                     </Column>
                 </DataTable>
             </template>
-
         </Card>
     </div>
 
@@ -168,9 +170,6 @@ export default {
 
 .p-togglebutton-checked .p-togglebutton-label {
     color: var(--primary-contrast-color)!important;
-}
-.p-multiselect-label-container {
-    margin-right: 20px;
 }
 </style>
 

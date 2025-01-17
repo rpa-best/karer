@@ -10,6 +10,7 @@
     "dependencies": {
         "@primevue/forms": "^4.2.5",
         "@primevue/themes": "^4.2.4",
+        "@vueuse/core": "^12.4.0",
         "chart.js": "3.3.2",
         "pinia": "^2.3.0",
         "primeflex": "^3.3.1",

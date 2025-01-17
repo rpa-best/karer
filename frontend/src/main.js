@@ -4,9 +4,8 @@ import router from './router';
 import { createI18n } from "vue-i18n";
 import { definePreset } from '@primevue/themes';
 import { createPinia } from 'pinia'
-
+import {getPreset, getPresetExt} from "@/layout/composables/layout";
 import PrimeVue from "primevue/config";
-import Aura from '@primevue/themes/aura';
 import AutoComplete from 'primevue/autocomplete';
 import Accordion from 'primevue/accordion';
 import AccordionPanel from 'primevue/accordionpanel';
@@ -141,11 +140,7 @@ app.use(router);
 app.use(PrimeVue, {
     ripple: true,
     theme: {
-        preset: definePreset(Aura, {
-            semantic: {
-                primary: { 50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81', 950: '#1e1b4b' }
-            }
-        }),
+        preset: definePreset(getPreset(), getPresetExt()),
         options: {
             darkModeSelector: '.app-dark'
         }

@@ -21,7 +21,7 @@ export default {
                         <span class="text-muted-color mb-8">У вас нет необходимых разрешений. Пожалуйста, свяжитесь с администраторами.</span>
                         <img src="/demo/images/access/asset-access.svg" alt="Access denied" class="mb-8" width="80%" />
                         <div class="col-span-12 mt-8 text-center">
-                            <Button as="router-link" label="Перейти на панель управления" :to="$route.query.next ?? '/'" severity="warn" />
+                            <Button as="router-link" label="Перейти на панель управления" :to="'/'" severity="warn" />
                         </div>
                     </div>
                 </div>
