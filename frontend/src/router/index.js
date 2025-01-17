@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import others from './others'
 import AppLayout from "@/layout/AppLayout.vue";
-import {auth} from "@/middlewares"
-import {isLogist} from "@/permissions";
+import {auth, permission} from "@/middlewares"
+import {isAuth, isLogist} from "@/permissions";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -11,7 +11,8 @@ const router = createRouter({
             path: '/',
             component: AppLayout,
             meta: {
-                middleware: [auth]
+                middleware: [auth, permission],
+                permissions: [isAuth]
             },
             children: [
                 {
@@ -27,7 +28,7 @@ const router = createRouter({
                 {
                     path: '/car',
                     name: 'cars',
-                    component: () => import('@/views/Cars.vue'),
+                    component: () => import('@/views/cars/Cars.vue'),
                     meta: {
                         permissions: [isLogist]
                     },
@@ -35,7 +36,7 @@ const router = createRouter({
                 {
                     path: '/driver',
                     name: 'drivers',
-                    component: () => import('@/views/Drivers.vue'),
+                    component: () => import('@/views/drivers/Drivers.vue'),
                     meta: {
                         permissions: [isLogist]
                     },

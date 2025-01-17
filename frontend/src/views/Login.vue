@@ -1,6 +1,7 @@
 <script>
 import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
 import {Form} from '@primevue/forms';
+import {useUser} from "@/store";
 
 export default {
     name: 'Login',
@@ -11,20 +12,13 @@ export default {
             email: null,
             password: null,
             career: null,
-            careers: [
-                {
-                    id: 1,
-                    name: 'Career 1'
-                }
-            ],
-
         }
     },
     methods: {
         auth(e) {
             if (e.valid) {
                 this.authed = true
-                console.log(e.states.email.value, e.states.password.value)
+                useUser().auth(e.states.email.value, e.states.password.value)
             }
         },
         resolver_auth({values}) {
@@ -42,13 +36,13 @@ export default {
         },
         login(e) {
             if (e.valid) {
-                console.log(e.states.career.value)
                 this.$toast.add({
                     severity: 'success',
                     summary: 'Авторизация прошла успешно',
                     life: 3000
                 });
-                this.$router.push("/")
+                useUser().set_career(e.states.career.value)
+                this.$router.push(this.$route.query.next ?? "/")
             }
         },
         resolver_login({values}) {
@@ -60,6 +54,9 @@ export default {
                 errors
             };
         },
+    },
+    computed: {
+        careers: () => useUser().careers
     }
 }
 </script>

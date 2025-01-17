@@ -3,6 +3,7 @@ import { useLayout } from '@/layout/composables/layout';
 import {computed, ref, watch} from 'vue';
 import AppSidebar from './AppSidebar.vue';
 import AppTopbar from './AppTopbar.vue';
+import { useToken } from "@/composables";
 
 const { layoutConfig, layoutState, isSidebarActive } = useLayout();
 
@@ -52,13 +53,15 @@ function isOutsideClicked(event) {
 
     return !(sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target) || topbarEl.isSameNode(event.target) || topbarEl.contains(event.target));
 }
+
+const career = computed(() => useToken.value.career)
 </script>
 
 <template>
     <div class="layout-wrapper" :class="containerClass">
         <app-topbar></app-topbar>
         <app-sidebar></app-sidebar>
-        <div class="layout-main-container">
+        <div class="layout-main-container" :key="career">
 <!--            <div class="layout-main">-->
                 <router-view></router-view>
 <!--            </div>-->
