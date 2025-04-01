@@ -1,5 +1,5 @@
+from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 from rest_framework import exceptions
 from rest_framework_simplejwt.settings import api_settings
@@ -31,3 +31,10 @@ class AuthEmailSerializer(TokenObtainPairSerializer):
 
 class AuthUsernameSerializer(TokenObtainPairSerializer):
     username_field = "username"
+
+
+class MeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ["id", "email", "username", "first_name", "last_name", "role"]

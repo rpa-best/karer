@@ -1,7 +1,8 @@
 from rest_framework import serializers
+from rest_framework.generics import RetrieveAPIView
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter, inline_serializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import AuthEmailSerializer, AuthUsernameSerializer
+from .serializers import AuthEmailSerializer, AuthUsernameSerializer, MeSerializer
 
 
 @extend_schema_view(
@@ -31,3 +32,10 @@ class AuthView(TokenObtainPairView):
     def get_serializer_class(self):
         return AuthUsernameSerializer if self.request.query_params.get("by", "email") == "username" else AuthEmailSerializer
 
+
+class MeView(RetrieveAPIView):
+    serializer_class = MeSerializer
+    
+    def get_object(self):
+        return self.request.user
+    

@@ -1,0 +1,36 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev -p 4000 --host 0.0.0.0",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@artmizu/yandex-metrika-nuxt": "^1.1.0",
+    "@nuxtjs/color-mode": "^3.5.2",
+    "@nuxtjs/i18n": "^9.3.1",
+    "@nuxtjs/leaflet": "^1.2.6",
+    "@nuxtjs/tailwindcss": "^6.13.2",
+    "@primeuix/themes": "^1.0.0",
+    "@primevue/forms": "^4.3.2",
+    "@vueuse/core": "^13.0.0",
+    "axios": "^1.8.3",
+    "date-fns": "^4.1.0",
+    "lucide-vue-next": "^0.483.0",
+    "nuxt": "^3.16.0",
+    "pinia": "^3.0.1",
+    "primevue": "^4.3.2",
+    "tailwindcss-animated": "^2.0.0",
+    "tailwindcss-primeui": "^0.5.1",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@primevue/nuxt-module": "^4.3.2"
+  }
+}
