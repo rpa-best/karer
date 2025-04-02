@@ -3,7 +3,11 @@ from django.db.models import Sum
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import ValidationError
-from .models import Invoice, InvoiceNomenclature, Order
+from onec.models import Specification
+from car.serializers import CarSerializer
+from driver.serializers import DriverSerializer
+from onec.serializers import NomenclatureSerializer
+from .models import Invoice, InvoiceNomenclature, Order, TYPE_LIMIT, TYPE_PREPAYMENT, TYPE_DEFERMENT_PAYMENT
 
 
 class InvoiceNomenclatureSerializer(serializers.ModelSerializer):
@@ -15,6 +19,7 @@ class InvoiceNomenclatureSerializer(serializers.ModelSerializer):
 
 class InvoiceShowSerializer(serializers.ModelSerializer):
     nomenclatures = serializers.SerializerMethodField()
+    number = serializers.CharField(read_only=True)
 
     class Meta:
         model = Invoice
@@ -26,7 +31,7 @@ class InvoiceShowSerializer(serializers.ModelSerializer):
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
-    nomenclatures = InvoiceNomenclatureSerializer(many=True)
+    nomenclatures = serializers.ListField(write_only=True)
 
     class Meta:
         model = Invoice
@@ -36,6 +41,14 @@ class InvoiceSerializer(serializers.ModelSerializer):
     @atomic
     def create(self, validated_data):
         nomenclatures = validated_data.pop('nomenclatures', [])
+        specification: Specification = validated_data.get('specification')
+        if specification.amount_limit:
+            validated_data['type'] = TYPE_LIMIT
+        elif specification.payment_deferment:
+            validated_data['type'] = TYPE_DEFERMENT_PAYMENT
+        else:
+            validated_data['type'] = TYPE_PREPAYMENT
+
         instance = super().create(validated_data)
         for nomenclature in nomenclatures:
             nomenclature['invoice'] = instance.pk
@@ -49,6 +62,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         nomenclatures = validated_data.pop('nomenclatures', [])
         instance = super().update(instance, validated_data)
+        nomenclature_ids = []
         for nomenclature in nomenclatures:
             nomenclature['invoice'] = instance.pk
             if nomenclature.get('id'):
@@ -61,10 +75,15 @@ class InvoiceSerializer(serializers.ModelSerializer):
                     data=nomenclature, context=self.context, partial=True)
             serializer.is_valid(True)
             serializer.save()
+            nomenclature_ids.append(serializer.instance.pk)
+        InvoiceNomenclature.objects.filter(invoice=instance).exclude(id__in=nomenclature_ids).delete()
         return instance
 
 
 class OrderShowSerializer(serializers.ModelSerializer):
+    car = CarSerializer()
+    driver = DriverSerializer()
+    nomenclature = NomenclatureSerializer()
 
     class Meta:
         model = Order

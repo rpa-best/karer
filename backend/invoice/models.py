@@ -1,5 +1,7 @@
 from uuid import uuid4
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 TYPE_PREPAYMENT = 'prepayment'
@@ -29,6 +31,8 @@ class Invoice(models.Model):
     org = models.ForeignKey('onec.Organization', models.PROTECT)
     specification = models.ForeignKey('onec.Specification', models.PROTECT)
     address = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return self.number
@@ -42,6 +46,8 @@ class InvoiceNomenclature(models.Model):
     invoice = models.ForeignKey(Invoice, models.CASCADE)
     nomenclature = models.ForeignKey('onec.Nomenclature', models.PROTECT)
     value = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return f'{self.invoice} - {self.nomenclature}'
@@ -59,11 +65,19 @@ class Order(models.Model):
     nomenclature = models.ForeignKey('onec.Nomenclature', models.PROTECT)
     per_price = models.FloatField()
     price = models.FloatField()
-    additive = models.FloatField(help_text='Добавка')
+    additive = models.FloatField(help_text='Добавка', blank=True, null=True)
     order = models.FloatField(help_text='Заказ')
     fact = models.FloatField(blank=True, null=True)
     done = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return  f"{self.invoice} - {self.nomenclature}"
     
+
+@receiver(post_save, sender=Order, dispatch_uid="update_invoice_status_process")
+def update_stock(sender, instance: Order, **kwargs):
+    if instance.invoice.status == STATUS_CREATED:
+        instance.invoice.status = STATUS_PROCESS
+        instance.invoice.save()

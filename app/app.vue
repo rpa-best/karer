@@ -5,9 +5,9 @@
       <NuxtPage />
     </NuxtLayout>
   </div>
-  <div v-if="loader().loading" class="absolute top-0 left-0 w-full h-full bg-white z-[998]">
+  <!-- <div v-if="loader().loading" class="absolute top-0 left-0 w-full h-full bg-white z-[998]">
     <Loader />
-  </div>
+  </div> -->
 </template>
 
 <script setup>

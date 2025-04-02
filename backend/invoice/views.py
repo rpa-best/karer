@@ -9,7 +9,7 @@ from .models import Invoice, InvoiceNomenclature, Order, STATUS_CREATED
 
 class InvoiceViewset(ModelViewSet):
     http_method_names = ['get', 'head', 'patch', 'post', 'delete']
-    queryset = Invoice.objects.all()
+    queryset = Invoice.objects.all().order_by('-created_at')
 
     def get_serializer_class(self):
         if self.action in ['create', 'partial_update']:
@@ -26,7 +26,7 @@ class OrderViewset(ModelViewSet):
     http_method_names = ['get', 'head', 'patch', 'post', 'delete']
 
     def get_queryset(self):
-        return Order.objects.filter(invoice_id=self.kwargs.get('invoice_id'))
+        return Order.objects.filter(invoice_id=self.kwargs.get('invoice_id')).order_by('-created_at')
 
     def get_serializer_class(self):
         if self.action in ['create', 'partial_update']:

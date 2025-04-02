@@ -1,0 +1,22 @@
+version: '3.3'
+
+services:
+  karer_backend:
+    container_name: karer_backend
+    build: ./backend
+    ports:
+      - "8000:8000"
+    command: sh -c "python manage.py runserver 0.0.0.0:8000"
+    restart: always
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend/:/app/
+  
+  karer_front:
+    container_name: karer_front
+    build: ./app/
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./app/.env
