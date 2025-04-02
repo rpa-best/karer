@@ -18,40 +18,10 @@ export default {
                 limit: { label: 'Лимит' }
             },
             loading: true,
-            orgs: [
-                {
-                    id: 1,
-                    name: 'ООО “Примера”'
-                }
-            ],
+            orgs: [],
             invites: {
                 count: 20,
-                results: [
-                    {
-                        id: 1,
-                        date: '11.12.2024',
-                        status: 'created',
-                        type: 'prepayment'
-                    },
-                    {
-                        id: 2,
-                        date: '11.12.2024',
-                        status: 'process',
-                        type: 'deferment_payment'
-                    },
-                    {
-                        id: 3,
-                        date: '11.12.2024',
-                        status: 'done',
-                        type: 'limit'
-                    },
-                    {
-                        id: 4,
-                        date: '11.12.2024',
-                        status: 'canceled',
-                        type: 'prepayment'
-                    }
-                ]
+                results: []
             },
             statusOptions: [
                 {
@@ -73,14 +43,22 @@ export default {
                 limit: 10,
                 offset: 0,
                 search: null
-            }
+            },
+            show_invoice: false,
+            invoice: {},
         };
     },
     async mounted() {
         await this.fetch_data();
+        const {data} = await this.$api.get('/onec/organization/')
+        this.orgs = data
     },
     methods: {
         isManager,
+        rowClick(e) {
+            this.show_invoice = true
+            this.invoice = e.data
+        },
         async onPage(e) {
             this.filters.offset = e.first;
             await this.fetch_data();
@@ -90,10 +68,9 @@ export default {
         },
         async fetch_data() {
             this.loading = true;
-            console.log(this.filters);
-            setTimeout(() => {
-                this.loading = false;
-            }, 3000);
+            const { data } = await this.$api.get('/invoice/', {params: this.filters})
+            this.invites = data
+            this.loading = false;
         }
     }
 };
@@ -113,8 +90,8 @@ export default {
                     </IconField>
                 </div>
                 <Select @value-change="onFilter" show-clear v-model="filters.org" :options="orgs" optionLabel="name"
-                    option-value="id" filter placeholder="Выберите организацию" class="w-full md:mr-3 mb-3" />
-                <Button v-if="isManager()" class="mb-3 w-full">
+                    option-value="uuid" filter placeholder="Выберите организацию" class="w-full md:mr-3 mb-3" />
+                <Button v-if="isManager()" class="mb-3 w-full" @click="() => rowClick({data: {}})">
                     <Plus />
                     Создать заявку
                 </Button>
@@ -125,23 +102,25 @@ export default {
             option-value="value" dataKey="label" />
 
         <DataTable size="large" :value="invites.results" paginator :rows="filters.limit" lazy @page="onPage($event)"
-            rowHover :total-records="invites.count" :loading="loading" responsive-layout="scroll">
-            <Column field="id" header="Номер заявки" style="font-weight: 600; text-wrap: nowrap; text-align: center"
-               ></Column>
-            <Column field="date" header="Дата создания" style="font-weight: 600; text-wrap: nowrap; text-align: center"
-               ></Column>
-            <Column field="date" header="Тип" style="font-weight: 600; text-wrap: nowrap; text-align: center"
-               >
+            rowHover :total-records="invites.count" :loading="loading" responsive-layout="scroll" @row-click="rowClick">
+            <Column field="number" header="Номер заявки"></Column>
+            <Column field="created_at" header="Дата создания"></Column>
+            <Column field="type" header="Тип">
                 <template #body="slotProps">
                     {{ types[slotProps.data.type].label }}
                 </template>
             </Column>
-            <Column header="Статус" field="status" style="font-weight: 600; text-align: center">
+            <Column header="Статус" field="status">
                 <template #body="slotProps">
                     <Tag :value="statuses[slotProps.data.status].label" :severity="statuses[slotProps.data.status].color"
                         class="text-nowrap" />
                 </template>
             </Column>
+            <template #empty> <p class="text-center"> Инвойси не найдены. </p></template>
         </DataTable>
     </div>
+    <Dialog v-model:visible="show_invoice" @close="invoice={}" modal header="Изменить инвойс"
+            :style="{ 'max-width': '700px', width: '100%'}">
+        <Invoice v-if="show_invoice" :invoice="invoice" @close="flag => {invoice = {}; show_invoice=false; flag ? fetch_data() : null}"/>
+    </Dialog>
 </template>
