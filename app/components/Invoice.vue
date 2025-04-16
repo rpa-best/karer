@@ -92,7 +92,7 @@ export default {
                 <DataTable :key="invoiceNomenclatures.length" v-model:editingRows="invoiceNomenclatures" :value="invoiceNomenclatures" editMode="row" dataKey="created_at">
                     <Column field="nomenclature" header="Номенклатура">
                         <template #editor="{ data, field }">
-                            <Select :disabled="nDisabled" empty-message="Пусто" placeholder="Выберите номенклатуру" v-model="data[field]" :options="nomenclatures" option-value="uuid" option-label="name"/>
+                            <Select class="max-w-[250px]" :disabled="nDisabled" empty-message="Пусто" placeholder="Выберите номенклатуру" v-model="data[field]" :options="nomenclatures" option-value="uuid" option-label="name"/>
                         </template>
                     </Column>
                     <Column field="value" header="Потребность">
