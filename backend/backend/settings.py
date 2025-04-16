@@ -66,6 +66,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -134,7 +135,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = False
+USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -194,8 +195,8 @@ SIMPLE_JWT = {
 AUTH_USER_MODEL = 'oauth.User'
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Karer',
-    'DESCRIPTION': 'Karer',
+    'TITLE': 'Career',
+    'DESCRIPTION': 'career',
     'VERSION': '1.0',
     # 'PREPROCESSING_HOOKS': ['v1_1.swagger_content.hooks.preprocessing_filter_admin'],
     'COMPONENT_SPLIT_REQUEST': True,
@@ -206,13 +207,12 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(os.getenv("REDIS_HOST", "karer_redis"), 6379)],
+            "hosts": [(os.getenv("REDIS_HOST", "career_redis"), 6379)],
         },
     },
 }
 
-CELERY_BROKER_URL = f'amqp://{os.getenv("RABBITMQ_DEFAULT_USER")}:' \
-                    f'{os.getenv("RABBITMQ_DEFAULT_PASS")}@{os.getenv("RABBITMQ_DEFAULT_HOST")}:5672'
+CELERY_BROKER_URL = f'redis://{os.getenv("REDIS_HOST")}:6379'
 
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_TIMEZONE = 'Europe/Moscow'

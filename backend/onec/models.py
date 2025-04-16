@@ -9,18 +9,18 @@ class Organization(models.Model):
     inn = models.CharField(max_length=255)
     kpp = models.CharField(max_length=255)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.name
 
 
 class Specification(models.Model):
     uuid = models.UUIDField(default=uuid4, primary_key=True)
     name = models.CharField(max_length=255)
-    delivery_address = models.CharField(max_length=255)
+    delivery_address = models.CharField(max_length=255, blank=True, null=True)
     payment_deferment = models.IntegerField(blank=True, null=True)
     amount_limit = models.FloatField(blank=True, null=True)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.name
     
 
@@ -29,14 +29,14 @@ class Nomenclature(models.Model):
     name = models.CharField(max_length=255)
     unit = models.CharField(max_length=255)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.name
     
 
 class Price(models.Model):
     nomenclature = models.ForeignKey(Nomenclature, models.CASCADE)
     specification = models.ForeignKey(Specification, models.CASCADE)
-    date = models.DateField()
+    date = models.DateTimeField()
     price = models.FloatField()
 
     def __str__(self) -> str:
