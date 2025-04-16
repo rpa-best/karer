@@ -16,16 +16,16 @@ def sync_db():
         raise Exception(f"Failed to sync data from {url}: {response.status_code}")
 
     data = response.json()
-    _sync_organizations(data.get('ORGANIZATIONS', []))
-    _sync_specifications(data.get('SPECIFICATIONS', []))
-    _sync_nomenclatures(data.get('ITEMS', []))
-    _sync_prices(data.get('PRICES', []))
-    _sync_balances(data.get('BALANCES', []))
+    _sync_organizations(data.get('ORGANIZATIONS', {}))
+    _sync_specifications(data.get('SPECIFICATIONS', {}))
+    _sync_nomenclatures(data.get('ITEMS', {}))
+    _sync_prices(data.get('PRICES', {}))
+    _sync_balances(data.get('BALANCES', {}))
 
 
 
 def _sync_organizations(data):
-    for org_data in data:
+    for org_data in data.values():
         org, created = Organization.objects.update_or_create(
             uuid=org_data['XML_ID'],
             defaults={
@@ -39,7 +39,7 @@ def _sync_organizations(data):
 
 
 def _sync_specifications(data):
-    for spec_data in data:
+    for spec_data in data.values():
         spec, created = Specification.objects.update_or_create(
             uuid=spec_data['XML_ID'],
             defaults={
@@ -53,7 +53,7 @@ def _sync_specifications(data):
 
 
 def _sync_nomenclatures(data):
-    for nom_data in data:
+    for nom_data in data.values():
         nom, created = Nomenclature.objects.update_or_create(
             uuid=nom_data['XML_ID'],
             defaults={
@@ -65,7 +65,7 @@ def _sync_nomenclatures(data):
 
 
 def _sync_prices(data):
-    for price_data in data:
+    for price_data in data.values():
         try:
             nomenclature = Nomenclature.objects.get(uuid=price_data['ITEM_ID'])
             specification = Specification.objects.get(uuid=price_data['SPECIFICATION_ID'])
@@ -85,7 +85,7 @@ def _sync_prices(data):
 
 
 def _sync_balances(data):
-    for balance_data in data:
+    for balance_data in data.values():
         try:
             specification = Specification.objects.get(uuid=balance_data['SPECIFICATION_ID'])
         except Specification.DoesNotExist:
