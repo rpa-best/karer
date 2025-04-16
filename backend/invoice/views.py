@@ -3,13 +3,16 @@ from rest_framework.exceptions import ValidationError
 from onec.models import Nomenclature
 from onec.serializers import NomenclatureSerializer
 
-from . import serializers
+from . import serializers, filters
 from .models import Invoice, InvoiceNomenclature, Order, STATUS_CREATED
 
 
 class InvoiceViewset(ModelViewSet):
     http_method_names = ['get', 'head', 'patch', 'post', 'delete']
     queryset = Invoice.objects.all().order_by('-created_at')
+    filterset_class = filters.InvoiceFilter
+    search_fields = ['id']
+    ordering = ['-created_at', '-id']
 
     def get_serializer_class(self):
         if self.action in ['create', 'partial_update']:
@@ -24,6 +27,8 @@ class InvoiceViewset(ModelViewSet):
 
 class OrderViewset(ModelViewSet):
     http_method_names = ['get', 'head', 'patch', 'post', 'delete']
+    search_fields = ['car__number', 'address']
+    ordering = ['-created_at']
 
     def get_queryset(self):
         return Order.objects.filter(invoice_id=self.kwargs.get('invoice_id')).order_by('-created_at')

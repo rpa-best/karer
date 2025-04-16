@@ -39,7 +39,7 @@ class Invoice(models.Model):
 
     @property
     def number(self):
-        return f"{dict(TYPES)[self.type][0]}{self.id}"
+        return f"{dict(TYPES)[str(self.type)][0]}{self.pk}"
     
 
 class InvoiceNomenclature(models.Model):
