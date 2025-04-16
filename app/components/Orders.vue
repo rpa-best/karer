@@ -82,19 +82,21 @@ export default {
             <Column field="additive" header="Добавка" style="font-weight: 600"></Column>
             <Column field="order" header="Заказ" style="font-weight: 600"></Column>
             <Column field="fact" header="Факт" style="font-weight: 600"></Column>
-            <Column class="flex justify-center">
+            <Column>
                 <template #body="{data}">
-                    <Button v-if="data.done" severity="success" rounded class="size-8 p-1">
+                  <div class="flex justify-center items-center">
+                    <Button v-if="data.done" severity="success" rounded class="size-8 !p-1">
                         <Check/>
                     </Button>
                     <div v-else class="flex gap-2">
-                        <Button @click="rowClick({data: data})" severity="help" rounded class="size-8 p-2">
+                        <Button @click="rowClick({data: data})" severity="help" rounded class="size-8 !p-2">
                             <Pen />
                         </Button>
-                        <Button @click="confirmDelete($event, data)" severity="danger" rounded class="size-8 p-2">
+                        <Button @click="confirmDelete($event, data)" severity="danger" rounded class="size-8 !p-2">
                             <X />
                         </Button>
                     </div>
+                  </div>
                 </template>
             </Column>
             <template #empty> <p class="text-center"> Заказы не найдены. </p></template>
