@@ -19,9 +19,8 @@ def sync_db():
     _sync_organizations(data.get('ORGANIZATIONS', {}))
     _sync_specifications(data.get('SPECIFICATIONS', {}))
     _sync_nomenclatures(data.get('ITEMS', {}))
-    _sync_prices(data.get('PRICES', {}))
+    _sync_prices(data.get('PRICE', {}))
     _sync_balances(data.get('BALANCES', {}))
-
 
 
 def _sync_organizations(data):
