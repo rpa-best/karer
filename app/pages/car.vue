@@ -37,7 +37,7 @@ export default {
 </script>
 
 <template>
-    <div>
+    <loading :loading="loading">
         <div class="flex justify-between align-items-center flex-wrap">
             <h2 style="font-size: 24px; font-weight: bold" class="mb-3">Автомобили</h2>
             <div class="flex md:flex-nowrap gap-3 flex-wrap md:w-auto w-full">
@@ -64,7 +64,7 @@ export default {
                 </DataTable>
             </template>
         </Card>
-    </div>
+    </loading>
     <Dialog v-model:visible="show_car" @close="car = {}" modal header="Изменить автомобиль" :style="{ 'max-width': '500px', width: '100%' }">
         <Car v-if="show_car" :car="car" @close="flag => {car = {}; show_car=false; flag ? fetch_data() : null}" />
     </Dialog>

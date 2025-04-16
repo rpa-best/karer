@@ -56,7 +56,7 @@ export default {
 </script>
 
 <template>
-    <div>
+    <loading :loading="loading">
         <div class="flex justify-between align-items-center flex-wrap">
             <IconField class="mb-3">
                 <InputText placeholder="Поиск" v-model="filters.search" @keydown.enter="onFilter" class="w-full" />
@@ -99,7 +99,7 @@ export default {
             </Column>
             <template #empty> <p class="text-center"> Заказы не найдены. </p></template>
         </DataTable>
-    </div>
+    </loading>
     <Dialog v-model:visible="show_order" modal header="Заказ"
             :style="{ 'max-width': '700px', width: '100%'}">
         <Order v-if="show_order" :order="order" :invoice="invoice" @close="flag => {order = {}; show_order=false; flag ? fetch_data() : null}"/>

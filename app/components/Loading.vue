@@ -1,5 +1,5 @@
 <template>
-    <div v-if="loading" class="w-full h-full flex flex-col justify-center items-center">
+    <div v-if="loading" class="w-full h-full min-h-[200px] flex flex-col justify-center items-center">
         <slot name="label" />
         <div class="relative">
             <div class="top">
