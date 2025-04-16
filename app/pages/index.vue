@@ -77,7 +77,7 @@ export default {
 </script>
 
 <template>
-    <div>
+    <loading :loading="loading">
         <div class="flex justify-between align-items-center flex-wrap">
             <h2 class="mb-3 text-3xl font-bold">Заявки</h2>
             <div class="flex md:flex-nowrap flex-wrap">
@@ -118,7 +118,7 @@ export default {
             </Column>
             <template #empty> <p class="text-center"> Инвойси не найдены. </p></template>
         </DataTable>
-    </div>
+    </loading>
     <Dialog v-model:visible="show_invoice" @close="invoice={}" modal header="Изменить инвойс"
             :style="{ 'max-width': '700px', width: '100%'}">
         <Invoice v-if="show_invoice" :invoice="invoice" @close="flag => {invoice = {}; show_invoice=false; flag ? fetch_data() : null}"/>

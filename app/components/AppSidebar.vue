@@ -3,7 +3,7 @@
       <SidebarContent class="h-full">
         <Logo class="justify-center mb-3 hidden md:flex" />
 
-        <Menu :model="sidebar" class="p-0 !bg-transparent !border-0">
+        <Menu :model="sidebar()" class="p-0 !bg-transparent !border-0">
           <template #item="{ item }">
             <NuxtLink :class="useRoute().path === item.url ? 'text-primary' : ''" :to="item.url" class="flex flex-row px-3 py-2 cursor-pointer">
               <component :is="item.icon" />

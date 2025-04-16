@@ -37,7 +37,7 @@ export default {
 </script>
 
 <template>
-    <div>
+    <loading :loading="loading">
         <div class="flex justify-between align-items-center flex-wrap">
             <h2 style="font-size: 24px; font-weight: bold" class="mb-3">Водители</h2>
             <div class="flex gap-3 md:flex-nowrap flex-wrap md:w-auto w-full">
@@ -64,7 +64,7 @@ export default {
             </template>
 
         </Card>
-    </div>
+    </loading>
     <Dialog v-model:visible="show_driver" @close="driver={}" modal header="Изменить водителя"
             :style="{ 'max-width': '500px', width: '100%'}">
         <Driver v-if="show_driver" :driver="driver" @close="flag => {driver = {}; show_driver=false; flag ? fetch_data() : null}"/>
