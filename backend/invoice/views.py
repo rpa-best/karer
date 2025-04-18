@@ -1,6 +1,7 @@
+from django.db.models import Subquery, OuterRef
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.exceptions import ValidationError
-from onec.models import Nomenclature
+from onec.models import Nomenclature, Price
 from onec.serializers import NomenclatureSerializer
 
 from . import serializers, filters
@@ -16,7 +17,7 @@ class InvoiceViewset(ModelViewSet):
 
     def get_serializer_class(self):
         if self.action in ['create', 'partial_update']:
-            return serializers.InvoiceSerializer           
+            return serializers.InvoiceSerializer
         return serializers.InvoiceShowSerializer
 
     def perform_destroy(self, instance: Invoice):
@@ -35,18 +36,18 @@ class OrderViewset(ModelViewSet):
 
     def get_serializer_class(self):
         if self.action in ['create', 'partial_update']:
-            return serializers.OrderSerializer           
+            return serializers.OrderSerializer
         return serializers.OrderShowSerializer
 
     def perform_destroy(self, instance: Order):
         if not instance.done:
             return super().perform_destroy(instance)
         raise ValidationError(f'Заказ {instance} нельзя удалить')
-    
+
     def create(self, request, *args, **kwargs):
         request.data.update(invoice=self.kwargs.get('invoice_id'))
         return super().create(request, *args, **kwargs)
-    
+
     def update(self, request, *args, **kwargs):
         request.data.update(invoice=self.kwargs.get('invoice_id'))
         return super().update(request, *args, **kwargs)
@@ -54,8 +55,14 @@ class OrderViewset(ModelViewSet):
 
 class AvailableNomenclatureViewset(ReadOnlyModelViewSet):
     serializer_class = NomenclatureSerializer
-    queryset = Nomenclature.objects
 
     def get_queryset(self):
         nids = InvoiceNomenclature.objects.filter(invoice_id=self.kwargs.get('invoice_id')).values_list('nomenclature_id', flat=True)
-        return Nomenclature.objects.filter(uuid__in=nids)
+        return Nomenclature.objects.filter(uuid__in=nids).annotate(
+            per_price=Subquery(
+                Price.objects.filter(
+                    nomenclature_id=OuterRef('uuid'),
+                    specification_id=Subquery(Invoice.objects.filter(id=self.kwargs.get('invoice_id')).values('specification_id')[:1])
+                ).values('price')[:1]
+            )
+        )

@@ -4,6 +4,7 @@ from .models import Nomenclature, Specification, Organization
 
 
 class NomenclatureSerializer(serializers.ModelSerializer):
+    per_price = serializers.FloatField(required=False)
 
     class Meta:
         model = Nomenclature

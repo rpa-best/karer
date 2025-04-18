@@ -33,6 +33,24 @@ export default {
         this.disabled = false
     },
     methods: {
+      select_nomenclature({ value }, form) {
+        const nomenclature = this.nomenclatures.find(n => n.uuid === value)
+        if (nomenclature) {
+          if (!nomenclature.per_price) {
+            this.$toast.add({ severity: 'warn', summary: 'Ошибка', detail: 'У номенклатуры не указана цена', life: 3000})
+            form.per_price.value = null
+            form.price.value = null
+            form.per_price.invalid = true
+            form.price.invalid = true
+            return
+          }
+          console.log(form.fact.value ? form.fact.value : form.order.order)
+          form.per_price.invalid = false
+          form.price.invalid = false
+          form.per_price.value = nomenclature.per_price
+          form.price.value = nomenclature.per_price * (form.fact.value ? form.fact.value : form.order.value || 0)
+        }
+      },
         async save({ values }) {
             this.disabled = true
             try {
@@ -52,7 +70,7 @@ export default {
 
 <template>
   <loading :loading="disabled">
-    <Form :initial-values="myOrder" @submit="save">
+    <Form v-slot="$form" :initial-values="myOrder" @submit="save">
         <div class="grid gap-8 grid-cols-6 mt-5">
             <div class="col-span-6">
                 <FloatLabel>
@@ -74,39 +92,50 @@ export default {
             </div>
             <div class="col-span-6">
                 <FloatLabel>
-                    <Select emptyMessage="Пусто" required id="nomenclature" style="width: 100%" name="nomenclature" :disabled="order.done" :options="nomenclatures" option-value="uuid" option-label="name" />
+                    <Select @change="(e) => select_nomenclature(e, $form)" emptyMessage="Пусто" required id="nomenclature" style="width: 100%" name="nomenclature" :disabled="order.done" :options="nomenclatures" option-value="uuid" option-label="name" />
                     <label for="nomenclature" style="font-size: 12px">Номенклатура</label>
                 </FloatLabel>
             </div>
-            <div class="col-span-3">
-                <FloatLabel>
-                    <InputNumber required id="per_price" style="width: 100%" name="per_price" :disabled="order.done" />
-                    <label for="per_price" style="font-size: 12px">Стоимость за ед.</label>
-                </FloatLabel>
-            </div>
-            <div class="col-span-3">
-                <FloatLabel>
-                    <InputNumber required id="price" style="width: 100%" name="price" :disabled="order.done" />
-                    <label for="price" style="font-size: 12px">Сумма</label>
-                </FloatLabel>
-            </div>
+
             <div class="col-span-2">
                 <FloatLabel>
-                    <InputNumber id="additive" style="width: 100%" name="additive" :disabled="order.done" />
+                    <InputNumber required
+                        :suffix="` ${nomenclatures.find(n => n.uuid === $form.nomenclature?.value)?.unit}`"
+                        id="additive" style="width: 100%" name="additive" :disabled="order.done" />
                     <label for="additive" style="font-size: 12px">Добавка</label>
                 </FloatLabel>
             </div>
             <div class="col-span-2">
                 <FloatLabel>
-                    <InputNumber id="order" style="width: 100%" name="order" :disabled="order.done" />
+                    <InputNumber required @update:model-value="(value) => $form.price.value = $form.per_price?.value * ($form.fact?.value ? $form.fact.value : value)"
+                        :suffix="` ${nomenclatures.find(n => n.uuid === $form.nomenclature?.value)?.unit}`"
+                        id="order" style="width: 100%" name="order" :disabled="order.done" />
                     <label for="order" style="font-size: 12px">Заказ</label>
                 </FloatLabel>
             </div>
             <div class="col-span-2">
                 <FloatLabel>
-                    <InputNumber id="fact" style="width: 100%" name="fact" :disabled="order.done" />
+                    <InputNumber required
+                        :suffix="` ${nomenclatures.find(n => n.uuid === $form.nomenclature?.value)?.unit}`"
+                        id="fact" style="width: 100%" name="fact" :disabled="true" />
                     <label for="fact" style="font-size: 12px">Факт</label>
                 </FloatLabel>
+            </div>
+            <div class="col-span-3">
+              <FloatLabel>
+                <InputNumber
+                    suffix=" ₽"
+                    required id="per_price" style="width: 100%" name="per_price" :disabled="true" />
+                <label for="per_price" style="font-size: 12px">Стоимость за ед.</label>
+              </FloatLabel>
+            </div>
+            <div class="col-span-3">
+              <FloatLabel>
+                <InputNumber
+                    suffix=" ₽"
+                    required id="price" style="width: 100%" name="price" :disabled="true" />
+                <label for="price" style="font-size: 12px">Сумма</label>
+              </FloatLabel>
             </div>
         </div>
         <div class="flex flex-row gap-3 mt-2">
