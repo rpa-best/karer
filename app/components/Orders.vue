@@ -77,11 +77,31 @@ export default {
             <Column field="driver.name" header="Водитель" style="font-weight: 600"></Column>
             <Column field="address" header="Адрес поставки" style="font-weight: 600"></Column>
             <Column field="nomenclature.name" header="Номенклатура" style="font-weight: 600"></Column>
-            <Column field="per_price" header="Стоимость за ед." style="font-weight: 600"></Column>
-            <Column field="price" header="Сумма" style="font-weight: 600"></Column>
-            <Column field="additive" header="Добавка" style="font-weight: 600"></Column>
-            <Column field="order" header="Заказ" style="font-weight: 600"></Column>
-            <Column field="fact" header="Факт" style="font-weight: 600"></Column>
+            <Column field="per_price" header="Стоимость за ед." style="font-weight: 600">
+                <template #body="{data}">
+                    <span class="text-nowrap">{{ data.per_price }} ₽</span>
+                </template>
+            </Column>
+            <Column field="price" header="Сумма" style="font-weight: 600">
+                <template #body="{data}">
+                    <span class="text-nowrap">{{ data.price }} ₽</span>
+                </template>
+            </Column>
+            <Column field="additive" header="Добавка" style="font-weight: 600">
+                <template #body="{data}">
+                    <span class="text-nowrap">{{ data.additive }} {{ data.nomenclature.unit }}</span>
+                </template>
+            </Column>
+            <Column field="order" header="Заказ" style="font-weight: 600">
+                <template #body="{data}">
+                    <span class="text-nowrap">{{ data.order }} {{ data.nomenclature.unit }}</span>
+                </template>
+            </Column>
+            <Column field="fact" header="Факт" style="font-weight: 600">
+                <template #body="{data}">
+                    <span class="text-nowrap">{{ data.fact }} {{ data.nomenclature.unit }}</span>
+                </template>
+            </Column>
             <Column>
                 <template #body="{data}">
                   <div class="flex justify-center items-center">

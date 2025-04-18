@@ -97,7 +97,7 @@ export default {
                     </Column>
                     <Column field="value" header="Потребность">
                         <template #editor="{ data, field }">
-                            <InputNumber suffix=" кг" :disabled="nDisabled" placeholder="Введите потребность" v-model="data[field]" />
+                            <InputNumber :suffix="` ${nomenclatures.find(v => v.uuid === data?.nomenclature)?.unit}`" :disabled="nDisabled" placeholder="Введите потребность" v-model="data[field]" />
                         </template>
                     </Column>
                     <Column v-if="!nDisabled" bodyStyle="text-align:center">
@@ -108,7 +108,7 @@ export default {
                         </template>
                     </Column>
                     <template #footer>
-                        <Button v-if="!nDisabled && isManager()" @click="addRow" severity="info" class="w-full">Добавить номенклатура</Button>
+                        <Button v-if="!nDisabled && isManager()" @click="addRow" severity="info" class="w-full">Добавить номенклатуру</Button>
                     </template>
                 </DataTable>
             </div>

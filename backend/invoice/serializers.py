@@ -54,7 +54,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
             nomenclature['invoice'] = instance.pk
             serializer = InvoiceNomenclatureSerializer(
                 data=nomenclature, context=self.context)
-            serializer.is_valid(True)
+            serializer.is_valid(raise_exception=True)
             serializer.save()
         return instance
 
@@ -73,7 +73,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
             else:
                 serializer = InvoiceNomenclatureSerializer(
                     data=nomenclature, context=self.context, partial=True)
-            serializer.is_valid(True)
+            serializer.is_valid(raise_exception=True)
             serializer.save()
             nomenclature_ids.append(serializer.instance.pk)
         InvoiceNomenclature.objects.filter(invoice=instance).exclude(id__in=nomenclature_ids).delete()
@@ -104,6 +104,6 @@ class OrderSerializer(serializers.ModelSerializer):
             invoice=invoice,
             nomenclature=attrs['nomenclature']
         ).aggregate(norder=Sum('order'), nfact=Sum('fact'))
-        if (agg.get('order', 0) + attrs.get('order') > agg_invoice.value):
+        if agg.get('order', 0) + attrs.get('order') > agg_invoice.value:
             raise ValidationError("Потрепность больше чем указано в инвоийс")
         return super().validate(attrs)

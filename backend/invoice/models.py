@@ -77,7 +77,7 @@ class Order(models.Model):
     
 
 @receiver(post_save, sender=Order, dispatch_uid="update_invoice_status_process")
-def update_stock(sender, instance: Order, **kwargs):
+def update_invoice_status_process(sender, instance: Order, **kwargs):
     if instance.invoice.status == STATUS_CREATED:
         instance.invoice.status = STATUS_PROCESS
         instance.invoice.save()
