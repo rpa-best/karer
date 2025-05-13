@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from career.tasks import send_to_career
 
 TYPE_PREPAYMENT = 'prepayment'
 TYPE_DEFERMENT_PAYMENT = 'deferment_payment'
@@ -81,3 +82,4 @@ def update_invoice_status_process(sender, instance: Order, **kwargs):
     if instance.invoice.status == STATUS_CREATED:
         instance.invoice.status = STATUS_PROCESS
         instance.invoice.save()
+    send_to_career.delay(instance.pk)

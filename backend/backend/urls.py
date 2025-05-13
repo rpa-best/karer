@@ -26,6 +26,7 @@ urlpatterns = [
     path('api/driver/', include('driver.urls')),
     path('api/invoice/', include('invoice.urls')),
     path('api/onec/', include('onec.urls')),
+    path('api/career/', include('career.urls')),
 
     path('api/i18n/', include("django.conf.urls.i18n")),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
