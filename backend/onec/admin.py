@@ -4,17 +4,17 @@ from .models import Organization, Specification, Nomenclature, Price, Balance
 
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
-    list_display = ['inn', 'name']
+    list_display = ['uuid', 'inn', 'name']
 
 
 @admin.register(Specification)
 class SpecificationAdmin(admin.ModelAdmin):
-    list_display = ['name']
+    list_display = ['uuid', 'name']
 
 
 @admin.register(Nomenclature)
 class NomenclatureAdmin(admin.ModelAdmin):
-    list_display = ['name', 'unit']
+    list_display = ['uuid', 'name', 'unit']
 
 
 @admin.register(Price)
