@@ -1,10 +1,10 @@
 <script lang="ts">
-import {Plus, Check, X, Pen} from "lucide-vue-next"
+import {Plus, Check, X, Pen, EllipsisVertical} from "lucide-vue-next"
 
 export default {
   name: 'Order',
   props: ['invoice'],
-  components: {Plus, X, Check, Pen},
+  components: {Plus, X, Check, Pen, EllipsisVertical},
   data() {
     return {
       loading: true,
@@ -14,7 +14,22 @@ export default {
       pivot: {},
       filters: {
         search: null,
-      }
+      },
+      menuItems: [
+        {
+          label: 'Параметры',
+          items: [
+            {
+              label: 'Изменить',
+              icon: 'pi pi-refresh'
+            },
+            {
+              label: 'Удалить',
+              icon: 'pi pi-upload'
+            }
+          ]
+        }
+      ]
     }
   },
   async mounted() {
@@ -62,13 +77,18 @@ export default {
 <template>
   <loading :loading="loading">
     <div class="flex justify-between align-items-center flex-wrap">
-      <IconField class="mb-3">
-        <InputText placeholder="Поиск" v-model="filters.search" @keydown.enter="onFilter" class="w-full"/>
-        <InputIcon>
-          <i class="pi pi-search cursor-pointer" @click="onFilter"/>
-        </InputIcon>
-      </IconField>
+      <h2 class="text-2xl font-bold">
+        Заказы:
+        <span class="text-primary">{{invoice.number}}</span>
+        <span v-if="orders.day_count" class="text-primary">(Отсрочка платежа осталось дней: {{orders.day_count}})</span>
+      </h2>
       <div class="flex md:flex-nowrap gap-3 flex-wrap md:w-auto w-full">
+        <IconField class="mb-3">
+          <InputText placeholder="Поиск" v-model="filters.search" @keydown.enter="onFilter" class="w-full min-w-[200px]"/>
+          <InputIcon>
+            <i class="pi pi-search cursor-pointer" @click="onFilter"/>
+          </InputIcon>
+        </IconField>
         <Button class="mb-3 w-full" @click="() => rowClick({data: {}})">
           <Plus/>
           Добавить заказ
@@ -129,22 +149,26 @@ export default {
               <Button @click="confirmDelete($event, data)" severity="danger" rounded class="size-8 !p-2">
                 <X/>
               </Button>
+<!--              <Button @click="$refs.menu.toggle" aria-haspopup="true" aria-controls="overlay_menu" rounded class="size-8 !p-2">-->
+<!--                <EllipsisVertical />-->
+<!--              </Button>-->
             </div>
           </div>
         </template>
       </Column>
       <ColumnGroup type="footer" v-if="pivot.results.length > 0">
         <Row>
-          <Column footer="Сумма:" :colspan="3" footer-class="!text-end font-semibold"/>
-          <Column class="text-nowrap font-semibold">
+          <Column v-if="invoice.type === 'limit'" footer="Сумма:" :colspan="3" footer-class="!text-end font-semibold"/>
+          <Column v-if="invoice.type === 'limit'" class="text-nowrap font-semibold">
             <template #footer>
-              {{pivot.current_summa}} / {{pivot.summa}}
+              {{pivot.current_summa ?? 0}} / {{pivot.summa}}
             </template>
           </Column>
+          <Column v-else :colspan="4"/>
           <Column :footer="pivot.results[0].name" :colspan="4" class="font-semibold"/>
           <Column class="text-nowrap font-semibold">
             <template #footer>
-              {{pivot.results[0].order_current_sum}} / {{pivot.results[0].order_sum}}
+              {{pivot.results[0].order_current_sum ?? 0}} / {{pivot.results[0].order_sum}}
             </template>
           </Column>
           <Column class="text-nowrap font-semibold">
@@ -160,7 +184,7 @@ export default {
           <Column :footer="n.name" :colspan="4" class="font-semibold"/>
           <Column class="text-nowrap font-semibold">
             <template #footer>
-              {{n.order_current_sum}} / {{n.order_sum}}
+              {{n.order_current_sum ?? 0}} / {{n.order_sum}}
             </template>
           </Column>
           <Column class="text-nowrap font-semibold">
@@ -181,4 +205,5 @@ export default {
            @close="flag => {order = {}; show_order=false; flag ? fetch_data() : null}"/>
   </Dialog>
   <ConfirmPopup></ConfirmPopup>
+  <Menu ref="menu" id="overlay_menu" :model="menuItems" :popup="true" />
 </template>

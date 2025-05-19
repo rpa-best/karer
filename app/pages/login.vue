@@ -1,31 +1,35 @@
 <template>
-    <div
-        class="h-screen px-6 py-20 md:px-12 lg:px-20 flex items-center justify-center bg-[linear-gradient(-225deg,var(--p-primary-500),var(--p-primary-700)_48%,var(--p-primary-800))] dark:bg-[linear-gradient(-225deg,var(--p-primary-400),var(--p-primary-600)_48%,var(--p-primary-800))]"
-    >
-        <Form @submit="auth" class="p-12 shadow text-center lg:w-[30rem] backdrop-blur-md rounded-xl bg-[rgba(255,255,255,0.1)]">
-            <div class="text-4xl font-medium mb-12 text-primary-contrast">Вход</div>
-            <InputText
-                type="email"
-                name="email"
-                class="!appearance-none placeholder:!text-primary-contrast/40 !border-0 !p-4 !w-full !outline-0 !text-xl !block !mb-6 !bg-white/10 !text-primary-contrast/70 !rounded-full"
-                placeholder="Введите Email"
-                required
-            />
-            <InputText
-                type="password"
-                name="password"
-                class="!appearance-none placeholder:!text-primary-contrast/40 !border-0 !p-4 !w-full !outline-0 !text-xl !mb-6 !bg-white/10 !text-primary-contrast/70 !rounded-full"
-                placeholder="Введите пароль"
-                required
-            />
-            <button
-                type="submit"
-                class="max-w-40 w-full rounded-full appearance-none border-0 p-4 outline-0 text-xl mb-6 font-medium bg-white/30 hover:bg-white/40 active:bg-white/20 text-primary-contrast/80 cursor-pointer transition-colors duration-150"
-            >
-                Продолжить
-            </button>
+  <div class="bg-gradient-to-tl from-green-400 to-indigo-900 px-6 py-20 md:px-12 lg:px-20 h-screen flex flex-col justify-center items-center">
+    <div class="bg-surface-0 dark:bg-surface-900 p-6 shadow rounded-border max-w-[500px] w-full lg:w-6/12 mx-auto">
+      <div class="mb-8">
+        <Logo class="w-32 mx-auto logo-spin" />
+      </div>
+
+      <!--      <div class="flex flex-col gap-3">-->
+      <!--        <TelegramAuthButton />-->
+      <!--        <GoogleAuthButton />-->
+      <!--      </div>-->
+
+      <!--      <div class="w-full flex items-center justify-between py-5">-->
+      <!--        <hr class="w-full border-gray-500">-->
+      <!--        <p class="text-base font-medium leading-4 px-2.5 text-gray-400">{{$t('ИЛИ')}}</p>-->
+      <!--        <hr class="w-full border-gray-500">-->
+      <!--      </div>-->
+      <loading :loading="loading" class="!max-h-[100px]">
+        <Form @submit="auth" method="post">
+          <label for="email" class="text-surface-900 dark:text-surface-0 font-medium mb-2 block">Почта</label>
+          <InputText id="email" name="email" type="email" placeholder="Введите почту" class="w-full mb-4" required/>
+
+          <label for="password" class="text-surface-900 dark:text-surface-0 font-medium mb-2 block">Пароль</label>
+          <Password id="password" name="password" type="password" placeholder="Введите пароль" class="w-full mb-4" fluid :feedback="false" required/>
+
+          <Button type="submit" label="Продолжить" icon="pi pi-user !text-xl !leading-none" class="w-full"/>
         </Form>
+      </loading>
+
     </div>
+  </div>
+
 </template>
 <script>
 import { token } from '~/composables'
@@ -35,15 +39,25 @@ definePageMeta({
 })
 
 export default {
+  data() {
+    return {
+      loading: false,
+    }
+  },
     methods: {
         redirect() {
             let next = this.$route.query.next ?? `/`
             window.location.href = next
         },
         async auth({values}) {
+          this.loading = true
+          try {
             const r = await this.$api.post('/oauth/auth/', values)
             token.value = r?.data
             this.redirect()
+          } finally {
+            this.loading = false
+          }
         }
     }
 }
