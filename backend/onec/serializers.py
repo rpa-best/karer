@@ -5,6 +5,10 @@ from .models import Nomenclature, Specification, Organization
 
 class NomenclatureSerializer(serializers.ModelSerializer):
     per_price = serializers.FloatField(required=False)
+    fact = serializers.FloatField(required=False)
+    fact_current = serializers.FloatField(required=False)
+    order_sum = serializers.FloatField(required=False)
+    order_current_sum = serializers.FloatField(required=False)
 
     class Meta:
         model = Nomenclature

@@ -9,4 +9,8 @@ class Driver(models.Model):
     image = models.ImageField(blank=True, null=True, upload_to='driver')
 
     def __str__(self) -> str:
-        return self.name
+        return str(self.name)
+
+    def send_comment(self, text):
+        # If error return: ConnectionError
+        pass

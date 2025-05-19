@@ -13,8 +13,9 @@
           </template>
         </Menu>
       </SidebarContent>
-      <SidebarContent class="md:flex hidden">
+      <SidebarContent class="md:flex hidden items-center">
         <UserDropdown />
+        <Notifications />
       </SidebarContent>
     </div>
 </template>

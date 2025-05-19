@@ -67,26 +67,35 @@ export default {
 
 <template>
   <loading :loading="disabled">
-    <Form :initial-values="invoice" @submit="save">
+    <Form v-slot="$form" :initial-values="invoice" @submit="save" autocomplete="off">
         <div class="grid gap-8 grid-cols-3 mt-5">
             <div class="col-span-3">
                 <FloatLabel>
-                    <Select emptyMessage="Пусто" required id="org" style="width: 100%" name="org" :disabled="nDisabled" :options="orgs" option-value="uuid" option-label="name" />
-                    <label for="org" style="font-size: 12px">Грузаполучатель</label>
+                    <Select emptyMessage="Пусто" required id="org" class="w-full" name="org" :disabled="nDisabled" :options="orgs" option-value="uuid" option-label="name" />
+                    <label for="org" class="text-sm">Грузаполучатель</label>
                 </FloatLabel>
             </div>
             <div class="col-span-3">
                 <FloatLabel>
-                    <Select emptyMessage="Пусто" required id="specification" style="width: 100%" name="specification" :disabled="nDisabled" :options="specifications" option-value="uuid" option-label="name" />
-                    <label for="specification" style="font-size: 12px">Спецификация</label>
+                    <Select @update:model-value="(value) => {
+                      $form.address.value = specifications.find(s => s.uuid === value).delivery_address
+                    }" emptyMessage="Пусто" required id="specification" class="w-full" name="specification" :disabled="nDisabled" :options="specifications" option-value="uuid" option-label="name" />
+                    <label for="specification" class="text-sm">Спецификация</label>
                 </FloatLabel>
             </div>
             <div class="col-span-3">
                 <FloatLabel>
-                    <InputText required id="address" style="width: 100%" name="address" :disabled="nDisabled" />
-                    <label for="address" style="font-size: 12px">Адрес поставки</label>
+                    <InputText required id="address" class="w-full" name="address" :disabled="!!$form.address?.value" />
+                    <label for="address" class="text-sm">Адрес поставки</label>
                 </FloatLabel>
             </div>
+
+          <div class="col-span-3">
+            <FloatLabel>
+              <Textarea id="comment" size="large" class="w-full" name="comment" :disabled="nDisabled" />
+              <label for="comment" class="text-sm">Комментария</label>
+            </FloatLabel>
+          </div>
 
             <div class="col-span-3">
                 <DataTable :key="invoiceNomenclatures.length" v-model:editingRows="invoiceNomenclatures" :value="invoiceNomenclatures" editMode="row" dataKey="created_at">
@@ -97,7 +106,7 @@ export default {
                     </Column>
                     <Column field="value" header="Потребность">
                         <template #editor="{ data, field }">
-                            <InputNumber :suffix="` ${nomenclatures.find(v => v.uuid === data?.nomenclature)?.unit}`" :disabled="nDisabled" placeholder="Введите потребность" v-model="data[field]" />
+                            <InputNumber :input-props="{autocomplete: 'off'}" :suffix="` ${nomenclatures.find(v => v.uuid === data?.nomenclature)?.unit}`" :disabled="nDisabled" placeholder="Введите потребность" v-model="data[field]" />
                         </template>
                     </Column>
                     <Column v-if="!nDisabled" bodyStyle="text-align:center">

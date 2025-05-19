@@ -34,6 +34,7 @@
                     </span>
                 </button>
                 <h2 v-else class="font-bold text-lg">{{ $t('Пользователь') }}</h2>
+              <Notifications />
             </SidebarContent>
             <AppSidebar class="!h-auto" />
             <Button v-if="user.id" class="w-full mt-2" severity="danger" @click="logout">

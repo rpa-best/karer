@@ -24,9 +24,11 @@ urlpatterns = [
     path('api/oauth/', include("oauth.urls")),
     path('api/car/', include('car.urls')),
     path('api/driver/', include('driver.urls')),
-    path('api/invoice/', include('invoice.urls')),
+    path('api/invoice/', include('invoice.urls.invoice')),
+    path('api/order/', include('invoice.urls.order')),
     path('api/onec/', include('onec.urls')),
     path('api/career/', include('career.urls')),
+    path('api/notification/', include('notification.urls')),
 
     path('api/i18n/', include("django.conf.urls.i18n")),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

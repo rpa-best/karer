@@ -1,9 +1,9 @@
 <script>
-import { isManager } from '@/permissions';
-import { Plus } from "lucide-vue-next"
+import { isManager, isLogist } from '@/permissions';
+import {Pen, Plus} from "lucide-vue-next"
 export default {
     name: 'Invites',
-    components: { Plus },
+    components: {Pen, Plus },
     data() {
         return {
             statuses: {
@@ -46,6 +46,7 @@ export default {
             },
             show_invoice: false,
             invoice: {},
+          expandedRowGroups: null
         };
     },
     async mounted() {
@@ -54,7 +55,7 @@ export default {
         this.orgs = data
     },
     methods: {
-        isManager,
+        isManager, isLogist,
         rowClick(e) {
             this.show_invoice = true
             this.invoice = e.data
@@ -93,7 +94,7 @@ export default {
                     option-value="uuid" filter placeholder="Выберите организацию" class="w-full md:mr-3 mb-3" />
                 <Button v-if="isManager()" class="mb-3 w-full" @click="() => rowClick({data: {}})">
                     <Plus />
-                    Создать заявку
+                    Создать инвойс
                 </Button>
             </div>
         </div>
@@ -102,10 +103,12 @@ export default {
             option-value="value" dataKey="label" />
 
         <DataTable size="large" :value="invites.results" paginator :rows="filters.limit" lazy @page="onPage($event)"
-            rowHover :total-records="invites.count" :loading="loading" responsive-layout="scroll" @row-click="rowClick">
+            rowHover :total-records="invites.count" :loading="loading" responsive-layout="scroll"
+                   v-model:expandedRows="expandedRowGroups" dataKey="id">
+            <Column expander v-if="isLogist()"></Column>
             <Column field="number" header="Номер заявки"></Column>
             <Column field="created_at" header="Дата создания"></Column>
-            <Column field="type" header="Тип">
+            <Column field="type" header="Условия отгрузки">
                 <template #body="slotProps">
                     {{ types[slotProps.data.type].label }}
                 </template>
@@ -116,7 +119,17 @@ export default {
                         class="text-nowrap" />
                 </template>
             </Column>
+          <column>
+            <template #body="{data}">
+              <Button @click="rowClick({data: data})" severity="help" rounded class="size-8 !p-2">
+                <Pen />
+              </Button>
+            </template>
+          </column>
             <template #empty> <p class="text-center"> Инвойси не найдены. </p></template>
+          <template #expansion="{data}">
+            <Orders :invoice="data" />
+          </template>
         </DataTable>
     </loading>
     <Dialog v-model:visible="show_invoice" @close="invoice={}" modal header="Изменить инвойс"
