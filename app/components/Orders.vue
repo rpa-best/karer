@@ -99,7 +99,7 @@ export default {
       <Column field="created_at" header="Дата"></Column>
       <Column field="car.number" header="Авто"></Column>
       <Column field="driver.name" header="Водитель"></Column>
-      <Column field="address" header="Адрес поставки"></Column>
+      <!-- <Column field="address" header="Адрес поставки"></Column> -->
       <Column field="nomenclature.name" header="Номенклатура"></Column>
       <Column field="per_price" header="Стоимость за ед.">
         <template #body="{data}">
@@ -126,7 +126,7 @@ export default {
           <span v-if="data.fact" class="text-nowrap">{{ data.fact }} {{ data.nomenclature.unit }}</span>
         </template>
       </Column>
-      <Column field="fact" header="Факт">
+      <Column field="fact" header="Статус">
         <template #body="{data}">
           <Badge v-if="data.done" severity="success" class="p-2">
             Отгружен
@@ -158,7 +158,7 @@ export default {
       </Column>
       <ColumnGroup type="footer" v-if="pivot.results.length > 0">
         <Row>
-          <Column v-if="invoice.type === 'limit'" footer="Сумма:" :colspan="3" footer-class="!text-end font-semibold"/>
+          <Column v-if="invoice.type === 'limit'" footer="Лимит:" :colspan="3" footer-class="!text-end font-semibold"/>
           <Column v-if="invoice.type === 'limit'" class="text-nowrap font-semibold">
             <template #footer>
               {{pivot.current_summa ?? 0}} / {{pivot.summa}}

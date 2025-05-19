@@ -149,7 +149,7 @@ export default {
         <div class="col-span-6">
           <FloatLabel>
             <Textarea id="comment" size="large" class="w-full" name="comment" :disabled="nDisabled"/>
-            <label for="comment" class="text-sm">Комментария</label>
+            <label for="comment" class="text-sm">Комментарий</label>
           </FloatLabel>
         </div>
       </div>
