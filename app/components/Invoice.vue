@@ -71,7 +71,7 @@ export default {
             <div class="col-span-3">
                 <FloatLabel>
                     <Select emptyMessage="Пусто" required id="org" class="w-full" name="org" :disabled="nDisabled" :options="orgs" option-value="uuid" option-label="name" />
-                    <label for="org" class="text-sm">Грузаполучатель</label>
+                    <label for="org" class="text-sm">Грузополучатель</label>
                 </FloatLabel>
             </div>
             <div class="col-span-3">
@@ -92,7 +92,7 @@ export default {
           <div class="col-span-3">
             <FloatLabel>
               <Textarea id="comment" size="large" class="w-full" name="comment" :disabled="nDisabled" />
-              <label for="comment" class="text-sm">Комментария</label>
+              <label for="comment" class="text-sm">Комментарии</label>
             </FloatLabel>
           </div>
 

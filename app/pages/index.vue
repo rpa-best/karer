@@ -94,7 +94,7 @@ export default {
                     option-value="uuid" filter placeholder="Выберите организацию" class="w-full md:mr-3 mb-3" />
                 <Button v-if="isManager()" class="mb-3 w-full" @click="() => rowClick({data: {}})">
                     <Plus />
-                    Создать инвойс
+                    Создать заявку
                 </Button>
             </div>
         </div>
@@ -126,13 +126,13 @@ export default {
               </Button>
             </template>
           </column>
-            <template #empty> <p class="text-center"> Инвойси не найдены. </p></template>
+            <template #empty> <p class="text-center"> Заявки не найдены. </p></template>
           <template #expansion="{data}">
             <Orders :invoice="data" />
           </template>
         </DataTable>
     </loading>
-    <Dialog v-model:visible="show_invoice" @close="invoice={}" modal header="Изменить инвойс"
+    <Dialog v-model:visible="show_invoice" @close="invoice={}" modal :header="invoice.id ? 'Изменить заявку' : 'Создать заявку'"
             :style="{ 'max-width': '700px', width: '100%'}">
         <Invoice v-if="show_invoice" :invoice="invoice" @close="flag => {invoice = {}; show_invoice=false; flag ? fetch_data() : null}"/>
     </Dialog>

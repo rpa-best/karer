@@ -7,10 +7,10 @@ from oauth.models import User, ROLE_LOGIST
 
 
 ORDER_URL = '/order/{order_id}/'
-ORDER_SEND_MESSAGE = 'Заказ отправлен в карер'
-ORDER_ACCEPTED_MESSAGE = 'Карер получил заказ'
+ORDER_SEND_MESSAGE = 'Заказ отправлена в карерь'
+ORDER_ACCEPTED_MESSAGE = 'Карерь получил заказ'
 ORDER_ERROR_MESSAGE = 'Заказ не отправлен. Попробуйте позже.'
-ORDER_LABEL_MESSAGE = 'Информация о заказа'
+ORDER_LABEL_MESSAGE = 'Информация о заказе'
 
 def _send_notifications(order_id, users, message, severity):
     notifications = []
