@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from onec.models import Specification
 from car.serializers import CarSerializer
 from driver.serializers import DriverSerializer
-from onec.serializers import NomenclatureSerializer
+from onec.serializers import NomenclatureSerializer, SpecificationSerializer
 from .models import Invoice, InvoiceNomenclature, Order, TYPE_LIMIT, TYPE_PREPAYMENT, TYPE_DEFERMENT_PAYMENT
 
 
@@ -91,12 +91,14 @@ class OrderShowSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    new_driver_comment = serializers.CharField(required=False)
 
     class Meta:
         model = Order
         fields = "__all__"
+        read_only_fields = ['driver_comment']
 
-    def validate(self, attrs):
+    def validate(self, attrs: dict):
         invoice = attrs.get('invoice')
         agg_invoice = get_object_or_404(
             InvoiceNomenclature, invoice=invoice, nomenclature=attrs['nomenclature'])
@@ -107,3 +109,17 @@ class OrderSerializer(serializers.ModelSerializer):
         if agg.get('order', 0) + attrs.get('order') > agg_invoice.value:
             raise ValidationError("Потрепность больше чем указано в инвоийс")
         return super().validate(attrs)
+
+    def create(self, validated_data: dict):
+        new_driver_comment = validated_data.pop('new_driver_comment', None)
+        instance: Order = super().create(validated_data)
+        if new_driver_comment:
+            instance.send_driver_comment.delay(new_driver_comment)
+        return instance
+
+    def update(self, instance, validated_data):
+        new_driver_comment = validated_data.pop('new_driver_comment', None)
+        instance: Order = super().update(instance, validated_data)
+        if new_driver_comment:
+            instance.send_driver_comment.delay(new_driver_comment)
+        return instance

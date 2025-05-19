@@ -1,5 +1,29 @@
 import requests
+from requests.exceptions import RequestException
 from celery import shared_task
+from notification.consumers import send_notification
+from notification.models import Notification, SEVERITY_DANGER, SEVERITY_SUCCESS
+from oauth.models import User, ROLE_LOGIST
+
+
+ORDER_URL = '/order/{order_id}/'
+ORDER_SEND_MESSAGE = 'Заказ отправлен в карер'
+ORDER_ACCEPTED_MESSAGE = 'Карер получил заказ'
+ORDER_ERROR_MESSAGE = 'Заказ не отправлен. Попробуйте позже.'
+ORDER_LABEL_MESSAGE = 'Информация о заказа'
+
+def _send_notifications(order_id, users, message, severity):
+    notifications = []
+    for user in users:
+        notifications.append(Notification(
+            user=user, label=ORDER_LABEL_MESSAGE,
+            redirect_url=ORDER_URL.format(order_id=order_id),
+            message=message,
+            severity=severity
+        ))
+    notifications = Notification.objects.bulk_create(notifications)
+    for notification in notifications:
+        send_notification(notification)
 
 
 @shared_task
@@ -9,6 +33,19 @@ def send_to_career(order_id):
 
     order = Order.objects.get(pk=order_id)
     data = OrderShowSerializer(order).data
-    url = ''
-    response = requests.post(url, json=data)
-    return response.json()
+
+    users = User.objects.filter(
+        role=ROLE_LOGIST
+    )
+    _send_notifications(order_id, users, ORDER_SEND_MESSAGE, SEVERITY_SUCCESS)
+    try:
+        url = ''
+        response = requests.post(url, json=data)
+        if response.ok:
+            _send_notifications(order_id, users, ORDER_ACCEPTED_MESSAGE, SEVERITY_SUCCESS)
+        else:
+            _send_notifications(order_id, users, ORDER_ERROR_MESSAGE, SEVERITY_DANGER)
+        return response
+    except RequestException:
+        _send_notifications(order_id, users, ORDER_ERROR_MESSAGE, SEVERITY_DANGER)
+    return None

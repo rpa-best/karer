@@ -1,11 +1,15 @@
-from django.db.models import Subquery, OuterRef
+from django.db.models import Subquery, OuterRef, Sum
+from rest_framework.generics import ListAPIView
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.exceptions import ValidationError
+
+from contrib.expressions import SumSubquery
 from onec.models import Nomenclature, Price
 from onec.serializers import NomenclatureSerializer
 
-from . import serializers, filters
-from .models import Invoice, InvoiceNomenclature, Order, STATUS_CREATED
+from .. import serializers, filters
+from ..models import Invoice, InvoiceNomenclature, Order, STATUS_CREATED
 
 
 class InvoiceViewset(ModelViewSet):
@@ -66,3 +70,27 @@ class AvailableNomenclatureViewset(ReadOnlyModelViewSet):
                 ).values('price')[:1]
             )
         )
+
+
+class InvoicePivotView(ListAPIView):
+    serializer_class = NomenclatureSerializer
+
+    def get_queryset(self):
+        nomenclatures = InvoiceNomenclature.objects.filter(invoice_id=self.kwargs.get('invoice_id'))
+        orders = Order.objects.filter(invoice_id=self.kwargs.get('invoice_id'))
+        return Nomenclature.objects.filter(uuid__in=nomenclatures.values_list('nomenclature_id', flat=True)).annotate(
+            fact=SumSubquery(nomenclatures.filter(nomenclature_id=OuterRef('uuid')), 'value'),
+            fact_current=SumSubquery(orders.filter(nomenclature_id=OuterRef('uuid')), 'fact'),
+            order_sum=SumSubquery(nomenclatures.filter(nomenclature_id=OuterRef('uuid')), 'value'),
+            order_current_sum=SumSubquery(orders.filter(nomenclature_id=OuterRef('uuid')), 'order'),
+        )
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        invoice: Invoice = Invoice.objects.select_related('specification').get(id=self.kwargs.get('invoice_id'))
+        return Response({
+            'results': serializer.data,
+            'summa': invoice.specification.amount_limit,
+            'current_summa': Order.objects.filter(invoice_id=self.kwargs.get('invoice_id')).aggregate(sum=Sum('price')).get('sum')
+        })

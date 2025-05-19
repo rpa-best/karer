@@ -1,9 +1,9 @@
 <script>
-import { Plus } from "lucide-vue-next"
+import {Pen, Plus} from "lucide-vue-next"
 
 export default {
     name: 'Cars',
-    components: {Plus},
+    components: {Pen, Plus},
     data() {
         return {
             loading: true,
@@ -55,11 +55,18 @@ export default {
         </div>
         <Card>
             <template #content>
-                <DataTable size="large" :value="cars" lazy :loading="loading" @row-click="rowClick" rowHover>
+                <DataTable size="large" :value="cars" lazy :loading="loading" rowHover>
                     <Column field="number" header="Номер" style="font-weight: 600"></Column>
                     <Column field="marka" header="Марка" style="font-weight: 600"></Column>
                     <Column field="model" header="Модель" style="font-weight: 600"></Column>
                     <Column field="vin" header="VIN-Номер" style="font-weight: 600"></Column>
+                    <column>
+                      <template #body="{data}">
+                        <Button @click="rowClick({data: data})" severity="help" rounded class="size-8 !p-2">
+                          <Pen />
+                        </Button>
+                      </template>
+                    </column>
                     <template #empty> <p class="text-center"> Машины не найдены. </p></template>
                 </DataTable>
             </template>

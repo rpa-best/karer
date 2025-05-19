@@ -1,4 +1,6 @@
 from uuid import uuid4
+
+from celery import shared_task
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -34,6 +36,7 @@ class Invoice(models.Model):
     address = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    comment = models.TextField(blank=True, null=True)
 
     def __str__(self) -> str:
         return self.number
@@ -72,9 +75,31 @@ class Order(models.Model):
     done = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    comment = models.TextField(blank=True, null=True)
+    driver_comments = models.JSONField(default=list)
 
     def __str__(self) -> str:
         return  f"{self.invoice} - {self.nomenclature}"
+
+    @shared_task
+    def send_driver_comment(self, text):
+        comment = {
+            'uuid': uuid4(),
+            'status': 'loading',
+            'comment': text
+        }
+        self.driver_comments.append(comment)
+        self.save()
+        try:
+            self.driver.send_comment(text)
+            comment['status'] = 'ok'
+        except ConnectionError:
+            comment['status'] = 'error'
+        for c in self.driver_comments:
+            if c['uuid'] == comment['uuid']:
+                c['status'] = comment['status']
+                break
+        self.save()
     
 
 @receiver(post_save, sender=Order, dispatch_uid="update_invoice_status_process")

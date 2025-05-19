@@ -1,5 +1,6 @@
 import os
 import requests
+from django.conf import settings
 from celery import shared_task
 from .models import Organization, Specification, Nomenclature, Price, Balance
 
@@ -19,6 +20,7 @@ def sync_db():
 
 
 def _request():
+    if settings.DEBUG: return {}
     url = HOST + "/accounting_copy/hs/career/data"
     response = requests.get(url, auth=(USERNAME, PASSWORD))
     if not response.ok:

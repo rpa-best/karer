@@ -51,11 +51,13 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'django_celery_beat',
     'django_celery_results',
+    'channels',
     'oauth',
     'car',
     'driver',
     'invoice',
     'onec',
+    'notification',
 ]
 
 MIDDLEWARE = [
@@ -88,7 +90,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'backend.wsgi.application'
+ASGI_APPLICATION = 'backend.asgi.application'
 
 
 # Database
