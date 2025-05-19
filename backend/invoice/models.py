@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from celery import shared_task
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 from career.tasks import send_to_career
@@ -108,3 +108,8 @@ def update_invoice_status_process(sender, instance: Order, **kwargs):
         instance.invoice.status = STATUS_PROCESS
         instance.invoice.save()
     send_to_career.delay(instance.pk)
+
+
+receiver(post_delete, sender=Order, dispatch_uid="delete_order")
+def delete_order(sender, instance: Order, **kwargs):
+    send_to_career.delay(instance.pk, delete=True)

@@ -27,13 +27,18 @@ def _send_notifications(order_id, users, message, severity):
 
 
 @shared_task
-def send_to_career(order_id):
+def send_to_career(order_id, delete=False):
     from invoice.serializers import OrderShowSerializer
     from invoice.models import Order
 
-    order = Order.objects.get(pk=order_id)
-    data = OrderShowSerializer(order).data
+    if delete:
+        order = Order.objects.get(pk=order_id)
+        data = OrderShowSerializer(order).data
 
+    else:
+        data = {'uuid': order_id}
+
+    data['delete'] = delete
     users = User.objects.filter(
         role=ROLE_LOGIST
     )

@@ -15,7 +15,6 @@ export default {
             disabled: false,
             invoiceNomenclatures: this.invoice.nomenclatures || [],
             editingRows: [],
-            show_orders: false,
         };
     },
     computed: {
@@ -124,13 +123,8 @@ export default {
         </div>
         <div class="flex flex-row gap-3 mt-2">
             <Button @click="$emit('close')" class="w-full" severity="secondary">Отменить</Button>
-            <Button @click="show_orders = true" class="w-full" severity="help" :disabled="!['created', 'process'].includes(invoice.status)" v-if="invoice.id && isLogist()">Заказы</Button>
             <Button v-if="isManager()" :disabled="nDisabled" :loading="disabled" type="submit" class="w-full">Сохранить</Button>
         </div>
     </Form>
   </loading>
-    <Dialog v-model:visible="show_orders" modal header="Заказы"
-            :style="{ 'max-width': '90vw', width: '100%'}">
-        <Orders v-if="show_orders" :invoice="invoice" @close="show_orders=false"/>
-    </Dialog>
 </template>
