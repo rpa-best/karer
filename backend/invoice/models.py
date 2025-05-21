@@ -1,31 +1,12 @@
 from uuid import uuid4
 
-from celery import shared_task
 from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 from career.tasks import send_to_career
-
-TYPE_PREPAYMENT = 'prepayment'
-TYPE_DEFERMENT_PAYMENT = 'deferment_payment'
-TYPE_LIMIT = 'limit'
-TYPES = (
-    (TYPE_PREPAYMENT, 'Предоплата'),
-    (TYPE_DEFERMENT_PAYMENT, 'Отсрочка платежа'),
-    (TYPE_LIMIT, 'Лимит')
-)
-
-STATUS_CREATED = 'created'
-STATUS_PROCESS = 'process'
-STATUS_DONE = 'done'
-STATUS_CANCELED = 'canceled'
-STATUSES = (
-    (STATUS_CREATED, 'Принято'),
-    (STATUS_PROCESS, 'В обработке'),
-    (STATUS_DONE, 'Успешно'),
-    (STATUS_CANCELED, 'Отклонено')
-)
+from .constants import *
+from .tasks import send_driver_comment
 
 
 class Invoice(models.Model):
@@ -76,31 +57,23 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     comment = models.TextField(blank=True, null=True)
-    driver_comments = models.JSONField(default=list)
 
     def __str__(self) -> str:
         return  f"{self.invoice} - {self.nomenclature}"
 
-    @shared_task
-    def send_driver_comment(self, text):
-        comment = {
-            'uuid': uuid4(),
-            'status': 'loading',
-            'comment': text
-        }
-        self.driver_comments.append(comment)
-        self.save()
-        try:
-            self.driver.send_comment(text)
-            comment['status'] = 'ok'
-        except ConnectionError:
-            comment['status'] = 'error'
-        for c in self.driver_comments:
-            if c['uuid'] == comment['uuid']:
-                c['status'] = comment['status']
-                break
-        self.save()
+
+class DriverComment(models.Model):
+    order = models.ForeignKey(Order, models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=255, choices=COMMENT_STATUSES, default=COMMENT_STATUS_LOADING)
+
+    def __str__(self) -> str:
+        return f"{self.order} - {self.text}"
     
+    def send_driver_comment(self, user_id):
+        return send_driver_comment.delay(self.pk, user_id)
+
 
 @receiver(post_save, sender=Order, dispatch_uid="update_invoice_status_process")
 def update_invoice_status_process(sender, instance: Order, **kwargs):

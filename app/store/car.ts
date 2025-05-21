@@ -1,19 +1,34 @@
 import { defineStore } from "pinia";
+import type { Car } from "~/types/car";
 
 
 export interface CarsParams {
-    search: string
+    search?: string | null
 }
 
-export const useCar = defineStore("car", () => {
-    const {$api} = useNuxtApp()
+interface CarStore {
+    cars: Car[] | undefined
+}
 
-    const cars = ref([])
-
-    const fetchCars = async (params: CarsParams) => {
-        const response = await $api.get('/car/', {params})
-        cars.value = response?.data
+export const useCar = defineStore("car", {
+    state: (): CarStore => ({
+        cars: undefined
+    }),
+    actions: {
+        async fetchCars(params: CarsParams | null = null){
+            const {$api} = useNuxtApp()
+            const response = await $api.get('/car/', {params})
+            this.cars = response?.data
+        },
+        async createCar(car: Car | FormData){
+            const {$api} = useNuxtApp()
+            const response = await $api.post('/car/', car)
+            return response?.data
+        },
+        async updateCar(car_id: number, car: Car | FormData){
+            const {$api} = useNuxtApp()
+            const response = await $api.patch(`/car/${car_id}/`, car)
+            return response?.data
+        }
     }
-
-    return {cars, fetchCars}
 })

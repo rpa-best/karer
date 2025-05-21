@@ -15,7 +15,7 @@ export class Client {
 
         this.url = new URL([protocol, `//`, backend.host, backend.pathname, url].join(''))
         console.log(this.url)
-        this.url.searchParams.set("token", token.value.access)
+        this.url.searchParams.set("token", token.value?.access ?? '')
         this.socket = new WebSocket(this.url);
         this.socket.onopen = onopen
         this.socket.onmessage = onmessage

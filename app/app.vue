@@ -10,7 +10,7 @@
   </div> -->
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { token } from './composables'
 import loader from "~/store/loader";
 
@@ -33,8 +33,8 @@ useHead({
 })
 
 onMounted(async () => {
-  if (useRoute().query.access) token.value.access = useRoute().query.access
-  if (useRoute().query.refresh) token.value.refresh = useRoute().query.refresh
+  if (useRoute().query.access) token.value.access = useRoute().query.access as string
+  if (useRoute().query.refresh) token.value.refresh = useRoute().query.refresh as string
 })
 </script>
 <style>

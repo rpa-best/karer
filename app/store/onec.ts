@@ -1,41 +1,78 @@
 import { defineStore } from "pinia";
+import type { Nomenclature, Organization, Specification } from "~/types/onec";
 
+interface OrganizationStore {
+    organizations: Organization[] | undefined
+}
 
-export const useOrganization = defineStore("organization", () => {
-    const {$api} = useNuxtApp()
+interface OrganizationParams {
+    limit: number
+    offset: number
+    search: string
+    ordering: string
+}
 
-    const orgs = ref([])
+export const useOrganization = defineStore("organization", {
+    state: (): OrganizationStore => ({
+        organizations: undefined
+    }),
+    actions: {
+        async fetchOrganizations(params: OrganizationParams | null = null) {
+            const {$api} = useNuxtApp()
 
-    const fetchOrganizations = async (params) => {
-        const response = await $api.get('/onec/organization/', {params})
-        orgs.value = response?.data
+            const response = await $api.get('/onec/organization/', {params})
+            this.organizations = response?.data
+        }
     }
-
-    return {orgs, fetchOrganizations}
 })
 
-export const useSpecifications = defineStore("specifications", () => {
-    const {$api} = useNuxtApp()
+interface SpecificationStore {
+    specifications: Specification[] | undefined
+}
 
-    const specifications = ref([])
+interface SpecificationParams {
+    limit: number
+    offset: number
+    search: string
+    ordering: string
+}
 
-    const fetchSpecifications = async (params) => {
-        const response = await $api.get('/onec/specification/', {params})
-        specifications.value = response?.data
+export const useSpecification = defineStore("specification", {
+    state: (): SpecificationStore => ({
+        specifications: undefined
+    }),
+    actions: {
+        async fetchSpecifications(params: SpecificationParams | null = null) {
+            const {$api} = useNuxtApp()
+
+            const response = await $api.get('/onec/specification/', {params})
+            this.specifications = response?.data
+        }
     }
-
-    return {specifications, fetchSpecifications}
 })
 
-export const useNomenclatures = defineStore("nomenclatures", () => {
-    const {$api} = useNuxtApp()
 
-    const nomenclatures = ref([])
+interface NomenclatureStore {
+    nomenclatures: Nomenclature[] | undefined
+}
 
-    const fetchNomenclatures = async (params) => {
-        const response = await $api.get('/onec/nomenclature/', {params})
-        nomenclatures.value = response?.data
+interface NomenclatureParams {
+    limit: number
+    offset: number
+    search: string
+    ordering: string
+}
+
+export const useNomenclature = defineStore("nomenclature", {
+    state: (): NomenclatureStore => ({
+        nomenclatures: undefined
+    }),
+    actions: {
+        async fetchNomenclatures(params: NomenclatureParams | null = null) {
+            const {$api} = useNuxtApp()
+
+            const response = await $api.get('/onec/nomenclature/', {params})
+            this.nomenclatures = response?.data
+        }
     }
-
-    return {nomenclatures, fetchNomenclatures}
 })

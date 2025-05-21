@@ -1,8 +1,12 @@
 import { defineStore } from "pinia";
 
+interface LoaderStore {
+    logo: string
+    loading: boolean
+}   
 
 export default defineStore("loader", {
-    state: () => ({
+    state: (): LoaderStore => ({
         logo: '/favicon.ico',
         loading: true
     }),

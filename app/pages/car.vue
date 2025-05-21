@@ -1,43 +1,38 @@
-<script>
+<script setup lang="ts">
 import {Pen, Plus} from "lucide-vue-next"
+import { ref, onMounted } from 'vue'
+import { useNuxtApp } from '#app'
+import type { Car } from "~/types/car"
+import { useCar, type CarsParams } from "~/store/car"
 
-export default {
-    name: 'Cars',
-    components: {Pen, Plus},
-    data() {
-        return {
-            loading: true,
-            car: {},
-            show_car: false,
-            cars: [],
-            filters: {
-                search: null
-            }
-        };
-    },
-    async mounted() {
-        await this.fetch_data();
-    },
-    methods: {
-        rowClick(e) {
-            this.show_car = true;
-            this.car = e.data;
-        },
-        async onFilter() {
-            await this.fetch_data();
-        },
-        async fetch_data() {
-            this.loading = true;
-            const { data } = await this.$api.get('/car/', {params: this.filters})
-            this.cars = data
-            this.loading = false;
-        }
-    }
-};
+const loading = ref(true)
+const car = ref<Car | null>(null)
+const show_car = ref(false)
+const cars = useCar()
+const filters = ref<CarsParams>({})
+
+const rowClick = (data: Car | null) => {
+    show_car.value = true
+    car.value = data
+}
+
+const fetch_data = async () => {
+    loading.value = true
+    await cars.fetchCars(filters.value)
+    loading.value = false
+}
+
+const onFilter = async () => {
+    await fetch_data()
+}
+
+onMounted(async () => {
+    await fetch_data()
+})
 </script>
 
 <template>
-    <loading :loading="loading">
+    <Loading :loading="loading">
         <div class="flex justify-between align-items-center flex-wrap">
             <h2 style="font-size: 24px; font-weight: bold" class="mb-3">Автомобили</h2>
             <div class="flex md:flex-nowrap gap-3 flex-wrap md:w-auto w-full">
@@ -47,7 +42,7 @@ export default {
                         <i class="pi pi-search cursor-pointer" @click="onFilter" />
                     </InputIcon>
                 </IconField>
-                <Button class="mb-3 w-full" @click="() => rowClick({data: {}})">
+                <Button class="mb-3 w-full" @click="() => rowClick(null)">
                     <Plus />
                     Добавить автомобиль
                 </Button>
@@ -55,14 +50,14 @@ export default {
         </div>
         <Card>
             <template #content>
-                <DataTable size="large" :value="cars" lazy :loading="loading" rowHover>
+                <DataTable size="large" :value="cars.cars" lazy :loading="loading" rowHover>
                     <Column field="number" header="Номер" style="font-weight: 600"></Column>
                     <Column field="marka" header="Марка" style="font-weight: 600"></Column>
                     <Column field="model" header="Модель" style="font-weight: 600"></Column>
                     <Column field="vin" header="VIN-Номер" style="font-weight: 600"></Column>
                     <column>
                       <template #body="{data}">
-                        <Button @click="rowClick({data: data})" severity="help" rounded class="size-8 !p-2">
+                        <Button @click="rowClick(data)" severity="help" rounded class="size-8 !p-2">
                           <Pen />
                         </Button>
                       </template>
@@ -71,9 +66,9 @@ export default {
                 </DataTable>
             </template>
         </Card>
-    </loading>
-    <Dialog v-model:visible="show_car" @close="car = {}" modal header="Изменить автомобиль" :style="{ 'max-width': '500px', width: '100%' }">
-        <Car v-if="show_car" :car="car" @close="flag => {car = {}; show_car=false; flag ? fetch_data() : null}" />
+    </Loading>
+    <Dialog v-model:visible="show_car" @close="car = null" modal header="Изменить автомобиль" :style="{ 'max-width': '500px', width: '100%' }">
+        <Car v-if="show_car" :car="car" @close="(flag: boolean) => {car = null; show_car=false; flag ? fetch_data() : null}" />
     </Dialog>
 </template>
 

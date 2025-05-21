@@ -15,7 +15,7 @@
       <!--        <p class="text-base font-medium leading-4 px-2.5 text-gray-400">{{$t('ИЛИ')}}</p>-->
       <!--        <hr class="w-full border-gray-500">-->
       <!--      </div>-->
-      <loading :loading="loading" class="!max-h-[100px]">
+      <Loading :loading="loading" class="!max-h-[100px]">
         <Form @submit="auth" method="post">
           <label for="email" class="text-surface-900 dark:text-surface-0 font-medium mb-2 block">Почта</label>
           <InputText id="email" name="email" type="email" placeholder="Введите почту" class="w-full mb-4" required/>
@@ -25,40 +25,32 @@
 
           <Button type="submit" label="Продолжить" icon="pi pi-user !text-xl !leading-none" class="w-full"/>
         </Form>
-      </loading>
+      </Loading>
 
     </div>
   </div>
 
 </template>
-<script>
-import { token } from '~/composables'
+<script setup lang="ts">
+import { useUser } from '@/store/user'
+import type { UserLogin } from '~/types/user'
+import {Form, type FormSubmitEvent} from '@primevue/forms'
 
 definePageMeta({
-  layout: "none"
+  layout: false
 })
 
-export default {
-  data() {
-    return {
-      loading: false,
-    }
-  },
-    methods: {
-        redirect() {
-            let next = this.$route.query.next ?? `/`
-            window.location.href = next
-        },
-        async auth({values}) {
-          this.loading = true
-          try {
-            const r = await this.$api.post('/oauth/auth/', values)
-            token.value = r?.data
-            this.redirect()
-          } finally {
-            this.loading = false
-          }
-        }
-    }
+const loading = ref(false)
+
+const user = useUser()
+
+async function auth(event: FormSubmitEvent<Record<string, any>>) {
+  loading.value = true
+  try {
+    await user.auth(event.values as UserLogin)
+    user.redirect()
+  } catch {
+    loading.value = false
+  }
 }
 </script>
