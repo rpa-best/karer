@@ -9,7 +9,7 @@ from onec.models import Nomenclature, Price
 from onec.serializers import NomenclatureSerializer
 
 from .. import serializers, filters
-from ..models import Invoice, InvoiceNomenclature, Order, STATUS_CREATED
+from ..models import Invoice, InvoiceNomenclature, Order, STATUS_CREATED, DriverComment
 
 
 class InvoiceViewset(ModelViewSet):
@@ -54,6 +54,22 @@ class OrderViewset(ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         request.data.update(invoice=self.kwargs.get('invoice_id'))
+        return super().update(request, *args, **kwargs)
+
+
+class OrderDriverCommentViewset(ModelViewSet):
+    http_method_names = ['get', 'head', 'patch', 'post']
+    serializer_class = serializers.OrderDriverCommentSerializer
+
+    def get_queryset(self):
+        return DriverComment.objects.filter(order_id=self.kwargs.get('order_id'))
+    
+    def create(self, request, *args, **kwargs):
+        request.data.update(order=self.kwargs.get('order_id'))
+        return super().create(request, *args, **kwargs)
+    
+    def update(self, request, *args, **kwargs):
+        request.data.update(order=self.kwargs.get('order_id'))
         return super().update(request, *args, **kwargs)
 
 

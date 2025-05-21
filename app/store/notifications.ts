@@ -1,17 +1,5 @@
 import { defineStore } from "pinia";
-
-
-export interface Notification {
-    id: number,
-    label: string
-    message: string
-    redirect_url: string
-    read: boolean
-    created_at: string
-    read_at: string
-    severity: string
-}
-
+import type { Notification } from "~/types/notifications";
 
 interface NotificationStore {
     items: { results: Notification[], count: number, unread: number }

@@ -25,47 +25,37 @@
                 <Logo />
             </template>
             <SidebarContent class="mb-3">
-                <button v-if="user.id" v-ripple
+                <button v-if="user.user?.id" v-ripple
                     class="relative overflow-hidden w-full border-0 bg-transparent flex items-center p-2 pl-4 hover:bg-surface-100 rounded-none cursor-pointer transition-colors duration-200">
-                    <Avatar v-if="user.first_name" :label="user.first_name[0]" class="mr-2 cursor-pointer" shape="circle"
-                        @click="toggle" size="large" />
+                    <Avatar v-if="user.user?.first_name" :label="user.user?.first_name[0]" class="mr-2 cursor-pointer" shape="circle" size="large" />
                     <span class="inline-flex flex-col items-start">
-                        <span class="font-bold">{{ user.first_name }} {{ user.last_name }}</span>
+                        <span class="font-bold">{{ user.user?.first_name }} {{ user.user?.last_name }}</span>
                     </span>
                 </button>
                 <h2 v-else class="font-bold text-lg">{{ $t('Пользователь') }}</h2>
               <Notifications />
             </SidebarContent>
             <AppSidebar class="!h-auto" />
-            <Button v-if="user.id" class="w-full mt-2" severity="danger" @click="logout">
+            <Button v-if="user.user?.id" class="w-full mt-2" severity="danger" @click="user.logout">
                 {{ $t('Выйти') }}
             </Button>
         </Drawer>
     </div>
 </template>
-<script>
-import { BookText, Users, Truck, Menu } from 'lucide-vue-next'
+<script setup lang="ts">
+import { BookText, Users, Truck, Menu as MenuIcon } from 'lucide-vue-next'
 import { useUser } from "@/store/user"
+import { ref, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
-export default {
-    components: {BookText, Users, Truck, MenuIcon: Menu},
-    data() {
-        return {
-            profile_open: false,
-        }
-    },
-    computed: {
-        user: () => useUser().user,
-        path: () => useRoute().fullPath
-    },
-    watch: {
-        path() {
-            this.profile_open = false
-        }
-    },
-    methods: {
-        p: (value) => useLocalePath()(value),
-        logout: () => useUser().logout()
-    }
-}
+const profile_open = ref(false)
+
+const user = useUser()
+const path = computed(() => useRoute().fullPath)
+
+watch(path, () => {
+    profile_open.value = false
+})
+
+const p = (value: string) => useLocalePath()(value)
 </script>

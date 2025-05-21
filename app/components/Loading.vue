@@ -62,11 +62,10 @@
     </div>
     <slot v-else />
 </template>
-<script>
-export default {
-    name: 'Loading',
-    props: ['loading']
-}
+<script setup lang="ts">
+defineProps<{
+    loading: boolean
+}>()
 </script>
 
 <style scoped>

@@ -1,57 +1,64 @@
-<script>
-import { Form } from '@primevue/forms';
+<script setup lang="ts">
 import { FileImage } from 'lucide-vue-next'
+import { ref } from 'vue'
+import type { Driver } from '~/types/driver'
+import type { FormSubmitEvent } from '@primevue/forms'
+import { useDriver } from '~/store/driver'
 
-export default {
-    name: 'Driver',
-    props: ['driver'],
-    emits: ['close'],
-    components: { Form, FileImage },
-    data() {
-        return {
-            imageUrl: null,
-            image: null,
-            disabled: false
-        };
-    },
-    methods: {
-        onFileSelect(event) {
-            const file = event.files[0];
-            if (file) {
-                this.image = file;
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    this.imageUrl = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        },
-        selectImage() {
-            this.$refs.image.choose()
-        },
-        async save({ values }) {
-            this.disabled = true
-            if (this.image) {
-                const formData = new FormData()
-                formData.append('image', this.image)
-                for (const key of Object.keys(values)) {
-                    formData.append(key, values[key])
-                }
-                values = formData
-            }
-            try {
-                if (this.driver.id) {
-                    await this.$api.patch(`/driver/${this.driver.id}/`, values)
-                } else {
-                    await this.$api.post('/driver/', values)
-                }
-                this.$emit('close', true)
-            } catch (e) { console.log(e); } finally {
-                this.disabled = false
-            }
+const props =defineProps<{
+    driver: Driver | undefined
+}>()
+
+const emit = defineEmits<{
+    close: [success?: boolean]
+}>()
+
+const imageUrl = ref<string | null>(null)
+const image = ref<File | null>(null) 
+const disabled = ref(false)
+const imageRef = ref()
+const drivers = useDriver()
+
+const onFileSelect = (event: any) => {
+    const file = event.files[0]
+    if (file) {
+        image.value = file
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            imageUrl.value = e.target?.result as string
         }
+        reader.readAsDataURL(file)
     }
-};
+}
+
+const selectImage = () => {
+    imageRef.value.choose()
+}
+
+const save = async ({ values }: FormSubmitEvent<Record<string, any>>) => {
+    disabled.value = true
+    try {
+        let formData: FormData | Driver = values as Driver
+        if (image.value) {
+            formData = new FormData()
+            formData.append('image', image.value)
+            for (const key of Object.keys(values)) {
+                formData.append(key, String(values[key as keyof Driver])) 
+            }
+            
+        }
+        if (props.driver?.id) {
+            await drivers.updateDriver(props.driver.id, formData)
+        } else {
+            await drivers.createDriver(formData)
+        }
+        emit('close', true)
+    } catch (e) {
+        console.log(e)
+    } finally {
+        disabled.value = false
+    }
+}
 </script>
 
 <template>
@@ -59,10 +66,10 @@ export default {
         <div class="grid gap-8 grid-cols-3">
             <div class="col-span-1 text-hidden">
                 <div @click="selectImage" class="flex justify-center items-center bg-surface-200 rounded-xl h-full">
-                    <img :src="imageUrl || driver.image" v-if="imageUrl || driver.image" class="object-contain" />
+                    <img :src="imageUrl || driver?.image" v-if="imageUrl || driver?.image" class="object-contain" />
                     <FileImage v-else class="text-gray-500 size-8" />
                 </div>
-                <FileUpload ref="image" mode="basic" name="image" accept="image/*" @select="onFileSelect"/>
+                <FileUpload ref="imageRef" mode="basic" name="image" accept="image/*" @select="onFileSelect"/>
             </div>
             <div class="col-span-2 mt-5">
                 <div class="grid grid-cols-2 gap-8">

@@ -15,7 +15,7 @@ class NotificationViewSet(ModelViewSet):
     def get_queryset(self):
         if self.request.user.is_anonymous:
             return Notification.objects.all()
-        return Notification.objects.filter(user=self.request.user)
+        return Notification.objects.filter(user=self.request.user).order_by('-created_at')
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:

@@ -6,8 +6,8 @@ from rest_framework.exceptions import ValidationError
 from onec.models import Specification
 from car.serializers import CarSerializer
 from driver.serializers import DriverSerializer
-from onec.serializers import NomenclatureSerializer, SpecificationSerializer
-from .models import Invoice, InvoiceNomenclature, Order, TYPE_LIMIT, TYPE_PREPAYMENT, TYPE_DEFERMENT_PAYMENT
+from onec.serializers import NomenclatureSerializer
+from .models import Invoice, InvoiceNomenclature, Order, TYPE_LIMIT, TYPE_PREPAYMENT, TYPE_DEFERMENT_PAYMENT, DriverComment 
 
 
 class InvoiceNomenclatureSerializer(serializers.ModelSerializer):
@@ -100,26 +100,43 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs: dict):
         invoice = attrs.get('invoice')
-        agg_invoice = get_object_or_404(
-            InvoiceNomenclature, invoice=invoice, nomenclature=attrs['nomenclature'])
-        agg = Order.objects.filter(
-            invoice=invoice,
-            nomenclature=attrs['nomenclature']
-        ).aggregate(norder=Sum('order'), nfact=Sum('fact'))
-        if agg.get('order', 0) + attrs.get('order') > agg_invoice.value:
-            raise ValidationError("Потрепность больше чем указано в инвоийс")
+        if attrs.get('order') is not None:
+            agg_invoice = get_object_or_404(
+                InvoiceNomenclature, invoice=invoice, nomenclature=attrs['nomenclature'])
+            agg = Order.objects.filter(
+                invoice=invoice,
+                nomenclature=attrs['nomenclature']
+            ).aggregate(norder=Sum('order'), nfact=Sum('fact'))
+            if agg.get('order', 0) + attrs.get('order') > agg_invoice.value:
+                raise ValidationError("Потрепность больше чем указано в заказе")
         return super().validate(attrs)
 
     def create(self, validated_data: dict):
         new_driver_comment = validated_data.pop('new_driver_comment', None)
         instance: Order = super().create(validated_data)
         if new_driver_comment:
-            instance.send_driver_comment.delay(new_driver_comment)
+            instance.send_driver_comment(new_driver_comment, self.context.get('request').user.id)
         return instance
 
     def update(self, instance, validated_data):
         new_driver_comment = validated_data.pop('new_driver_comment', None)
         instance: Order = super().update(instance, validated_data)
         if new_driver_comment:
-            instance.send_driver_comment.delay(new_driver_comment)
+            instance.send_driver_comment(new_driver_comment, self.context.get('request').user.id)
+        return instance
+    
+
+class OrderDriverCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DriverComment
+        fields = '__all__'
+
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        instance.send_driver_comment(self.context.get('request').user.id)
+        return instance
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        instance.send_driver_comment(self.context.get('request').user.id)
         return instance

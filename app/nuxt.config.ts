@@ -9,7 +9,10 @@ export default defineNuxtConfig({
     '@nuxtjs/leaflet',
     '@nuxtjs/color-mode',
   ],
-  ssr: true,
+  ssr: false,
+  experimental: {
+    payloadExtraction: false
+  },
   runtimeConfig: {
     public: {
       NUXT_APP_BACKEND_HOST: process.env.NUXT_APP_BACKEND_HOST,
@@ -23,10 +26,13 @@ export default defineNuxtConfig({
 
   primevue: {
     autoImport: true,
-    options: {
-      ripple: true,
-      theme: Preset,
+    components: {
+      include: '*'
     },
+    directives: {
+      include: '*'
+    },
+    importTheme: { from: '@/theme.ts' },
   },
 
   i18n: {

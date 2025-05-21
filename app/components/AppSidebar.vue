@@ -5,8 +5,8 @@
 
         <Menu :model="sidebar()" class="p-0 !bg-transparent !border-0">
           <template #item="{ item }">
-            <NuxtLink :class="useRoute().path === item.url ? 'text-primary' : ''" :to="item.url" class="flex flex-row px-3 py-2 cursor-pointer">
-              <component :is="item.icon" />
+            <NuxtLink :class="route.path === item.url ? 'text-primary' : ''" :to="item.url" class="flex flex-row px-3 py-2 cursor-pointer">
+              <component v-if="item.icon" :is="item.icon" />
                 <span class="ml-2">{{ $t(item.title) }}</span>
                 <Badge severity="danger" class="ml-2" v-if="item.disabled" :value="$t('Скоро')"/>
             </NuxtLink>
@@ -19,8 +19,11 @@
       </SidebarContent>
     </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import sidebar from '@/layouts/sidebar-config'
 import SidebarContent from './SidebarContent.vue';
 import UserDropdown from './UserDropdown.vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute()
 </script>

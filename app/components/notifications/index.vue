@@ -1,49 +1,46 @@
-<script lang="ts">
+<script setup lang="ts">
 import { Bell, CheckCheck, X, Check, Info } from "lucide-vue-next";
-import {useNotification, type Notification} from "~/store/notifications.js";
+import {useNotification} from "~/store/notifications.js";
 import {NotificationSocket} from "./websocket"
+import type { Notification } from "~/types/notifications";
 
-export default {
-  components: { Bell, CheckCheck, X, Check, Info },
-  data() {
-    return {
-      loading: true,
-      open: false,
-      notification: useNotification(),
-      socket: null
-    }
-  },
-  async mounted() {
-    await this.fetch_data()
+const open = ref(false)
+const loading = ref(true)
+const notification = useNotification()
+const socket = ref<NotificationSocket | null>(null)
+const router = useRouter()
 
-    const socket = new NotificationSocket()
-    console.log(socket)
-  },
-  methods: {
-    format(value: string) {
-      return value
-      // return formatDistanceToNow(new Date(value), { addSuffix: true, locale: ru })
-    },
-    async fetch_data() {
-      this.loading = true
-      await this.notification.fetchData()
-      this.loading = false
-    },
-    async select(item: Notification) {
-      if (!item.read) {
-        await this.notification.read(item.id)
-        item.read = true
-      }
-      await this.$router.push(item.redirect_url)
-    },
-    async allCheck() {
-      if (this.notification.items.unread > 0) {
-        await this.notification.readAll()
-        await this.fetch_data()
-      }
-    }
+onMounted(async () => {
+  await fetch_data()
+  socket.value = new NotificationSocket()
+})
+
+const fetch_data = async () => {
+  loading.value = true
+  await notification.fetchData()
+  loading.value = false
+}
+
+const allCheck = async () => {
+  if (notification.items.unread > 0) {
+    await notification.readAll()
+    await fetch_data()
   }
 }
+
+const select = async (item: Notification) => {
+  if (!item.read) {
+    await notification.read(item.id)
+    item.read = true
+  }
+  await router.push(item.redirect_url)
+}
+
+const format = (value: string) => {
+  return value
+  // return formatDistanceToNow(new Date(value), { addSuffix: true, locale: ru })
+} 
+
 </script>
 
 <template>
