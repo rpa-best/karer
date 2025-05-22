@@ -3,8 +3,7 @@ import { FileImage } from 'lucide-vue-next'
 import { ref } from 'vue'
 import type { Driver } from '~/types/driver'
 import type { FormSubmitEvent } from '@primevue/forms'
-import { useDriver } from '~/store/driver'
-
+import { DriverService } from '~/services'
 const props =defineProps<{
     driver: Driver | undefined
 }>()
@@ -17,7 +16,7 @@ const imageUrl = ref<string | null>(null)
 const image = ref<File | null>(null) 
 const disabled = ref(false)
 const imageRef = ref()
-const drivers = useDriver()
+const driverService = new DriverService()
 
 const onFileSelect = (event: any) => {
     const file = event.files[0]
@@ -48,9 +47,9 @@ const save = async ({ values }: FormSubmitEvent<Record<string, any>>) => {
             
         }
         if (props.driver?.id) {
-            await drivers.updateDriver(props.driver.id, formData)
+            await driverService.update(props.driver.id, formData)
         } else {
-            await drivers.createDriver(formData)
+            await driverService.create(formData)
         }
         emit('close', true)
     } catch (e) {

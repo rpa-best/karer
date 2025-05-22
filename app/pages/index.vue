@@ -2,11 +2,11 @@
 import { ref, onMounted } from 'vue'
 import {Pen, Plus} from "lucide-vue-next"
 import type { DataTablePageEvent } from 'primevue/datatable';
-import type { InvoiceParams } from '~/store/invoices';
-import { useInvoice } from '~/store/invoices';
-import { useOrganization } from '~/store/onec';
 import { isManager, isLogist } from '~/permissions';
-import type { Invoice } from '~/types/invoices';
+import type { Invoice, InvoiceParams } from '~/types/invoices';
+import { InvoiceService } from '~/services/invoice';
+import type { Organization } from '~/types/onec';
+import { OrganizationService } from '~/services';
 
 const statuses: {[key: string]: {color: string, label: string}} = {
     created: { color: 'info', label: 'Принято' },
@@ -36,23 +36,20 @@ const statusOptions: {label: string, value: string}[] = [
     }
 ]
 
-const filters: Ref<InvoiceParams> = ref({
+const filters = ref<InvoiceParams>({
     status: 'all',
-    org: null,
     limit: 10,
-    offset: 0,
-    search: null,
-    type: null,
-    specification: null,
-    ordering: null
+    offset: 0
 })
 
 const loading = ref(true)
 const show_invoice = ref(false)
 const invoice: Ref<Invoice | undefined> = ref(undefined)
 const expandedRowGroups = ref(null)
-const organizations = useOrganization()
-const invites = useInvoice()
+const invoiceService = new InvoiceService()
+const invites = ref<{results?: Invoice[], count?: number}>({})
+const organizations = ref<Organization[]>([])
+const organizationService = new OrganizationService()
 
 const rowClick = (data: Invoice | undefined = undefined) => {
     show_invoice.value = true
@@ -66,7 +63,7 @@ const onPage = async (e: DataTablePageEvent) => {
 
 onMounted(async () => {
     await fetch_data()
-    await organizations.fetchOrganizations()
+    organizations.value = await organizationService.list()
 })
 
 async function onFilter() {
@@ -75,7 +72,8 @@ async function onFilter() {
 
 async function fetch_data() {
     loading.value = true;
-    await invites.fetchInvoices(filters.value)
+    const data = await invoiceService.list(filters.value) as {results?: Invoice[], count?: number}
+    invites.value = data
     loading.value = false;
 }
 </script>
@@ -93,7 +91,7 @@ async function fetch_data() {
                         </InputIcon>
                     </IconField>
                 </div>
-                <Select @value-change="onFilter" show-clear v-model="filters.org" :options="organizations.organizations" optionLabel="name"
+                <Select @value-change="onFilter" show-clear v-model="filters.org" :options="organizations" optionLabel="name"
                     option-value="uuid" filter placeholder="Выберите организацию" class="w-full md:mr-3 mb-3" />
                 <Button v-if="isManager()" class="mb-3 w-full" @click="() => rowClick()">
                     <Plus />
@@ -105,8 +103,8 @@ async function fetch_data() {
         <SelectButton @click="onFilter" class="mb-3" v-model="filters.status" :options="statusOptions" optionLabel="label"
             option-value="value" dataKey="label" />
 
-        <DataTable size="large" :value="invites.invoices?.results" paginator :rows="filters.limit" lazy @page="onPage"
-            rowHover :total-records="invites.invoices?.count" :loading="loading" responsive-layout="scroll"
+        <DataTable size="large" :value="invites?.results" paginator :rows="filters.limit" lazy @page="onPage"
+            rowHover :total-records="invites?.count" :loading="loading" responsive-layout="scroll"
                    v-model:expandedRows="expandedRowGroups" dataKey="id">
             <Column expander v-if="isLogist()"></Column>
             <Column field="number" header="Номер заявки"></Column>

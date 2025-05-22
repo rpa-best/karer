@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import {Pen, Plus} from "lucide-vue-next"
 import { ref, onMounted } from 'vue'
-import { useNuxtApp } from '#app'
 import type { Car } from "~/types/car"
-import { useCar, type CarsParams } from "~/store/car"
+import { CarService } from "~/services"
+import type { DefaultQueryParams } from '~/types'
 
 const loading = ref(true)
 const car = ref<Car | null>(null)
 const show_car = ref(false)
-const cars = useCar()
-const filters = ref<CarsParams>({})
+const carService = new CarService()
+const cars = ref<Car[]>([])
+const filters = ref<DefaultQueryParams>({})
 
 const rowClick = (data: Car | null) => {
     show_car.value = true
@@ -18,7 +19,7 @@ const rowClick = (data: Car | null) => {
 
 const fetch_data = async () => {
     loading.value = true
-    await cars.fetchCars(filters.value)
+    cars.value = await carService.list(filters.value)
     loading.value = false
 }
 
@@ -50,7 +51,7 @@ onMounted(async () => {
         </div>
         <Card>
             <template #content>
-                <DataTable size="large" :value="cars.cars" lazy :loading="loading" rowHover>
+                <DataTable size="large" :value="cars" lazy :loading="loading" rowHover>
                     <Column field="number" header="Номер" style="font-weight: 600"></Column>
                     <Column field="marka" header="Марка" style="font-weight: 600"></Column>
                     <Column field="model" header="Модель" style="font-weight: 600"></Column>

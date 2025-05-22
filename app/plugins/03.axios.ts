@@ -1,33 +1,33 @@
-import axios, { type AxiosResponse, type AxiosRequestConfig, type AxiosError } from "axios";
+import axios, { type AxiosResponse, type AxiosRequestConfig, type AxiosError, type AxiosInstance } from "axios";
 import { token } from "~/composables";
 import { useUser } from "~/store/user";
 
-export default defineNuxtPlugin((nuxtApp) => {
-  const {
-    public: { NUXT_APP_BACKEND_HOST },
-  } = useRuntimeConfig();
 
-  const api = axios.create({
-    baseURL: NUXT_APP_BACKEND_HOST,
-  });
+export class Api {
+  private readonly api: AxiosInstance
 
-  const request = async (
+  constructor() {
+    const {public: { NUXT_APP_BACKEND_HOST }} = useRuntimeConfig();
+    this.api = axios.create({baseURL: NUXT_APP_BACKEND_HOST});
+  }
+
+  async request(
     method: string,
     url: string,
     data: any | null,
     config: AxiosRequestConfig = {},
     toasted: boolean = true,
     redirect: boolean = true
-  ): Promise<AxiosResponse | undefined> => {
+  ): Promise<AxiosResponse> {
     config.url = url;
     config.method = method;
     config.data = data;
     config.headers = {
       Authorization: `Bearer ${token.value.access}`,
     }
-    const toast = nuxtApp.vueApp.config.globalProperties.$toast
+    const toast = useNuxtApp().vueApp.config.globalProperties.$toast
     try {
-      const response = await api.request(config);
+      const response = await this.api.request(config);
       if (toasted) {
         toast.add({severity: 'success', summary: "Операция выполнена успешно", life: 2000})
       }
@@ -36,15 +36,15 @@ export default defineNuxtPlugin((nuxtApp) => {
       const error = e as AxiosError
       if (error.response?.status == 401) {
         if (token.value.refresh) {
-          const { data } = await api.post("/oauth/refresh/", {
+          const { data } = await this.api.post("/oauth/refresh/", {
             refresh: token.value.refresh,
           });
           token.value = data
-          return await request(method, url, config.data, config, toasted, redirect)
+          return await this.request(method, url, config.data, config, toasted, redirect)
         }
         if (redirect) {
           useUser().login()
-          return
+          return error.response
         }
       }
       if (toasted) {
@@ -53,16 +53,27 @@ export default defineNuxtPlugin((nuxtApp) => {
       }
       throw e
     }
-  };
+  }
 
+  async get(url: string, config: AxiosRequestConfig = {}, redirect: boolean=true) {
+    return await this.request('get', url, null, config, false, redirect)
+  }
+  async post(url: string, data: any, config: AxiosRequestConfig = {}, toasted=true) {
+    return await this.request('post', url, data, config, toasted, true)
+  }
+  async patch(url: string, data: any, config: AxiosRequestConfig = {}, toasted=true) {
+    return await this.request('patch', url, data, config, toasted, true)
+  }
+  async delete(url: string, config: AxiosRequestConfig = {}, toasted=true) {
+    return await this.request('delete', url, null, config, toasted, true)
+  }
+}
+
+
+export default defineNuxtPlugin(() => {
   return {
     provide: {
-      api: {
-        get: async (url: string, config: AxiosRequestConfig = {}, redirect: boolean=true) => await request('get', url, null, config, false, redirect),
-        post: async (url: string, data: any, config: AxiosRequestConfig = {}, toasted=true) => await request('post', url, data, config, toasted, true),
-        patch: async (url: string, data: any, config: AxiosRequestConfig = {}, toasted=true) => await request('patch', url, data, config, toasted, true),
-        delete: async (url: string, config: AxiosRequestConfig = {}, toasted=true) => await request('delete', url, null, config, toasted, true),
-      }
+      api: new Api()
     },
   };
 })

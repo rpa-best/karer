@@ -6,7 +6,7 @@
         <Menu :model="sidebar()" class="p-0 !bg-transparent !border-0">
           <template #item="{ item }">
             <NuxtLink :class="route.path === item.url ? 'text-primary' : ''" :to="item.url" class="flex flex-row px-3 py-2 cursor-pointer">
-              <component v-if="item.icon" :is="item.icon" />
+              <component v-if="item.licon" :is="item.licon" />
                 <span class="ml-2">{{ $t(item.title) }}</span>
                 <Badge severity="danger" class="ml-2" v-if="item.disabled" :value="$t('Скоро')"/>
             </NuxtLink>

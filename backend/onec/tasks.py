@@ -1,4 +1,5 @@
 import os
+from django.db import IntegrityError
 import requests
 from django.conf import settings
 from celery import shared_task
@@ -31,41 +32,59 @@ def _request():
 
 def _sync_organizations(data):
     for org_data in data.values():
-        org, created = Organization.objects.update_or_create(
-            uuid=org_data['XML_ID'],
-            defaults={
-                'name': org_data['NAME'],
-                'fullname': org_data['FULLNAME'],
-                'inn': org_data['INN'],
-                'kpp': org_data['KPP'],
-            }
-        )
+        defaults={
+            'name': org_data.get('NAME'),
+            'fullname': org_data.get('FULLNAME'),
+            'inn': org_data.get('INN'),
+            'kpp': org_data.get('KPP'),
+        }
+        try:
+            org = Organization.objects.get(uuid=org_data['XML_ID'])
+            Organization.objects.filter(uuid=org_data['XML_ID']).update(**{
+                key: value for key, value in defaults.items() if value is not None
+            })
+            created = False
+        except Organization.DoesNotExist:
+            org = Organization.objects.create(uuid=org_data['XML_ID'], **defaults)
+            created = True
         print("Created" if created else "Updated", org)
 
 
 def _sync_specifications(data):
     for spec_data in data.values():
-        spec, created = Specification.objects.update_or_create(
-            uuid=spec_data['XML_ID'],
-            defaults={
-                'name': spec_data['NAME'],
-                'delivery_address': spec_data.get('DELIVERY_ADDRESS', ''),
-                'payment_deferment': spec_data.get('PAYMENT_DEFERMENT', 0),
-                'amount_limit': spec_data.get('AMOUNT_LIMIT', 0),
-            }
-        )
+        defaults={
+            'name': spec_data.get('NAME'),
+            'delivery_address': spec_data.get('DELIVERY_ADDRESS'),
+            'payment_deferment': spec_data.get('PAYMENT_DEFERMENT'),
+            'amount_limit': spec_data.get('AMOUNT_LIMIT'),
+        }
+        try:
+            spec = Specification.objects.get(uuid=spec_data['XML_ID'])
+            Specification.objects.filter(uuid=spec_data['XML_ID']).update(**{
+                key: value for key, value in defaults.items() if value is not None
+            })
+            created = False
+        except Specification.DoesNotExist:
+            spec = Specification.objects.create(uuid=spec_data['XML_ID'], **defaults)
+            created = True
         print("Created" if created else "Updated", spec)
 
 
 def _sync_nomenclatures(data):
     for nom_data in data.values():
-        nom, created = Nomenclature.objects.update_or_create(
-            uuid=nom_data['XML_ID'],
-            defaults={
-                'name': nom_data['NAME'],
-                'unit': nom_data['UNIT'],
-            }
-        )
+        defaults={
+            'name': nom_data['NAME'],
+            'unit': nom_data['UNIT'],
+        }
+        try:
+            nom = Nomenclature.objects.get(uuid=nom_data['XML_ID'])
+            Nomenclature.objects.filter(uuid=nom_data['XML_ID']).update(**{
+                key: value for key, value in defaults.items() if value is not None
+            })
+            created = False
+        except Nomenclature.DoesNotExist:
+            nom = Nomenclature.objects.create(uuid=nom_data['XML_ID'], **defaults)
+            created = True
         print("Created" if created else "Updated", nom)
 
 
@@ -78,14 +97,19 @@ def _sync_prices(data):
             print("Skipping price update due to missing nomenclature or specification", price_data)
             continue
 
-        price, created = Price.objects.update_or_create(
-            nomenclature=nomenclature,
-            specification=specification,
-            defaults={
-                'date': price_data['DATE'],
-                'price': price_data['PRICE'],
-            }
-        )
+        defaults={
+            'date': price_data['DATE'],
+            'price': price_data['PRICE'],
+        }
+        try:
+            price = Price.objects.get(nomenclature=nomenclature, specification=specification)
+            Price.objects.filter(nomenclature=nomenclature, specification=specification).update(**{
+                key: value for key, value in defaults.items() if value is not None
+            })
+            created = False
+        except Price.DoesNotExist:
+            price = Price.objects.create(nomenclature=nomenclature, specification=specification, **defaults)
+            created = True
         print("Created" if created else "Updated", price)
 
 
@@ -97,10 +121,16 @@ def _sync_balances(data):
             print("Skipping balance update due to missing specification", balance_data)
             continue
 
-        balance, created = Balance.objects.update_or_create(
-            specification=specification,
-            defaults={
-                'balance': balance_data['BALANCE'],
-            }
-        )
+        defaults={
+            'balance': balance_data['BALANCE'],
+        }
+        try:
+            balance = Balance.objects.get(specification=specification)
+            Balance.objects.filter(specification=specification).update(**{
+                key: value for key, value in defaults.items() if value is not None
+            })
+            created = False
+        except Balance.DoesNotExist:
+            balance = Balance.objects.create(specification=specification, **defaults)
+            created = True
         print("Created" if created else "Updated", balance)

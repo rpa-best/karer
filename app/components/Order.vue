@@ -3,15 +3,15 @@ import { useToast } from 'primevue/usetoast'
 import z from 'zod'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import type { Order, Invoice, OrderForm } from '~/types/invoices'
+import type { Car } from '~/types/car'
+import type { Driver } from '~/types/driver'
 import type { Nomenclature } from '~/types/onec'
-import { useCar } from '~/store/car'
-import { useDriver } from '~/store/driver'
-import { useNomenclature } from '~/store/onec'
-import { useOrder } from '~/store/invoices'
 import type { FormSubmitEvent } from '@primevue/forms'
+import { CarService, DriverService, NomenclatureService } from '~/services'
+import { InvoiceService } from '~/services/invoice'
 
 const { order, invoice } = defineProps<{
-  order: Order
+  order: Order | {}
   invoice: Invoice
 }>()
 
@@ -21,16 +21,21 @@ const emit = defineEmits<{
 
 const myOrder = ref<OrderForm>({
   ...JSON.parse(JSON.stringify(order)),
-  address: invoice?.address ?? order.address,
-  car: order.car ? order.car.id : null,
-  driver: order.driver ? order.driver.id : null,
-  nomenclature: order.nomenclature ? order.nomenclature.uuid : null
+  address: invoice?.address ?? (order as Order).address,
+  car: (order as Order).car ? (order as Order).car.id : null,
+  driver: (order as Order).driver ? (order as Order).driver.id : null,
+  nomenclature: (order as Order).nomenclature ? (order as Order).nomenclature.uuid : null
 })
 
-const cars = useCar()
-const drivers = useDriver()
-const nomenclatures = useNomenclature()
-const orders = useOrder()
+const carService = new CarService()
+const driverService = new DriverService()
+const nomenclatureService = new NomenclatureService()
+const invoiceService = new InvoiceService()
+
+const cars = ref<Car[]>([])
+const drivers = ref<Driver[]>([])
+const nomenclatures = ref<Nomenclature[]>([])
+
 const disabled = ref(false)
 const toast = useToast()
 
@@ -50,14 +55,14 @@ const resolver = zodResolver(
 
 onMounted(async () => {
   disabled.value = true
-  await cars.fetchCars()
-  await drivers.fetchDrivers()
-  await nomenclatures.fetchNomenclatures()
+  cars.value = await carService.list<Car>()
+  drivers.value = await driverService.list<Driver>()
+  nomenclatures.value = await nomenclatureService.list<Nomenclature>()
   disabled.value = false
 })
 
 function select_nomenclature({value}: {value: any}, form: any) {
-  const nomenclature = nomenclatures.nomenclatures?.find((n: Nomenclature) => n.uuid === value)
+  const nomenclature = nomenclatures.value?.find((n: Nomenclature) => n.uuid === value)
   if (nomenclature) {
     if (!nomenclature.per_price) {
       toast.add({severity: 'warn', summary: 'Ошибка', detail: 'У номенклатуры не указана цена', life: 3000})
@@ -78,10 +83,10 @@ async function save({values, valid}: FormSubmitEvent) {
   if (!valid) return
   disabled.value = true
   try {
-    if (order.uuid) {
-      await orders.updateOrder(invoice.id, order.uuid, values as OrderForm)
+    if (myOrder.value.uuid) {
+      await invoiceService.order.update(myOrder.value.uuid, values as OrderForm, {}, {invoice_id: invoice.id})
     } else {
-      await orders.createOrder(invoice.id, values as OrderForm)
+      await invoiceService.order.create(values as OrderForm, {}, {invoice_id: invoice.id})
     }
     emit('close', true)
   } catch (e) {
@@ -93,7 +98,7 @@ async function save({values, valid}: FormSubmitEvent) {
 }
 
 function getUnit(nomenclature: string) {
-  return nomenclatures.nomenclatures?.find((n: Nomenclature) => n.uuid === nomenclature)?.unit
+  return nomenclatures.value?.find((n: Nomenclature) => n.uuid === nomenclature)?.unit
 }
 </script>
 
@@ -103,15 +108,15 @@ function getUnit(nomenclature: string) {
       <div class="grid gap-8 grid-cols-6 mt-5">
         <div class="col-span-6">
           <FloatLabel>
-            <Select emptyMessage="Пусто" required id="car" class="w-full" name="car" :disabled="order.done"
-                    :options="cars.cars" option-value="id" option-label="number"/>
+            <Select emptyMessage="Пусто" required id="car" class="w-full" name="car" :disabled="myOrder.done"
+                    :options="cars" option-value="id" option-label="number"/>
             <label for="car" style="font-size: 12px">Машина</label>
           </FloatLabel>
         </div>
         <div class="col-span-6">
           <FloatLabel>
-            <Select emptyMessage="Пусто" required id="driver" style="width: 100%" name="driver" :disabled="order.done"
-                    :options="drivers.drivers" option-value="id" option-label="name"/>
+            <Select emptyMessage="Пусто" required id="driver" style="width: 100%" name="driver" :disabled="myOrder.done"
+                    :options="drivers" option-value="id" option-label="name"/>
             <label for="driver" style="font-size: 12px">Водитель</label>
           </FloatLabel>
         </div>
@@ -124,7 +129,7 @@ function getUnit(nomenclature: string) {
         <div class="col-span-6">
           <FloatLabel>
             <Select @change="(e: any) => select_nomenclature(e, $form)" emptyMessage="Пусто" required id="nomenclature"
-                    style="width: 100%" name="nomenclature" :disabled="order.done" :options="nomenclatures.nomenclatures"
+                    style="width: 100%" name="nomenclature" :disabled="myOrder.done" :options="nomenclatures"
                     option-value="uuid" option-label="name"/>
             <label for="nomenclature" style="font-size: 12px">Номенклатура</label>
           </FloatLabel>
@@ -134,7 +139,7 @@ function getUnit(nomenclature: string) {
           <FloatLabel>
             <InputNumber required 
                          :suffix="` ${getUnit($form.nomenclature?.value)}`"
-                         id="additive" style="width: 100%" name="additive" :disabled="order.done"/>
+                         id="additive" style="width: 100%" name="additive" :disabled="myOrder.done"/>
             <label for="additive" style="font-size: 12px">Добавка</label>
           </FloatLabel>
         </div>
@@ -143,7 +148,7 @@ function getUnit(nomenclature: string) {
             <InputNumber required
                          @update:model-value="(value: number) => $form.price.value = $form.per_price?.value * ($form.fact?.value ? $form.fact.value : value)"
                          :suffix="` ${getUnit($form.nomenclature?.value)}`"
-                         id="order" style="width: 100%" name="order" :disabled="order.done"/>
+                         id="order" style="width: 100%" name="order" :disabled="myOrder.done"/>
             <label for="order" style="font-size: 12px">Количество на отгрузку</label>
           </FloatLabel>
         </div>
@@ -181,7 +186,7 @@ function getUnit(nomenclature: string) {
       <slot name="buttons" :disabled="disabled">
         <div class="flex flex-row gap-3 mt-2">
             <Button @click="$emit('close')" class="w-full" severity="secondary">Отменить</Button>
-            <Button v-if="!order.done" :disabled="disabled" :loading="disabled" type="submit" class="w-full">Сохранить</Button>
+            <Button v-if="!myOrder.done" :disabled="disabled" :loading="disabled" type="submit" class="w-full">Сохранить</Button>
         </div>
       </slot>
     </Form>

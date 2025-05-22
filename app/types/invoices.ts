@@ -1,3 +1,4 @@
+import type { DefaultQueryParams } from "."
 import type { Car } from "./car"
 import type { Driver } from "./driver"
 import type { Nomenclature } from "./onec"
@@ -14,13 +15,20 @@ export interface Invoice {
     number: string
     created_at: string
     updated_at: string
-    status: string
+    status: 'created' | 'process' | 'done' | 'canceled'
     address: string
-    type: string
+    type: 'prepayment' | 'deferment_payment' | 'limit'
     comment: string
     org: string
     specification: string
     nomenclatures: InvoiceNomenclature[]
+}
+
+export interface InvoiceParams extends DefaultQueryParams {
+    status?: 'all' |'created' | 'process' | 'done' | 'canceled' | undefined  
+    type?: 'prepayment' | 'deferment_payment' | 'limit' | undefined
+    org?: string | undefined
+    specification?: string | undefined
 }
 
 export interface DriverComment {
@@ -59,4 +67,13 @@ export interface OrderForm {
     order: number
     fact: number
     comment: string
+    done: boolean
 }
+
+export interface Pivot {   
+    current_summa: number
+    results: Nomenclature[]
+    summa: number  
+}
+
+export interface OrderParams extends DefaultQueryParams {}

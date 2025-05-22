@@ -1,26 +1,23 @@
 <script setup lang="ts">
 import { Pen, MessageCircle, Send, Trash, EllipsisVertical, Check, Plus } from "lucide-vue-next"
 import { order_columns } from "~/composables"
-import type { Invoice, Order } from "~/types/invoices"
-import { useOrder, useInvoice, type OrderParams } from "~/store/invoices"
-import { ref, onMounted } from "vue"
-import { useNuxtApp } from "#app"
+import type { Invoice, Order, Pivot, OrderParams } from "~/types/invoices"
+import { InvoiceService } from "~/services/invoice"
+import { useConfirm } from "primevue/useconfirm";
 
 const props = defineProps<{
   invoice: Invoice
 }>()
 
 const loader = ref(true)
-const orders = useOrder()
-const order = ref<Order | null>(null)
+const invoiceService = new InvoiceService()
+const orders = ref<Order[]>([])
+const pivot = ref<Pivot | undefined>(undefined)
+
+const confirm = useConfirm()
+const order = ref<Order | {}>({})
 const show_order = ref(false)
-const pivot = useInvoice()
-const filters = ref<OrderParams>({
-  search: null,
-  order: null,
-  limit: null,
-  offset: null,
-})
+const filters = ref<OrderParams>({})
 
 const columns = [
   {
@@ -63,7 +60,7 @@ const menuItems = ref([
         licon: Pen,
         command: () => {
           if (order.value) {
-            rowClick(order.value)
+            rowClick(order.value as Order)
           }
         }
       },
@@ -79,15 +76,15 @@ const menuItems = ref([
         licon: Send,
         command: () => {
           if (order.value) {
-            orders.sendCareer(props.invoice.id, order.value.uuid)
+            invoiceService.order.sendCareer(props.invoice.id, (order.value as Order).uuid)
           }
         }
       },
       {
         label: 'Удалить',
         licon: Trash,
-        command: ({ originalEvent }: { originalEvent: Event }) => {
-          if (originalEvent) confirmDelete(originalEvent, order.value)
+        command: () => {
+          if (order.value) confirmDelete(order.value as Order)
         }
       }
     ]
@@ -100,7 +97,7 @@ onMounted(async () => {
   await fetch_data()
 })
 
-function rowClick(data: Order | null = null) {
+function rowClick(data: Order | {} = {}) {
   show_order.value = true
   order.value = data
 }
@@ -111,35 +108,32 @@ async function onFilter() {
 
 async function fetch_data() {
   loader.value = true
-  await orders.fetchOrders(props.invoice.id, filters.value)
-  await pivot.fetchPivot(props.invoice.id, filters.value)
+  orders.value = await invoiceService.order.list(filters.value, { invoice_id: props.invoice.id })
+  pivot.value = await invoiceService.fetchPivot(props.invoice.id, filters.value)
   loader.value = false
 }
 
-function confirmDelete(event: Event, data: any) {
-  const confirm: any = useNuxtApp().$confirm
-  if (confirm) {
-    confirm?.require({
-      target: event.currentTarget,
-      message: 'Вы хотите удалить эту запись?',
-      rejectProps: {
-        label: 'Назад',
-        severity: 'secondary',
-        outlined: true
-      },
-      acceptProps: {
-        label: 'Удалить',
-        severity: 'danger'
-      },
-      accept: async () => {
-        await orders.deleteOrder(props.invoice.id, data.uuid)
-        await fetch_data()
-      },
-    })
-  }
+function confirmDelete(data: Order) {
+  confirm.require({
+    header: 'Удалить заказ',
+    message: 'Вы хотите удалить эту запись?',
+    rejectProps: {
+      label: 'Назад',
+      severity: 'secondary',
+      outlined: true
+    },
+    acceptProps: {
+      label: 'Удалить',
+      severity: 'danger'
+    },
+    accept: async () => {
+      await invoiceService.order.delete(data.uuid, {}, { invoice_id: props.invoice.id.toString() })
+      await fetch_data()
+    },
+  })
 }
 
-function select_order(event: Event, data: any) {
+function select_order(event: Event, data: Order) {
   order.value = data
   menu.value.toggle(event)
 }
@@ -170,10 +164,10 @@ function select_order(event: Event, data: any) {
         </Button>
       </div>
     </div>
-    <DataTable size="large" :value="orders.orders" :loading="loader" rowHover responsive-layout="scroll">
+    <DataTable size="large" :value="orders" :loading="loader" rowHover responsive-layout="scroll">
       <Column field="uuid" header="Номер" class="text-nowrap" v-if="order_columns.includes('uuid')">
         <template #body="{ data }">
-          <a class="text-nowrap text-primary font-semibold" :href="`/orders/${data.uuid}`">{{ data.uuid }}</a>
+          <NuxtLink class="text-nowrap text-primary font-semibold" :to="`/orders/${data.uuid}`">{{ data.uuid }}</NuxtLink>
         </template>
       </Column>
       <Column field="created_at" header="Дата"></Column>
@@ -231,35 +225,35 @@ function select_order(event: Event, data: any) {
           </div>
         </template>
       </Column>
-      <ColumnGroup type="footer" v-if="(pivot.pivot?.results?.length ?? 0) > 0">
+      <ColumnGroup type="footer" v-if="(pivot?.results?.length ?? 0) > 0">
         <Row>
           <Column v-if="order_columns.includes('uuid')"></Column>
           <Column v-if="invoice.type === 'limit'" footer="Лимит:" :colspan="2" footer-class="!text-end font-semibold" />
           <Column v-if="invoice.type === 'limit'" class="text-nowrap font-semibold">
             <template #footer>
-              {{ pivot.pivot?.current_summa ?? 0 }} / {{ pivot.pivot?.summa }}
+              {{ pivot?.current_summa ?? 0 }} / {{ pivot?.summa }}
             </template>
           </Column>
           <Column v-else :colspan="4" />
-          <Column :footer="pivot.pivot?.results[0].name" class="font-semibold" />
+          <Column :footer="pivot?.results[0].name" class="font-semibold" />
           <Column v-if="order_columns.includes('address')"></Column>
           <Column v-if="order_columns.includes('per_price')"></Column>
           <Column v-if="order_columns.includes('price')"></Column>
           <Column v-if="order_columns.includes('additive')"></Column>
           <Column v-if="order_columns.includes('order')" class="text-nowrap font-semibold">
             <template #footer>
-              {{ pivot.pivot?.results[0].order_current_sum ?? 0 }} / {{ pivot.pivot?.results[0].order_sum }}
+              {{ pivot?.results[0].order_current_sum ?? 0 }} / {{ pivot?.results[0].order_sum }}
             </template>
           </Column>
           <Column v-if="order_columns.includes('fact')" class="text-nowrap font-semibold">
             <template #footer>
-              {{ pivot.pivot?.results[0].fact_current ?? 0 }} / {{ pivot.pivot?.results[0].fact }}
+              {{ pivot?.results[0].fact_current ?? 0 }} / {{ pivot?.results[0].fact }}
             </template>
           </Column>
           <Column />
           <Column />
         </Row>
-        <Row v-for="n in pivot.pivot?.results.slice(1)">
+        <Row v-for="n in pivot?.results.slice(1)">
           <Column v-if="order_columns.includes('uuid')"></Column>
           <Column :colspan="3" />
           <Column :footer="n.name" class="font-semibold text-nowrap" />
@@ -287,10 +281,10 @@ function select_order(event: Event, data: any) {
     </DataTable>
   </Loading>
   <Dialog v-model:visible="show_order" modal :header="`Заказ`" :style="{ 'max-width': '700px', width: '100%' }">
-    <Order v-if="order" :order="order" :invoice="invoice"
-      @close="(flag: boolean | undefined) => { order = null; show_order = false; flag ? fetch_data() : null }" />
+    <Order :order="order" :invoice="invoice"
+      @close="(flag: boolean | undefined) => { order = {}; show_order = false; flag ? fetch_data() : null }" />
   </Dialog>
-  <ConfirmPopup></ConfirmPopup>
+  <ConfirmDialog></ConfirmDialog>
 
   <Menu ref="menu" id="overlay_menu" :model="menuItems" :popup="true">
     <template #itemicon="{ item }">
@@ -300,6 +294,7 @@ function select_order(event: Event, data: any) {
 
   <Dialog v-model:visible="show_driver_comment" modal header="Чат с водителям"
     :style="{ 'max-width': '700px', width: '100%' }">
-    <DriverComment v-if="order" :order="order" :invoice="invoice" @close="order = null; show_driver_comment = false" />
+    <DriverComment v-if="order" :order="order" :invoice="invoice"
+      @close="order = {}; show_driver_comment = false" />
   </Dialog>
 </template>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { SendHorizonal, Loader2, Check, X } from "lucide-vue-next";
+import { SendHorizonal, Loader2, Check, X, RefreshCcw } from "lucide-vue-next";
 import { type FormSubmitEvent } from '@primevue/forms'
-import { useOrder } from "~/store/invoices";
 import type { DriverComment } from "~/types/invoices";
+import { InvoiceService } from '~/services/invoice'
 
 const props = defineProps({
   order: {
@@ -16,23 +16,24 @@ const props = defineProps({
 })
 
 const loading = ref(true)
-const orders = useOrder()
+const invoiceService = new InvoiceService()
+const comments = ref<DriverComment[]>([])
 const chatContainer = ref<HTMLDivElement>()
 
 const send = async ({ values }: FormSubmitEvent<Record<string, any>>) => {
   if (!values.text) return
-  await orders.createDriverComment(props.invoice.id, props.order.uuid, values.text)
+  await invoiceService.order.driverComment.create({text: values.text}, {}, {invoice_id: props.invoice.id, order_id: props.order.uuid})
   await fetchComments()
 }
 
 const updateComment = async (id: number, comment: DriverComment) => {
-  await orders.updateDriverComment(props.invoice.id, props.order.uuid, id, comment.text)
+  await invoiceService.order.driverComment.update(id, {text: comment.text}, {}, {invoice_id: props.invoice.id, order_id: props.order.uuid})
   comment.status = 'loading'
 }
 
 const fetchComments = async () => {
   loading.value = true
-  await orders.fetchDriverComments(props.invoice.id, props.order.uuid)
+  comments.value = await invoiceService.order.driverComment.list<DriverComment>({}, {invoice_id: props.invoice.id, order_id: props.order.uuid})
   loading.value = false
 
   await nextTick()
@@ -52,7 +53,7 @@ defineEmits(['close'])
   <Loading :loading="loading">
     <div class="min-h-[300px] max-h-[600px] flex flex-col justify-between">
       <div ref="chatContainer" class="h-full w-full overflow-y-auto gap-3 flex flex-col mb-3">
-        <div class="bg-surface-200 rounded-md p-2" v-for="comment in orders.driver_comments" :key="comment.id">
+        <div class="bg-surface-200 rounded-md p-2" v-for="comment in comments" :key="comment.id">
           <div class="text-muted-foreground mb-3">
             {{ comment.text }}
           </div>
@@ -65,13 +66,16 @@ defineEmits(['close'])
           </div>
         </div>
         <div class="text-muted-foreground text-sm">
-          {{ orders.driver_comments?.length }} комментариев
+          {{ comments.length }} комментариев
         </div>
       </div>
       <div v-if="!order.done">
         <Form method="post" @submit="send">
-          <InputGroup>
-            <InputText name="text" placeholder="Введите текст..." />
+          <InputGroup class="border border-surface-200 rounded-md">
+            <Button severity="secondary" @click="fetchComments">
+              <RefreshCcw />
+            </Button>
+            <InputText class="border-none" name="text" placeholder="Введите текст..." />
             <Button type="submit">
               <SendHorizonal />
             </Button>
