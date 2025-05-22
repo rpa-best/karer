@@ -34,7 +34,6 @@ def send_to_career(order_id, delete=False):
     if delete:
         order = Order.objects.get(pk=order_id)
         data = OrderShowSerializer(order).data
-
     else:
         data = {'uuid': order_id}
 
@@ -51,6 +50,7 @@ def send_to_career(order_id, delete=False):
         else:
             _send_notifications(order_id, users, ORDER_ERROR_MESSAGE, SEVERITY_DANGER)
         return response
-    except RequestException:
+    except Exception as e:
+        print(e)
         _send_notifications(order_id, users, ORDER_ERROR_MESSAGE, SEVERITY_DANGER)
     return None

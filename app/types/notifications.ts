@@ -6,5 +6,5 @@ export interface Notification {
     read: boolean
     created_at: string
     read_at: string
-    severity: string
+    severity: 'success' | 'info' | 'danger'
 }

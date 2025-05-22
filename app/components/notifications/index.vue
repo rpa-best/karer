@@ -33,6 +33,7 @@ const select = async (item: Notification) => {
     await notification.read(item.id)
     item.read = true
   }
+  open.value = false
   await router.push(item.redirect_url)
 }
 

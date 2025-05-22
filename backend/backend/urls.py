@@ -32,7 +32,7 @@ urlpatterns = [
 
     path('api/i18n/', include("django.conf.urls.i18n")),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
 
 

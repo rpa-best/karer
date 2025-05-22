@@ -3,6 +3,11 @@ import {useNotification} from "~/store/notifications";
 import { useNuxtApp } from '#app';
 
 export class NotificationSocket extends Client {
+    severities = {
+        'success': 'success',
+        'info': 'info',
+        'danger': 'error',
+    }
     constructor() {
         const onopen = () => {
             console.log(`Websocket open: ${this.url}`);
@@ -20,9 +25,8 @@ export class NotificationSocket extends Client {
 
                 notification.items.results = [data, ...notification.items.results]
                 notification.items.unread += 1
-
                 toast.add({
-                    severity: data.severity,
+                    severity: this.severities[data.severity as keyof typeof this.severities],
                     summary: data.label,
                     detail: data.message,
                     // command: async () => {

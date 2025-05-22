@@ -24,6 +24,10 @@ const filters = ref<OrderParams>({
 
 const columns = [
   {
+    field: 'uuid',
+    header: 'Номер',
+  },
+  {
     field: 'address',
     header: 'Адрес поставки',
   },
@@ -167,6 +171,11 @@ function select_order(event: Event, data: any) {
       </div>
     </div>
     <DataTable size="large" :value="orders.orders" :loading="loader" rowHover responsive-layout="scroll">
+      <Column field="uuid" header="Номер" class="text-nowrap" v-if="order_columns.includes('uuid')">
+        <template #body="{ data }">
+          <a class="text-nowrap text-primary font-semibold" :href="`/orders/${data.uuid}`">{{ data.uuid }}</a>
+        </template>
+      </Column>
       <Column field="created_at" header="Дата"></Column>
       <Column field="car.number" header="Авто"></Column>
       <Column field="driver.name" header="Водитель"></Column>
@@ -224,6 +233,7 @@ function select_order(event: Event, data: any) {
       </Column>
       <ColumnGroup type="footer" v-if="(pivot.pivot?.results?.length ?? 0) > 0">
         <Row>
+          <Column v-if="order_columns.includes('uuid')"></Column>
           <Column v-if="invoice.type === 'limit'" footer="Лимит:" :colspan="2" footer-class="!text-end font-semibold" />
           <Column v-if="invoice.type === 'limit'" class="text-nowrap font-semibold">
             <template #footer>
@@ -250,6 +260,7 @@ function select_order(event: Event, data: any) {
           <Column />
         </Row>
         <Row v-for="n in pivot.pivot?.results.slice(1)">
+          <Column v-if="order_columns.includes('uuid')"></Column>
           <Column :colspan="3" />
           <Column :footer="n.name" class="font-semibold text-nowrap" />
           <Column v-if="order_columns.includes('address')"></Column>
@@ -275,7 +286,7 @@ function select_order(event: Event, data: any) {
       </template>
     </DataTable>
   </Loading>
-  <Dialog v-model:visible="show_order" modal header="Заказ" :style="{ 'max-width': '700px', width: '100%' }">
+  <Dialog v-model:visible="show_order" modal :header="`Заказ`" :style="{ 'max-width': '700px', width: '100%' }">
     <Order v-if="order" :order="order" :invoice="invoice"
       @close="(flag: boolean | undefined) => { order = null; show_order = false; flag ? fetch_data() : null }" />
   </Dialog>
