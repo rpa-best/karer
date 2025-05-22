@@ -3,12 +3,16 @@ import { Bell, CheckCheck, X, Check, Info } from "lucide-vue-next";
 import {useNotification} from "~/store/notifications.js";
 import {NotificationSocket} from "./websocket"
 import type { Notification } from "~/types/notifications";
+import type { DefaultQueryParams } from "~/types";
 
 const open = ref(false)
 const loading = ref(true)
 const notification = useNotification()
 const socket = ref<NotificationSocket | null>(null)
 const router = useRouter()
+const filters = ref<DefaultQueryParams>({
+  limit: 50,
+})
 
 onMounted(async () => {
   await fetch_data()
@@ -17,12 +21,12 @@ onMounted(async () => {
 
 const fetch_data = async () => {
   loading.value = true
-  await notification.fetchData()
+  await notification.fetchData(filters.value)
   loading.value = false
 }
 
 const allCheck = async () => {
-  if (notification.items.unread > 0) {
+  if (notification.items?.unread) {
     await notification.readAll()
     await fetch_data()
   }

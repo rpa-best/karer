@@ -19,8 +19,8 @@
         </template>
         <template #item="{ item, props }">
           <a v-ripple class="flex items-center" v-bind="props.action">
-            <component v-if="item.icon" :is="item.icon"/>
-            <span>{{ $t(item.label) }}</span>
+            <component v-if="item.licon" :is="item.licon"/>
+            <span>{{ $t(item.label as string) }}</span>
           </a>
         </template>
       </Menu>
@@ -30,16 +30,16 @@
 <script setup lang="ts">
 import {useUser} from "@/store/user"
 import {LogOut, LogIn, CircleUserRound} from 'lucide-vue-next'
-
+import type { MenuItem } from 'primevue/menuitem'
 
 const user = useUser()
 
 const menu = ref<any>(null)
 
-const items = computed(() => [
+const items = computed((): MenuItem[] => [
   {
     label: user.user?.id ? 'Выйти' : 'Войти',
-    icon: user.user?.id ? LogOut : LogIn,
+    licon: user.user?.id ? LogOut : LogIn,
     command: () => {
       if (user.user?.id) {
         user.logout()

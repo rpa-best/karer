@@ -1,30 +1,30 @@
 import { defineStore } from "pinia";
 import type { Notification } from "~/types/notifications";
+import { NotificationService } from "~/services/notification";
+import type { DefaultQueryParams } from "~/types";
 
 interface NotificationStore {
-    items: { results: Notification[], count: number, unread: number }
+    service: NotificationService
+    items: { results?: Notification[], count?: number, unread?: number }
 }
-
 
 export const useNotification = defineStore("notification", {
     state: (): NotificationStore => ({
+        service: new NotificationService(),
         items: {
             results: [], count: 20, unread: 0,
         }
     }),
     actions: {
-        async fetchData() {
-            const {$api} = useNuxtApp()
-            const response = await $api.get('/notification/', { params: { limit: 30 } })
-            this.items = response?.data
+        async fetchData(params: DefaultQueryParams) {
+            const data = await this.service.list(params) 
+            this.items = data as {results?: Notification[], count?: number, unread?: number}
         },
         async read(pk: number) {
-            const {$api} = useNuxtApp()
-            await $api.patch(`/notification/${pk}/`, {}, {}, false)
+            await this.service.read(pk)
         },
         async readAll() {
-            const {$api} = useNuxtApp()
-            await $api.patch(`/notification/read/`, {}, {}, false)
+            await this.service.readAll()
         }
     }
 })

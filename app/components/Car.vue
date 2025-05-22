@@ -3,7 +3,7 @@ import { FileImage } from 'lucide-vue-next'
 import { ref } from 'vue'
 import type { Car } from '~/types/car'
 import type { FormSubmitEvent } from '@primevue/forms'
-import { useCar } from '~/store/car'
+import { CarService } from '~/services'
 
 const props = defineProps<{
     car: Car | undefined
@@ -17,7 +17,7 @@ const imageUrl = ref<string | null>(null)
 const image = ref<File | null>(null)
 const disabled = ref(false)
 const imageRef = ref()
-const cars = useCar()
+const carService = new CarService()
 
 const onFileSelect = (event: any) => {
     const file = event.files[0]
@@ -47,9 +47,9 @@ const save = async ({ values }: FormSubmitEvent<Record<string, any>>) => {
             }
         }
         if (props.car?.id) {
-            await cars.updateCar(props.car.id, formData)
+            await carService.update(props.car.id, formData)
         } else {
-            await cars.createCar(formData)
+            await carService.create(formData)
         }
         emit('close', true)
     } finally {

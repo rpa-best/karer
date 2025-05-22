@@ -23,8 +23,8 @@ export class NotificationSocket extends Client {
                 const toast = useNuxtApp().vueApp.config.globalProperties.$toast
                 const notification = useNotification()
 
-                notification.items.results = [data, ...notification.items.results]
-                notification.items.unread += 1
+                notification.items.results = [data, ...(notification.items.results || [])   ]
+                notification.items.unread = (notification.items.unread || 0) + 1
                 toast.add({
                     severity: this.severities[data.severity as keyof typeof this.severities],
                     summary: data.label,

@@ -1,20 +1,20 @@
 <template>
     <div
         class="z-[999] p-2 rounded-t-2xl w-full md:hidden h-[70px] bg-surface-50 fixed bottom-0 left-0 right-0 flex flex-row justify-around shadow-md">
-        <a class="flex flex-col items-center" :href="p('/')" :class="useRoute().path === '/my' ? 'text-primary' : ''">
+        <NuxtLink class="flex flex-col items-center" :to="p('/')" :class="useRoute().path === '/my' ? 'text-primary' : ''">
             <BookText />
             <p>{{ $t('Заявки') }}</p>
-        </a>
-        <a class="flex flex-col items-center" :href="p('/driver')"
+        </NuxtLink>
+        <NuxtLink class="flex flex-col items-center" :to="p('/driver')"
             :class="useRoute().path === '/driver' ? 'text-primary' : ''">
             <Users />
             <p>{{ $t('Водители') }}</p>
-        </a>
-        <a class="flex flex-col items-center" :href="p('/car')"
+        </NuxtLink>
+        <NuxtLink class="flex flex-col items-center" :to="p('/car')"
             :class="useRoute().path === '/car' ? 'text-primary' : ''">
             <Truck />
             <p>{{ $t('Автомобили') }}</p>
-        </a>
+        </NuxtLink>
 
         <a class="flex flex-col items-center" @click="profile_open = true">
             <MenuIcon />
@@ -46,7 +46,6 @@
 import { BookText, Users, Truck, Menu as MenuIcon } from 'lucide-vue-next'
 import { useUser } from "@/store/user"
 import { ref, computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
 
 const profile_open = ref(false)
 

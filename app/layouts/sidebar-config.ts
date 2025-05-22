@@ -1,17 +1,16 @@
-import {
-    BookText, Truck, Users
-  } from 'lucide-vue-next' 
 import {isManager, isLogist} from "~/permissions";
+import { BookText, Users, Truck } from "lucide-vue-next";
+import type { SidebarItem } from '~/types';
 
 
-export default () => {
-    const sidebar = []
+export default (): SidebarItem[] => {
+    const sidebar: SidebarItem[] = []
 
     if (isManager() || isLogist()) {
         sidebar.push({
             title: 'Заявки',
             url: '/',
-            icon: BookText,
+            licon: BookText,
         })
     }
 
@@ -19,11 +18,11 @@ export default () => {
         sidebar.push({
             title: 'Водители',
             url: '/driver',
-            icon: Users,
+            licon: Users,
         }, {
             title: 'Автомобили',
             url: '/car',
-            icon: Truck,
+            licon: Truck,
         })
     }
     return sidebar

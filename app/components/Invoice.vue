@@ -5,12 +5,12 @@ import {isManager} from "~/permissions"
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import z from 'zod'
 import { ref, computed } from 'vue'
-import { useOrganization, useSpecification, useNomenclature } from '@/store/onec'
 import type { Invoice } from '~/types/invoices'
 import type { InvoiceNomenclature } from '~/types/invoices'
-import type { Specification, Nomenclature } from '~/types/onec'
-import { useInvoice } from '~/store/invoices'
-
+import type { Specification, Nomenclature, Organization } from '~/types/onec'
+import { InvoiceService } from '~/services/invoice'
+import { OrganizationService, SpecificationService, NomenclatureService } from '~/services'
+import { useToast } from 'primevue/usetoast'
 
 const props = defineProps<{
   invoice: Invoice | undefined
@@ -19,11 +19,15 @@ const props = defineProps<{
 const emit = defineEmits<{
   close: [flag?: boolean]
 }>()
+const toast = useToast()
+const organizationService = new OrganizationService()
+const specificationService = new SpecificationService()
+const nomenclatureService = new NomenclatureService()
+const invoiceService = new InvoiceService()
 
-const organization = useOrganization()
-const specification = useSpecification()
-const nomenclature = useNomenclature()
-const invoices = useInvoice()
+const organizations = ref<Organization[]>([])
+const specifications = ref<Specification[]>([])
+const nomenclatures = ref<Nomenclature[]>([])
 
 const disabled = ref(false)
 const invoiceNomenclatures = ref(props.invoice?.nomenclatures || [])
@@ -34,7 +38,7 @@ const resolver = zodResolver(
     org: z.string(),
     specification: z.string(), 
     address: z.string(),
-    comment: z.string().optional(),
+    comment: z.string().nullable(),
   })
 )
 
@@ -44,9 +48,9 @@ const nDisabled = computed(() => {
 
 async function mounted() {
   disabled.value = true
-  await organization.fetchOrganizations()
-  await specification.fetchSpecifications()
-  await nomenclature.fetchNomenclatures()
+  organizations.value = await organizationService.list<Organization>()
+  specifications.value = await specificationService.list<Specification>()
+  nomenclatures.value = await nomenclatureService.list<Nomenclature>()
   disabled.value = false
 }
 
@@ -65,14 +69,19 @@ function addRow() {
   editingRows.value.push(newN)
 }
 
-async function save({values}: {values: any}) {
+async function save({values, valid}: {values: any, valid: boolean}) {
+  if (invoiceNomenclatures.value.length === 0) {
+    toast.add({severity: 'error', summary: 'Ошибка', detail: 'Нужно добавить хотя бы одну номенклатуру', life: 3000})
+    return
+  }
+  if (!valid) return
   disabled.value = true
   values.nomenclatures = invoiceNomenclatures.value
   try {
     if (props.invoice?.id) {
-      await invoices.updateInvoice(props.invoice.id, values)
+      await invoiceService.update(props.invoice.id, values)
     } else {
-      await invoices.createInvoice(values)
+      await invoiceService.create(values)
     }
     emit('close', true)
   } catch (e) {
@@ -87,21 +96,21 @@ mounted()
 
 <template>
   <loading :loading="disabled">
-    <Form v-slot="$form" :resolver="resolver" :initial-values="invoice" @submit="save" autocomplete="off">
+    <Form v-slot="$form" :resolver="resolver" :initial-values="invoice" @submit="save" method="post" autocomplete="off">
       <div class="grid gap-8 grid-cols-3 mt-5">
         <div class="col-span-3">
           <FloatLabel>
             <Select emptyMessage="Пусто" required id="org" class="w-full" name="org" :disabled="nDisabled"
-                    :options="organization.organizations" option-value="uuid" option-label="name"/>
+                    :options="organizations" option-value="uuid" option-label="name"/>
             <label for="org" class="text-sm">Грузополучатель</label>
           </FloatLabel>
         </div>
         <div class="col-span-3">
           <FloatLabel>
             <Select @update:model-value="(value: string) => {
-                      $form.address.value = specification.specifications?.find((s: Specification) => s.uuid === value)?.delivery_address
+                      $form.address.value = specifications.find((s: Specification) => s.uuid === value)?.delivery_address
                     }" emptyMessage="Пусто" required id="specification" class="w-full" name="specification"
-                    :disabled="nDisabled" :options="specification.specifications" option-value="uuid" option-label="name"/>
+                    :disabled="nDisabled" :options="specifications" option-value="uuid" option-label="name"/>
             <label for="specification" class="text-sm">Спецификация</label>
           </FloatLabel>
         </div>
@@ -125,14 +134,14 @@ mounted()
             <Column field="nomenclature" header="Номенклатура">
               <template #editor="{ data, field }">
                 <Select class="max-w-[250px]" :disabled="nDisabled" empty-message="Пусто"
-                        placeholder="Выберите номенклатуру" v-model="data[field]" :options="nomenclature.nomenclatures"
+                        placeholder="Выберите номенклатуру" v-model="data[field]" :options="nomenclatures"
                         option-value="uuid" option-label="name"/>
               </template>
             </Column>
             <Column field="value" header="Потребность">
               <template #editor="{ data, field }">
                 <InputNumber :input-props="{autocomplete: 'off'}"
-                             :suffix="` ${nomenclature.nomenclatures?.find((v: Nomenclature) => v.uuid === data?.nomenclature)?.unit}`"
+                             :suffix="` ${nomenclatures?.find((v: Nomenclature) => v.uuid === data?.nomenclature)?.unit}`"
                              :disabled="nDisabled" placeholder="Введите потребность" v-model="data[field]"/>
               </template>
             </Column>

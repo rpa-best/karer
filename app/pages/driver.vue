@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import {Pen, Plus} from "lucide-vue-next"
 import { ref, onMounted } from 'vue'
-import type {DriverParams} from "@/store/driver"
-import { useDriver } from "@/store/driver"
 import type { Driver } from "~/types/driver"
+import type { DefaultQueryParams } from '~/types'
+import { DriverService } from '~/services'
+
 
 const loading = ref(true)
 const driver = ref<Driver | null>(null)
 const show_driver = ref(false)
-const drivers = useDriver()
-const filters = ref<DriverParams>({
-  search: null
-})
+const driverService = new DriverService()
+const drivers = ref<Driver[]>([])
+const filters = ref<DefaultQueryParams>({})
 
 const rowClick = (data: Driver | null = null) => {
   show_driver.value = true
@@ -20,7 +20,7 @@ const rowClick = (data: Driver | null = null) => {
 
 const fetch_data = async () => {
   loading.value = true
-  await drivers.fetchDrivers(filters.value)
+  drivers.value = await driverService.list(filters.value)
   loading.value = false
 }
 
@@ -52,7 +52,7 @@ onMounted(async () => {
     </div>
     <Card>
       <template #content>
-        <DataTable size="large" :value="drivers.drivers" :loading="loading" lazy rowHover>
+        <DataTable size="large" :value="drivers" :loading="loading" lazy rowHover>
           <Column field="id" header="ID" style="font-weight: 600"></Column>
           <Column field="name" header="ФИО" style="font-weight: 600"></Column>
           <Column field="phone" header="Телефон" style="font-weight: 600"></Column>

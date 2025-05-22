@@ -30,26 +30,27 @@
 
 <script setup lang="ts">
 import { isLogist } from '~/permissions'
-import { useOrder, useInvoice } from '~/store/invoices'
+import { OrderService } from '~/services'
+import { InvoiceService } from '~/services/invoice'
 import type { Order, Invoice } from '~/types/invoices'
 
 const route = useRoute()
 
-const orders = useOrder()
-const invoices = useInvoice()
+const orderService = new OrderService()
+const invoiceService = new InvoiceService()
 const order = ref<Order | undefined>(undefined)
 const invoice = ref<Invoice | undefined>(undefined)
 const router = useRouter()
 
 const sendCareer = async () => {
     if (order.value && invoice.value) {
-        await orders.sendCareer(invoice.value.id, order.value.uuid)
+        await invoiceService.order.sendCareer(invoice.value.id, order.value.uuid)
     }
 }
 
 const deleteOrder = async () => {
     if (order.value && invoice.value) {
-        await orders.deleteOrder(invoice.value.id, order.value.uuid)
+        await invoiceService.order.delete(order.value.uuid, {}, {invoice_id: invoice.value.id})
         await router.push('/')
     }
 }
@@ -59,9 +60,9 @@ onMounted(async () => {
         await router.push('/')
         return
     }
-    order.value = await orders.getOrder(route.params.id as string)
+    order.value = await orderService.get<Order>(route.params.id as string)
     if (order.value?.invoice) {
-        invoice.value = await invoices.getInvoice(order.value.invoice)
+        invoice.value = await invoiceService.get<Invoice>(order.value.invoice)
     }
 })
 </script>
