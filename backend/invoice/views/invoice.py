@@ -8,17 +8,28 @@ from contrib.expressions import SumSubquery
 from onec.models import Nomenclature, Price
 from onec.serializers import NomenclatureSerializer
 from career.tasks import send_to_career
+from oauth.permissions import IsLogistUserPermission, IsManagerUserPermission
 
 from .. import serializers, filters
 from ..models import Invoice, InvoiceNomenclature, Order, STATUS_CREATED, DriverComment
 
 
 class InvoiceViewset(ModelViewSet):
-    http_method_names = ['get', 'head', 'patch', 'post', 'delete']
+    http_method_names = ['get', 'head', 'patch', 'post']
     queryset = Invoice.objects.all().order_by('-created_at')
     filterset_class = filters.InvoiceFilter
     search_fields = ['id']
     ordering = ['-created_at', '-id']
+
+    def check_permissions(self, request):
+        if self.action in ['create', 'partial_update']:
+            permission = IsManagerUserPermission()
+            if not permission.has_permission(request, self):
+                self.permission_denied(
+                            request,
+                            message=getattr(permission, 'message', None),
+                            code=getattr(permission, 'code', None)
+                        )
 
     def get_serializer_class(self):
         if self.action in ['create', 'partial_update']:
@@ -35,6 +46,7 @@ class OrderViewset(ModelViewSet):
     http_method_names = ['get', 'head', 'patch', 'post', 'delete']
     search_fields = ['car__number', 'address']
     ordering = ['-created_at']
+    permission_classes = [IsLogistUserPermission]
 
     def get_queryset(self):
         return Order.objects.filter(invoice_id=self.kwargs.get('invoice_id')).order_by('-created_at')
@@ -67,6 +79,7 @@ class OrderViewset(ModelViewSet):
 class OrderDriverCommentViewset(ModelViewSet):
     http_method_names = ['get', 'head', 'patch', 'post']
     serializer_class = serializers.OrderDriverCommentSerializer
+    permission_classes = [IsLogistUserPermission]
 
     def get_queryset(self):
         return DriverComment.objects.filter(order_id=self.kwargs.get('order_id'))
@@ -97,6 +110,7 @@ class AvailableNomenclatureViewset(ReadOnlyModelViewSet):
 
 class InvoicePivotView(ListAPIView):
     serializer_class = NomenclatureSerializer
+    permission_classes = [IsLogistUserPermission]
 
     def get_queryset(self):
         nomenclatures = InvoiceNomenclature.objects.filter(invoice_id=self.kwargs.get('invoice_id'))

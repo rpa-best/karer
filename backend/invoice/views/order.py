@@ -2,12 +2,13 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.viewsets import ModelViewSet
 from invoice.models import Order
 from .. import serializers
-
+from oauth.permissions import IsLogistUserPermission
 
 class OrderViewSet(ModelViewSet):
     http_method_names = ['get', 'head', 'patch', 'delete']
     search_fields = ['car__number', 'address']
     ordering = ['-created_at']
+    permission_classes = [IsLogistUserPermission]
 
     def get_queryset(self):
         return Order.objects.order_by('-created_at')
