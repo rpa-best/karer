@@ -35,7 +35,7 @@ export interface Order {
     car: Car
     driver: Driver
     nomenclature: Nomenclature
-    invoice: Invoice
+    invoice: number
     address: string
     per_price: number
     additive: number

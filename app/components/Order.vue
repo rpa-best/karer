@@ -10,7 +10,7 @@ import { useNomenclature } from '~/store/onec'
 import { useOrder } from '~/store/invoices'
 import type { FormSubmitEvent } from '@primevue/forms'
 
-const props = defineProps<{
+const { order, invoice } = defineProps<{
   order: Order
   invoice: Invoice
 }>()
@@ -20,11 +20,11 @@ const emit = defineEmits<{
 }>()
 
 const myOrder = ref<OrderForm>({
-  ...JSON.parse(JSON.stringify(props.order)),
-  address: props.invoice?.address ?? props.order.address,
-  car: props.order.car ? props.order.car.id : null,
-  driver: props.order.driver ? props.order.driver.id : null,
-  nomenclature: props.order.nomenclature ? props.order.nomenclature.uuid : null
+  ...JSON.parse(JSON.stringify(order)),
+  address: invoice?.address ?? order.address,
+  car: order.car ? order.car.id : null,
+  driver: order.driver ? order.driver.id : null,
+  nomenclature: order.nomenclature ? order.nomenclature.uuid : null
 })
 
 const cars = useCar()
@@ -78,10 +78,10 @@ async function save({values, valid}: FormSubmitEvent) {
   if (!valid) return
   disabled.value = true
   try {
-    if (props.order.uuid) {
-      await orders.updateOrder(props.invoice.id, props.order.uuid, values as OrderForm)
+    if (order.uuid) {
+      await orders.updateOrder(invoice.id, order.uuid, values as OrderForm)
     } else {
-      await orders.createOrder(props.invoice.id, values as OrderForm)
+      await orders.createOrder(invoice.id, values as OrderForm)
     }
     emit('close', true)
   } catch (e) {
@@ -130,7 +130,7 @@ function getUnit(nomenclature: string) {
           </FloatLabel>
         </div>
 
-        <div class="col-span-2">
+        <div class="lg:col-span-2 col-span-6">
           <FloatLabel>
             <InputNumber required 
                          :suffix="` ${getUnit($form.nomenclature?.value)}`"
@@ -138,7 +138,7 @@ function getUnit(nomenclature: string) {
             <label for="additive" style="font-size: 12px">Добавка</label>
           </FloatLabel>
         </div>
-        <div class="col-span-2">
+        <div class="lg:col-span-2 col-span-6">
           <FloatLabel>
             <InputNumber required
                          @update:model-value="(value: number) => $form.price.value = $form.per_price?.value * ($form.fact?.value ? $form.fact.value : value)"
@@ -147,7 +147,7 @@ function getUnit(nomenclature: string) {
             <label for="order" style="font-size: 12px">Количество на отгрузку</label>
           </FloatLabel>
         </div>
-        <div class="col-span-2">
+        <div class="lg:col-span-2 col-span-6">
           <FloatLabel>
             <InputNumber required 
                          :suffix="` ${getUnit($form.nomenclature?.value)}`"
@@ -178,11 +178,12 @@ function getUnit(nomenclature: string) {
           </FloatLabel>
         </div>
       </div>
-      <div class="flex flex-row gap-3 mt-2">
-        <Button @click="$emit('close')" class="w-full" severity="secondary">Отменить</Button>
-        <Button v-if="!order.done" :disabled="disabled" :loading="disabled" type="submit" class="w-full">Сохранить
-        </Button>
-      </div>
+      <slot name="buttons" :disabled="disabled">
+        <div class="flex flex-row gap-3 mt-2">
+            <Button @click="$emit('close')" class="w-full" severity="secondary">Отменить</Button>
+            <Button v-if="!order.done" :disabled="disabled" :loading="disabled" type="submit" class="w-full">Сохранить</Button>
+        </div>
+      </slot>
     </Form>
   </Loading>
 </template>

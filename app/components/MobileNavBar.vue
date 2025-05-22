@@ -1,6 +1,6 @@
 <template>
     <div
-        class="z-[999] p-2 rounded-t-2xl w-full md:hidden h-[70px] bg-background fixed bottom-0 left-0 right-0 flex flex-row justify-around shadow-md">
+        class="z-[999] p-2 rounded-t-2xl w-full md:hidden h-[70px] bg-surface-50 fixed bottom-0 left-0 right-0 flex flex-row justify-around shadow-md">
         <a class="flex flex-col items-center" :href="p('/')" :class="useRoute().path === '/my' ? 'text-primary' : ''">
             <BookText />
             <p>{{ $t('Заявки') }}</p>

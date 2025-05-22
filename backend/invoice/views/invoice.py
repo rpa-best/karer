@@ -3,10 +3,11 @@ from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.exceptions import ValidationError
-
+from rest_framework.decorators import action
 from contrib.expressions import SumSubquery
 from onec.models import Nomenclature, Price
 from onec.serializers import NomenclatureSerializer
+from career.tasks import send_to_career
 
 from .. import serializers, filters
 from ..models import Invoice, InvoiceNomenclature, Order, STATUS_CREATED, DriverComment
@@ -55,6 +56,12 @@ class OrderViewset(ModelViewSet):
     def update(self, request, *args, **kwargs):
         request.data.update(invoice=self.kwargs.get('invoice_id'))
         return super().update(request, *args, **kwargs)
+
+    @action(detail=True, methods=['post'])
+    def send_career(self, request, *args, **kwargs):
+        order: Order = self.get_object()
+        send_to_career.delay(order.pk)
+        return Response({'message': 'Заказ отправлен в Career'})
 
 
 class OrderDriverCommentViewset(ModelViewSet):

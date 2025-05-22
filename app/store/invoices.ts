@@ -37,6 +37,11 @@ export const useInvoice = defineStore("invoice", {
             const response = await $api.get('/invoice/', {params})
             this.invoices = response?.data
         },
+        async getInvoice(invoice_id: number) {
+            const {$api} = useNuxtApp()
+            const response = await $api.get(`/invoice/${invoice_id}/`)
+            return response?.data
+        },
         async createInvoice(values: Invoice) {
             const {$api} = useNuxtApp()
             return await $api.post('/invoice/', values)
@@ -47,7 +52,8 @@ export const useInvoice = defineStore("invoice", {
         },
         async fetchPivot(invoice_id: number, params: OrderParams | null = null) {
             const {$api} = useNuxtApp()
-            return await $api.get(`/invoice/${invoice_id}/pivot/`, {params})
+            const response = await $api.get(`/invoice/${invoice_id}/pivot/`, {params})
+            this.pivot = response?.data
         }
     }
 })
@@ -76,9 +82,14 @@ export const useOrder = defineStore("order", {
             const response = await $api.get(`/invoice/${invoice_id}/order/`, {params})
             this.orders = response?.data
         },
+        async getOrder(order_id: string) {
+            const {$api} = useNuxtApp()
+            const response = await $api.get(`/order/${order_id}/`)
+            return response?.data
+        },
         async sendCareer(invoice_id: number, order_id: string) {
             const {$api} = useNuxtApp()
-            return await $api.post(`/invoice/${invoice_id}/order/${order_id}/send-career/`, {}, {})
+            return await $api.post(`/invoice/${invoice_id}/order/${order_id}/send_career/`, {}, {})
         },
         async createOrder(invoice_id: number, values: OrderForm) {
             const {$api} = useNuxtApp()

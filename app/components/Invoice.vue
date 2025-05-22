@@ -151,11 +151,14 @@ mounted()
           </DataTable>
         </div>
       </div>
-      <div class="flex flex-row gap-3 mt-2">
-        <Button @click="$emit('close')" class="w-full" severity="secondary">Отменить</Button>
-        <Button v-if="isManager()" :disabled="nDisabled" :loading="disabled" type="submit" class="w-full">Сохранить
-        </Button>
-      </div>
+      <slot name="buttons" :disabled="disabled">
+        <div class="flex flex-row gap-3 mt-2">
+          <Button @click="$emit('close')" class="w-full" severity="secondary">Отменить</Button>
+          <Button v-if="isManager()" :disabled="nDisabled" :loading="disabled" type="submit" class="w-full">Сохранить
+          </Button>
+        </div>
+      </slot>
+      
     </Form>
   </loading>
 </template>

@@ -68,7 +68,7 @@ defineEmits(['close'])
           {{ orders.driver_comments?.length }} комментариев
         </div>
       </div>
-      <div>
+      <div v-if="!order.done">
         <Form method="post" @submit="send">
           <InputGroup>
             <InputText name="text" placeholder="Введите текст..." />
