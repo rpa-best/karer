@@ -11,3 +11,9 @@ export interface UserLogin {
   email: string;
   password: string;
 }
+
+export interface Token {
+  access: string | null;
+  refresh: string | null;
+}
+

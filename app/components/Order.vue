@@ -32,11 +32,11 @@ const driverService = new DriverService()
 const nomenclatureService = new NomenclatureService()
 const invoiceService = new InvoiceService()
 
-const cars = ref<Car[]>([])
-const drivers = ref<Driver[]>([])
-const nomenclatures = ref<Nomenclature[]>([])
+const {data: cars} = carService.list<Car[]>()
+const {data: drivers} = driverService.list<Driver[]>()
+const {data: nomenclatures} = nomenclatureService.list<Nomenclature[]>()
 
-const disabled = ref(false)
+const disabled = ref(true)
 const toast = useToast()
 
 const resolver = zodResolver(
@@ -54,10 +54,6 @@ const resolver = zodResolver(
 )
 
 onMounted(async () => {
-  disabled.value = true
-  cars.value = await carService.list<Car>()
-  drivers.value = await driverService.list<Driver>()
-  nomenclatures.value = await nomenclatureService.list<Nomenclature>()
   disabled.value = false
 })
 

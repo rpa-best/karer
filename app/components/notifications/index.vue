@@ -6,35 +6,32 @@ import type { Notification } from "~/types/notifications";
 import type { DefaultQueryParams } from "~/types";
 
 const open = ref(false)
-const loading = ref(true)
 const notification = useNotification()
-const socket = ref<NotificationSocket | null>(null)
 const router = useRouter()
 const filters = ref<DefaultQueryParams>({
   limit: 50,
 })
 
-onMounted(async () => {
-  await fetch_data()
-  socket.value = new NotificationSocket()
-})
+const {data, isFetching, refetch} = notification.service.list<{results: Notification[], count: number, unread: number}>(filters.value)
 
-const fetch_data = async () => {
-  loading.value = true
-  await notification.fetchData(filters.value)
-  loading.value = false
-}
+const socket = new NotificationSocket()
+
+watchEffect(() => {
+  if (data.value) {
+    notification.items = data.value
+  }
+})
 
 const allCheck = async () => {
   if (notification.items?.unread) {
-    await notification.readAll()
-    await fetch_data()
+    await notification.service.readAll()
+    await refetch()
   }
 }
 
 const select = async (item: Notification) => {
   if (!item.read) {
-    await notification.read(item.id)
+    await notification.service.read(item.id)
     item.read = true
   }
   open.value = false
@@ -46,12 +43,20 @@ const format = (value: string) => {
   // return formatDistanceToNow(new Date(value), { addSuffix: true, locale: ru })
 } 
 
+onMounted(() => {
+  socket.connect()
+})
+
+onUnmounted(() => {
+  socket.close()
+})
+
 </script>
 
 <template>
   <button id="notifications" @click="open = true" class="w-full h-fit md:w-auto px-4 relative md:px-2 flex flex-row items-center outline-none bg-transparent p-2.5 md:rounded-full rounded-lg text-gray-600  hover:bg-gray-100">
 
-    <OverlayBadge v-if="notification.items.unread" :value="notification.items.unread" severity="danger" size="small">
+    <OverlayBadge v-if="notification.items?.unread" :value="notification.items?.unread" severity="danger" size="small">
       <Bell />
     </OverlayBadge>
     <Bell v-else />
@@ -66,7 +71,7 @@ const format = (value: string) => {
         </button>
       </div>
     </template>
-    <Loading :loading="loading">
+    <Loading :loading="isFetching">
       <div class="flex-1 flex flex-col gap-2 pt-0">
         <TransitionGroup name="list" appear>
           <Button v-for="item of notification.items.results" :key="item.id" outlined

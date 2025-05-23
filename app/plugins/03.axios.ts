@@ -1,3 +1,4 @@
+import { useQuery, type UseQueryReturnType } from "@tanstack/vue-query";
 import axios, { type AxiosResponse, type AxiosRequestConfig, type AxiosError, type AxiosInstance } from "axios";
 import { token } from "~/composables";
 import { useUser } from "~/store/user";
@@ -11,14 +12,14 @@ export class Api {
     this.api = axios.create({baseURL: NUXT_APP_BACKEND_HOST});
   }
 
-  async request(
+  async request<D = any, R = any>(
     method: string,
     url: string,
-    data: any | null,
+    data: D | null,
     config: AxiosRequestConfig = {},
     toasted: boolean = true,
     redirect: boolean = true
-  ): Promise<AxiosResponse> {
+  ): Promise<AxiosResponse<R>> {
     config.url = url;
     config.method = method;
     config.data = data;
@@ -33,7 +34,7 @@ export class Api {
       }
       return response
     } catch (e: unknown) {
-      const error = e as AxiosError
+      const error = e as AxiosError<R>
       if (error.response?.status == 401) {
         if (token.value.refresh) {
           const { data } = await this.api.post("/oauth/refresh/", {
@@ -48,24 +49,29 @@ export class Api {
         }
       }
       if (toasted) {
-        const message = Object.values(error.response?.data ?? {}).map(v => typeof v === 'string' ? v : v.join('. ')).join('. ')
+        const message = Object.values(error.response?.data ?? {}).map((v: any) => typeof v === 'string' ? v : v.join('. ')).join('. ')
         toast.add({severity: 'error', summary: message, life: 2000})
       }
       throw e
     }
   }
 
-  async get(url: string, config: AxiosRequestConfig = {}, redirect: boolean=true) {
-    return await this.request('get', url, null, config, false, redirect)
+  get<T = any>(url: string, config: AxiosRequestConfig = {}, redirect: boolean=true): UseQueryReturnType<T, AxiosError<T, any> | null> {
+    const new_url = `${url}?${new URLSearchParams(config.params).toString()}`
+    const fetcher = async (): Promise<T> => {
+      const response = await this.request<any, T>('get', url, null, config, false, redirect)
+      return response.data
+    }
+    return useQuery({queryKey: [new_url], queryFn: fetcher, staleTime: 1000 * 60 * 5})
   }
-  async post(url: string, data: any, config: AxiosRequestConfig = {}, toasted=true) {
-    return await this.request('post', url, data, config, toasted, true)
+  async post<D = any, R = any>(url: string, data: D, config: AxiosRequestConfig = {}, toasted=true): Promise<AxiosResponse<R>> {
+    return await this.request<D, R>('post', url, data, config, toasted, true)
   }
-  async patch(url: string, data: any, config: AxiosRequestConfig = {}, toasted=true) {
-    return await this.request('patch', url, data, config, toasted, true)
+  async patch<D = any, R = any>(url: string, data: D, config: AxiosRequestConfig = {}, toasted=true): Promise<AxiosResponse<R>> {
+    return await this.request<D, R>('patch', url, data, config, toasted, true)
   }
-  async delete(url: string, config: AxiosRequestConfig = {}, toasted=true) {
-    return await this.request('delete', url, null, config, toasted, true)
+  async delete<D = any, R = any>(url: string, data: D, config: AxiosRequestConfig = {}, toasted=true): Promise<AxiosResponse<R>> {
+    return await this.request<D, R>('delete', url, data, config, toasted, true)
   }
 }
 

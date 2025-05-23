@@ -1,5 +1,5 @@
 <template>
-    <Loading loading="true">
+    <Loading :loading="true">
         <template #label>
             <span class="text-lg mb-[50px] text-gray-700">
                 <img src="/favicon.ico" width="70" class="mx-auto" />

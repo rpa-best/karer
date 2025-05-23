@@ -42,14 +42,14 @@ const filters = ref<InvoiceParams>({
     offset: 0
 })
 
-const loading = ref(true)
 const show_invoice = ref(false)
-const invoice: Ref<Invoice | undefined> = ref(undefined)
+const invoice: Ref<Invoice | undefined> = ref()
 const expandedRowGroups = ref(null)
 const invoiceService = new InvoiceService()
-const invites = ref<{results?: Invoice[], count?: number}>({})
-const organizations = ref<Organization[]>([])
+const {data: invites, isFetching, refetch} = invoiceService.list<{results?: Invoice[], count?: number}>(filters.value)
+
 const organizationService = new OrganizationService()
+const {data: organizations} = organizationService.list<Organization[]>()
 
 const rowClick = (data: Invoice | undefined = undefined) => {
     show_invoice.value = true
@@ -58,28 +58,20 @@ const rowClick = (data: Invoice | undefined = undefined) => {
 
 const onPage = async (e: DataTablePageEvent) => {
     filters.value.offset = e.first
-    await fetch_data()
+    await refetch()
 }
 
 onMounted(async () => {
-    await fetch_data()
-    organizations.value = await organizationService.list()
+    await refetch()
 })
 
 async function onFilter() {
-    await fetch_data();
-}
-
-async function fetch_data() {
-    loading.value = true;
-    const data = await invoiceService.list(filters.value) as {results?: Invoice[], count?: number}
-    invites.value = data
-    loading.value = false;
+    await refetch();
 }
 </script>
 
 <template>
-    <Loading :loading="loading">
+    <Loading :loading="isFetching">
         <div class="flex justify-between align-items-center flex-wrap">
             <h2 class="mb-3 text-3xl font-bold">Заявки</h2>
             <div class="flex md:flex-nowrap flex-wrap">
@@ -104,7 +96,7 @@ async function fetch_data() {
             option-value="value" dataKey="label" />
 
         <DataTable size="large" :value="invites?.results" paginator :rows="filters.limit" lazy @page="onPage"
-            rowHover :total-records="invites?.count" :loading="loading" responsive-layout="scroll"
+            rowHover :total-records="invites?.count" :loading="isFetching" responsive-layout="scroll"
                    v-model:expandedRows="expandedRowGroups" dataKey="id">
             <Column expander v-if="isLogist()"></Column>
             <Column field="number" header="Номер заявки"></Column>
@@ -137,6 +129,6 @@ async function fetch_data() {
     </Loading>
     <Dialog v-model:visible="show_invoice" @close="invoice=undefined" modal :header="invoice?.id ? 'Изменить заявку' : 'Создать заявку'"
             :style="{ 'max-width': '700px', width: '100%'}">
-        <Invoice v-if="show_invoice" :invoice="invoice" @close="(flag: boolean | undefined) => {invoice = undefined; show_invoice=false; flag ? fetch_data() : null}"/>
+            <Invoice v-if="show_invoice" :invoice="invoice" @close="(flag: boolean | undefined) => {invoice = undefined; show_invoice=false; flag ? refetch() : null}"/>
     </Dialog>
 </template>

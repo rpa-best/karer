@@ -4,27 +4,30 @@ export class Client {
     url!: URL
     socket!: WebSocket
 
-    constructor(url: string,
-                onopen: ((this: WebSocket, ev: Event) => any) | null,
-                onmessage: ((this: WebSocket, ev: MessageEvent) => any) | null,
-                onclose: ((this: WebSocket, ev: CloseEvent) => any) | null) {
+    constructor(url: string) {
 
         const { public: { NUXT_APP_BACKEND_HOST } } = useRuntimeConfig();
         const backend = new URL(NUXT_APP_BACKEND_HOST)
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
 
         this.url = new URL([protocol, `//`, backend.host, backend.pathname, url].join(''))
-        console.log(this.url)
         this.url.searchParams.set("token", token.value?.access ?? '')
-        this.socket = new WebSocket(this.url);
-        this.socket.onopen = onopen
-        this.socket.onmessage = onmessage
-        this.socket.onclose = onclose
-        this.socket.onerror = this.onerror
     }
 
     onerror(e: Event) {
-        console.log(e);
+        console.log(`Websocket error: ${this.url}`);
+    }
+
+    onopen(e: Event) {
+        console.log(`Websocket open: ${this.url}`);
+    }
+
+    onmessage(e: MessageEvent) {
+        console.log(`Websocket message: ${this.url}`);
+    }
+
+    onclose(e: CloseEvent) {
+        console.log(`Websocket close: ${this.url}`);
     }
 
     async send(data: any) {
@@ -33,5 +36,13 @@ export class Client {
 
     close() {
         this.socket.close()
+    }
+
+    connect() {
+        this.socket = new WebSocket(this.url);
+        this.socket.onopen = this.onopen
+        this.socket.onmessage = this.onmessage
+        this.socket.onclose = this.onclose
+        this.socket.onerror = this.onerror
     }
 }

@@ -35,12 +35,16 @@ import { InvoiceService } from '~/services/invoice'
 import type { Order, Invoice } from '~/types/invoices'
 
 const route = useRoute()
-
+const router = useRouter()
 const orderService = new OrderService()
 const invoiceService = new InvoiceService()
-const order = ref<Order | undefined>(undefined)
-const invoice = ref<Invoice | undefined>(undefined)
-const router = useRouter()
+
+if (!isLogist()) {
+    router.push('/')
+}
+
+const {data: order} = orderService.get<Order>(route.params.id as string)
+const {data: invoice} = invoiceService.get<Invoice>(order.value?.invoice as number)
 
 const sendCareer = async () => {
     if (order.value && invoice.value) {
@@ -54,15 +58,4 @@ const deleteOrder = async () => {
         await router.push('/')
     }
 }
-
-onMounted(async () => {
-    if (!isLogist()) {
-        await router.push('/')
-        return
-    }
-    order.value = await orderService.get<Order>(route.params.id as string)
-    if (order.value?.invoice) {
-        invoice.value = await invoiceService.get<Invoice>(order.value.invoice)
-    }
-})
 </script>

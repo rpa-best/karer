@@ -25,11 +25,11 @@ const specificationService = new SpecificationService()
 const nomenclatureService = new NomenclatureService()
 const invoiceService = new InvoiceService()
 
-const organizations = ref<Organization[]>([])
-const specifications = ref<Specification[]>([])
-const nomenclatures = ref<Nomenclature[]>([])
+const {data: organizations} = organizationService.list<Organization[]>()
+const {data: specifications} = specificationService.list<Specification[]>()
+const {data: nomenclatures} = nomenclatureService.list<Nomenclature[]>()
 
-const disabled = ref(false)
+const disabled = ref(true)
 const invoiceNomenclatures = ref(props.invoice?.nomenclatures || [])
 const editingRows = ref<InvoiceNomenclature[]>([])
 
@@ -47,10 +47,6 @@ const nDisabled = computed(() => {
 })
 
 async function mounted() {
-  disabled.value = true
-  organizations.value = await organizationService.list<Organization>()
-  specifications.value = await specificationService.list<Specification>()
-  nomenclatures.value = await nomenclatureService.list<Nomenclature>()
   disabled.value = false
 }
 
@@ -108,7 +104,7 @@ mounted()
         <div class="col-span-3">
           <FloatLabel>
             <Select @update:model-value="(value: string) => {
-                      $form.address.value = specifications.find((s: Specification) => s.uuid === value)?.delivery_address
+                      $form.address.value = specifications?.find((s: Specification) => s.uuid === value)?.delivery_address
                     }" emptyMessage="Пусто" required id="specification" class="w-full" name="specification"
                     :disabled="nDisabled" :options="specifications" option-value="uuid" option-label="name"/>
             <label for="specification" class="text-sm">Спецификация</label>
