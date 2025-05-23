@@ -3,39 +3,35 @@ import {useNotification} from "~/store/notifications";
 import { useNuxtApp } from '#app';
 
 export class NotificationSocket extends Client {
-    severities = {
-        'success': 'success',
-        'info': 'info',
-        'danger': 'error',
-    }
     constructor() {
-        const onopen = () => {
-            console.log(`Websocket open: ${this.url}`);
+        super(`/ws/notification/`)
+    }
+
+    override onmessage(r: MessageEvent) {
+        const data = JSON.parse(r.data)
+        const severities = {
+            'success': 'success',
+            'info': 'info',
+            'danger': 'error',
         }
 
-        const onclose = () => {
-            console.log(`Websocket closed: ${this.url}`);
-        }
-        const onmessage = (r: MessageEvent) => {
-            const data = JSON.parse(r.data)
+        if (typeof window !== 'undefined') {
+            const toast = useNuxtApp().vueApp.config.globalProperties.$toast
+            const notification = useNotification()
 
-            if (typeof window !== 'undefined') {
-                const toast = useNuxtApp().vueApp.config.globalProperties.$toast
-                const notification = useNotification()
-
-                notification.items.results = [data, ...(notification.items.results || [])   ]
-                notification.items.unread = (notification.items.unread || 0) + 1
-                toast.add({
-                    severity: this.severities[data.severity as keyof typeof this.severities],
-                    summary: data.label,
-                    detail: data.message,
-                    // command: async () => {
-                    //     await useRouter().push(data.redirect_url)
-                    // },
-                    life: 10000
-                })
+            const items = notification.items
+            notification.$state.items = {
+                results: [data, ...items.results],
+                unread: (items.unread || 0) + 1,
+                count: (items.count || 0) + 1
             }
+
+            toast.add({
+                severity: severities[data.severity as keyof typeof severities],
+                summary: data.label,
+                detail: data.message,
+                life: 5000
+            })
         }
-        super(`/ws/notification/`, onopen, onmessage, onclose)
     }
 }

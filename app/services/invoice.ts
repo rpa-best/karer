@@ -1,5 +1,7 @@
 import type { InvoiceParams } from "~/types/invoices";
 import { CRUDService } from "./utils";
+import type { UseQueryReturnType } from "@tanstack/vue-query";
+import type { AxiosError } from "axios";
 
 
 class DriverCommentService extends CRUDService {
@@ -30,8 +32,7 @@ export class InvoiceService extends CRUDService {
         this.order = new OrderService()
     }
 
-    async fetchPivot(invoice_id: number, params: InvoiceParams | null = null) {
-        const response = await this.$api.get(`/invoice/${invoice_id}/pivot/`, {params})
-        return response.data
+    fetchPivot<T = any>(invoice_id: number, params: InvoiceParams | null = null): UseQueryReturnType<T, AxiosError<any, any> | null> {
+        return this.$api.get(`/invoice/${invoice_id}/pivot/`, {params})
     }
 }

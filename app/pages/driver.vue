@@ -1,40 +1,29 @@
 <script setup lang="ts">
 import {Pen, Plus} from "lucide-vue-next"
-import { ref, onMounted } from 'vue'
 import type { Driver } from "~/types/driver"
 import type { DefaultQueryParams } from '~/types'
 import { DriverService } from '~/services'
 
 
-const loading = ref(true)
+const filters = ref<DefaultQueryParams>({})
 const driver = ref<Driver | null>(null)
 const show_driver = ref(false)
 const driverService = new DriverService()
-const drivers = ref<Driver[]>([])
-const filters = ref<DefaultQueryParams>({})
+const {data: drivers, isFetching, refetch} = driverService.list<Driver[]>(filters.value)
+
 
 const rowClick = (data: Driver | null = null) => {
   show_driver.value = true
   driver.value = data
 }
 
-const fetch_data = async () => {
-  loading.value = true
-  drivers.value = await driverService.list(filters.value)
-  loading.value = false
-}
-
 const onFilter = async () => {
-  await fetch_data()
+  await refetch()
 }
-
-onMounted(async () => {
-  await fetch_data()
-})
 </script>
 
 <template>
-  <Loading :loading="loading">
+  <Loading :loading="isFetching">
     <div class="flex justify-between align-items-center flex-wrap">
       <h2 style="font-size: 24px; font-weight: bold" class="mb-3">Водители</h2>
       <div class="flex gap-3 md:flex-nowrap flex-wrap md:w-auto w-full">
@@ -52,7 +41,7 @@ onMounted(async () => {
     </div>
     <Card>
       <template #content>
-        <DataTable size="large" :value="drivers" :loading="loading" lazy rowHover>
+        <DataTable size="large" :value="drivers" :loading="isFetching" lazy rowHover>
           <Column field="id" header="ID" style="font-weight: 600"></Column>
           <Column field="name" header="ФИО" style="font-weight: 600"></Column>
           <Column field="phone" header="Телефон" style="font-weight: 600"></Column>
@@ -72,6 +61,6 @@ onMounted(async () => {
   <Dialog v-model:visible="show_driver" @close="driver=null" modal header="Изменить водителя"
           :style="{ 'max-width': '500px', width: '100%'}">
     <Driver v-if="show_driver" :driver="driver"
-            @close="(flag: boolean) => {driver = null; show_driver=false; flag ? fetch_data() : null}"/>
+            @close="(flag: boolean) => {driver = null; show_driver=false; flag ? refetch() : null}"/>
   </Dialog>
 </template>

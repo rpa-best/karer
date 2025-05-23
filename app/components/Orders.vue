@@ -9,15 +9,15 @@ const props = defineProps<{
   invoice: Invoice
 }>()
 
-const loader = ref(true)
+const filters = ref<OrderParams>({})
 const invoiceService = new InvoiceService()
-const orders = ref<Order[]>([])
-const pivot = ref<Pivot | undefined>(undefined)
+const {data: orders, isFetching, refetch} = invoiceService.order.list<Order[]>(filters.value, { invoice_id: props.invoice.id })
+const {data: pivot} = invoiceService.fetchPivot<Pivot>(props.invoice.id, filters.value)
 
 const confirm = useConfirm()
 const order = ref<Order | {}>({})
 const show_order = ref(false)
-const filters = ref<OrderParams>({})
+
 
 const columns = [
   {
@@ -93,24 +93,13 @@ const menuItems = ref([
 
 const menu = ref()
 
-onMounted(async () => {
-  await fetch_data()
-})
-
 function rowClick(data: Order | {} = {}) {
   show_order.value = true
   order.value = data
 }
 
 async function onFilter() {
-  await fetch_data()
-}
-
-async function fetch_data() {
-  loader.value = true
-  orders.value = await invoiceService.order.list(filters.value, { invoice_id: props.invoice.id })
-  pivot.value = await invoiceService.fetchPivot(props.invoice.id, filters.value)
-  loader.value = false
+  await refetch()
 }
 
 function confirmDelete(data: Order) {
@@ -128,7 +117,7 @@ function confirmDelete(data: Order) {
     },
     accept: async () => {
       await invoiceService.order.delete(data.uuid, {}, { invoice_id: props.invoice.id.toString() })
-      await fetch_data()
+      await refetch()
     },
   })
 }
@@ -140,7 +129,7 @@ function select_order(event: Event, data: Order) {
 </script>
 
 <template>
-  <Loading :loading="loader">
+  <Loading :loading="isFetching">
     <div class="flex justify-between align-items-center flex-wrap">
       <h2 class="text-2xl font-bold">
         Заказы:
@@ -164,7 +153,7 @@ function select_order(event: Event, data: Order) {
         </Button>
       </div>
     </div>
-    <DataTable size="large" :value="orders" :loading="loader" rowHover responsive-layout="scroll">
+    <DataTable size="large" :value="orders" :loading="isFetching" rowHover responsive-layout="scroll">
       <Column field="uuid" header="Номер" class="text-nowrap" v-if="order_columns.includes('uuid')">
         <template #body="{ data }">
           <NuxtLink class="text-nowrap text-primary font-semibold" :to="`/orders/${data.uuid}`">{{ data.uuid }}</NuxtLink>
@@ -282,7 +271,7 @@ function select_order(event: Event, data: Order) {
   </Loading>
   <Dialog v-model:visible="show_order" modal :header="`Заказ`" :style="{ 'max-width': '700px', width: '100%' }">
     <Order :order="order" :invoice="invoice"
-      @close="(flag: boolean | undefined) => { order = {}; show_order = false; flag ? fetch_data() : null }" />
+      @close="(flag: boolean | undefined) => { order = {}; show_order = false; flag ? refetch() : null }" />
   </Dialog>
   <ConfirmDialog></ConfirmDialog>
 

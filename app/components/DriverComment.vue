@@ -15,15 +15,15 @@ const props = defineProps({
   }
 })
 
-const loading = ref(true)
 const invoiceService = new InvoiceService()
-const comments = ref<DriverComment[]>([])
+
+const {data: comments, isFetching, refetch} = invoiceService.order.driverComment.list<DriverComment[]>({}, {invoice_id: props.invoice.id, order_id: props.order.uuid})
 const chatContainer = ref<HTMLDivElement>()
 
 const send = async ({ values }: FormSubmitEvent<Record<string, any>>) => {
   if (!values.text) return
   await invoiceService.order.driverComment.create({text: values.text}, {}, {invoice_id: props.invoice.id, order_id: props.order.uuid})
-  await fetchComments()
+  await refetch()
 }
 
 const updateComment = async (id: number, comment: DriverComment) => {
@@ -31,26 +31,18 @@ const updateComment = async (id: number, comment: DriverComment) => {
   comment.status = 'loading'
 }
 
-const fetchComments = async () => {
-  loading.value = true
-  comments.value = await invoiceService.order.driverComment.list<DriverComment>({}, {invoice_id: props.invoice.id, order_id: props.order.uuid})
-  loading.value = false
-
+onMounted(async () => {
   await nextTick()
   if (chatContainer.value) {
     chatContainer.value.scrollTop = chatContainer.value.scrollHeight
   }
-}
-
-onMounted(async () => {
-  await fetchComments()
 })
 
 defineEmits(['close'])
 </script>
 
 <template>
-  <Loading :loading="loading">
+  <Loading :loading="isFetching">
     <div class="min-h-[300px] max-h-[600px] flex flex-col justify-between">
       <div ref="chatContainer" class="h-full w-full overflow-y-auto gap-3 flex flex-col mb-3">
         <div class="bg-surface-200 rounded-md p-2" v-for="comment in comments" :key="comment.id">
@@ -66,13 +58,13 @@ defineEmits(['close'])
           </div>
         </div>
         <div class="text-muted-foreground text-sm">
-          {{ comments.length }} комментариев
+          {{ comments?.length }} комментариев
         </div>
       </div>
       <div v-if="!order.done">
         <Form method="post" @submit="send">
           <InputGroup class="border border-surface-200 rounded-md">
-            <Button severity="secondary" @click="fetchComments">
+            <Button severity="secondary" @click="() => refetch()">
               <RefreshCcw />
             </Button>
             <InputText class="border-none" name="text" placeholder="Введите текст..." />

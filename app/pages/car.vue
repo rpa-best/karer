@@ -1,39 +1,29 @@
 <script setup lang="ts">
 import {Pen, Plus} from "lucide-vue-next"
-import { ref, onMounted } from 'vue'
 import type { Car } from "~/types/car"
 import { CarService } from "~/services"
 import type { DefaultQueryParams } from '~/types'
 
-const loading = ref(true)
+const filters = ref<DefaultQueryParams>({})
 const car = ref<Car | null>(null)
 const show_car = ref(false)
 const carService = new CarService()
-const cars = ref<Car[]>([])
-const filters = ref<DefaultQueryParams>({})
+const {data: cars, isFetching, refetch} = carService.list<Car[]>(filters.value)
+
 
 const rowClick = (data: Car | null) => {
     show_car.value = true
     car.value = data
 }
 
-const fetch_data = async () => {
-    loading.value = true
-    cars.value = await carService.list(filters.value)
-    loading.value = false
-}
-
 const onFilter = async () => {
-    await fetch_data()
+    await refetch()
 }
 
-onMounted(async () => {
-    await fetch_data()
-})
 </script>
 
 <template>
-    <Loading :loading="loading">
+    <Loading :loading="isFetching">
         <div class="flex justify-between align-items-center flex-wrap">
             <h2 style="font-size: 24px; font-weight: bold" class="mb-3">Автомобили</h2>
             <div class="flex md:flex-nowrap gap-3 flex-wrap md:w-auto w-full">
@@ -51,7 +41,7 @@ onMounted(async () => {
         </div>
         <Card>
             <template #content>
-                <DataTable size="large" :value="cars" lazy :loading="loading" rowHover>
+                <DataTable size="large" :value="cars" lazy :loading="isFetching" rowHover>
                     <Column field="number" header="Номер" style="font-weight: 600"></Column>
                     <Column field="marka" header="Марка" style="font-weight: 600"></Column>
                     <Column field="model" header="Модель" style="font-weight: 600"></Column>
@@ -69,7 +59,7 @@ onMounted(async () => {
         </Card>
     </Loading>
     <Dialog v-model:visible="show_car" @close="car = null" modal header="Изменить автомобиль" :style="{ 'max-width': '500px', width: '100%' }">
-        <Car v-if="show_car" :car="car" @close="(flag: boolean) => {car = null; show_car=false; flag ? fetch_data() : null}" />
+        <Car v-if="show_car" :car="car" @close="(flag: boolean) => {car = null; show_car=false; flag ? refetch() : null}" />
     </Dialog>
 </template>
 

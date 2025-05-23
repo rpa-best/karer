@@ -1,5 +1,5 @@
 <template>
-  <button @click="toggle"
+  <button @click="menu?.toggle"
           class="hidden md:flex gap-3 items-center w-full outline-none bg-transparent p-2.5 rounded-full text-gray-600  hover:bg-gray-100">
     <Avatar v-if="user.user?.id" :label="user.user?.first_name[0]" class="cursor-pointer" shape="circle"/>
     <CircleUserRound class="size-7 text-gray-700 cursor-pointer" v-else/>
@@ -31,10 +31,19 @@
 import {useUser} from "@/store/user"
 import {LogOut, LogIn, CircleUserRound} from 'lucide-vue-next'
 import type { MenuItem } from 'primevue/menuitem'
+import type { PopoverMethods } from 'primevue/popover'
+import { UserService } from "~/services/user"
 
 const user = useUser()
+const user_service = new UserService()
 
-const menu = ref<any>(null)
+const {data: user_data} = user_service.me()
+
+watchEffect(() => {
+  user.user = user_data.value
+})
+
+const menu = ref<PopoverMethods | null>(null)
 
 const items = computed((): MenuItem[] => [
   {
@@ -50,11 +59,5 @@ const items = computed((): MenuItem[] => [
   }
 ])
 
-onMounted(async () => {
-  await user.fetch_user()
-})
 
-const toggle = (e: Event) => {
-  menu.value.toggle(e)
-}
 </script>

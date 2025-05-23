@@ -1,6 +1,7 @@
 import { useStorage } from '@vueuse/core'
+import type { Token } from '~/types/user'
 
-export const token = useStorage<{ access: string | null, refresh: string | null }>(
+export const token = useStorage<Token>(
     'token', { access: null, refresh: null }
 )
 
