@@ -33,6 +33,7 @@ import { isLogist } from '~/permissions'
 import { OrderService } from '~/services'
 import { InvoiceService } from '~/services/invoice'
 import type { Order, Invoice } from '~/types/invoices'
+import { useQuery } from '@tanstack/vue-query'
 
 const route = useRoute()
 const router = useRouter()
@@ -43,8 +44,14 @@ if (!isLogist()) {
     router.push('/')
 }
 
-const {data: order} = orderService.get<Order>(route.params.id as string)
-const {data: invoice} = invoiceService.get<Invoice>(order.value?.invoice as number)
+const {data: order} = useQuery({
+    queryKey: ['order', route.params.id],
+    queryFn: async () => await orderService.get<Order>(route.params.id as string)
+})
+const {data: invoice} = useQuery({
+    queryKey: ['invoice', order.value?.invoice],
+    queryFn: async () => await invoiceService.get<Invoice>(order.value?.invoice as number)
+})
 
 const sendCareer = async () => {
     if (order.value && invoice.value) {

@@ -7,6 +7,7 @@ import type { Invoice, InvoiceParams } from '~/types/invoices';
 import { InvoiceService } from '~/services/invoice';
 import type { Organization } from '~/types/onec';
 import { OrganizationService } from '~/services';
+import { useQuery } from '@tanstack/vue-query';
 
 const statuses: {[key: string]: {color: string, label: string}} = {
     created: { color: 'info', label: 'Принято' },
@@ -46,10 +47,17 @@ const show_invoice = ref(false)
 const invoice: Ref<Invoice | undefined> = ref()
 const expandedRowGroups = ref(null)
 const invoiceService = new InvoiceService()
-const {data: invites, isFetching, refetch} = invoiceService.list<{results?: Invoice[], count?: number}>(filters.value)
+
+const {data: invites, isFetching, refetch} = useQuery({
+  queryKey: ['invoices', filters.value],
+  queryFn: async () => await invoiceService.list<{results?: Invoice[], count?: number}>(filters.value)
+})
 
 const organizationService = new OrganizationService()
-const {data: organizations} = organizationService.list<Organization[]>()
+const {data: organizations} = useQuery({
+  queryKey: ['organizations'],
+  queryFn: async () => await organizationService.list<Organization[]>()
+})
 
 const rowClick = (data: Invoice | undefined = undefined) => {
     show_invoice.value = true

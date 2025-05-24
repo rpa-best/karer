@@ -4,6 +4,7 @@ import { order_columns } from "~/composables"
 import type { Invoice, Order, Pivot, OrderParams } from "~/types/invoices"
 import { InvoiceService } from "~/services/invoice"
 import { useConfirm } from "primevue/useconfirm";
+import { useQuery } from "@tanstack/vue-query";
 
 const props = defineProps<{
   invoice: Invoice
@@ -11,8 +12,16 @@ const props = defineProps<{
 
 const filters = ref<OrderParams>({})
 const invoiceService = new InvoiceService()
-const {data: orders, isFetching, refetch} = invoiceService.order.list<Order[]>(filters.value, { invoice_id: props.invoice.id })
-const {data: pivot} = invoiceService.fetchPivot<Pivot>(props.invoice.id, filters.value)
+
+const {data: orders, isFetching, refetch} = useQuery({
+  queryKey: ['orders', props.invoice.id, filters.value],
+  queryFn: async () => await invoiceService.order.list<Order[]>(filters.value, { invoice_id: props.invoice.id })
+})
+
+const {data: pivot} = useQuery({
+  queryKey: ['pivot', props.invoice.id, filters.value],
+  queryFn: async () => await invoiceService.fetchPivot<Pivot>(props.invoice.id, filters.value)
+})
 
 const confirm = useConfirm()
 const order = ref<Order | {}>({})

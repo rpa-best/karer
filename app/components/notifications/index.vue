@@ -4,6 +4,7 @@ import {useNotification} from "~/store/notifications.js";
 import {NotificationSocket} from "./websocket"
 import type { Notification } from "~/types/notifications";
 import type { DefaultQueryParams } from "~/types";
+import { useQuery } from "@tanstack/vue-query";
 
 const open = ref(false)
 const notification = useNotification()
@@ -12,7 +13,10 @@ const filters = ref<DefaultQueryParams>({
   limit: 50,
 })
 
-const {data, isFetching, refetch} = notification.service.list<{results: Notification[], count: number, unread: number}>(filters.value)
+const {data, isFetching, refetch} = useQuery({
+  queryKey: ['notifications', filters.value],
+  queryFn: async () => await notification.service.list<{results: Notification[], count: number, unread: number}>(filters.value),
+})
 
 const socket = new NotificationSocket()
 

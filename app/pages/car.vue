@@ -3,13 +3,17 @@ import {Pen, Plus} from "lucide-vue-next"
 import type { Car } from "~/types/car"
 import { CarService } from "~/services"
 import type { DefaultQueryParams } from '~/types'
+import { useQuery } from '@tanstack/vue-query'
 
 const filters = ref<DefaultQueryParams>({})
 const car = ref<Car | null>(null)
 const show_car = ref(false)
 const carService = new CarService()
-const {data: cars, isFetching, refetch} = carService.list<Car[]>(filters.value)
 
+const {data: cars, isFetching, refetch} = useQuery({
+  queryKey: ['cars', filters.value],
+  queryFn: async () => await carService.list<Car[]>(filters.value)
+})
 
 const rowClick = (data: Car | null) => {
     show_car.value = true

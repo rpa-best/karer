@@ -11,6 +11,7 @@ import type { Specification, Nomenclature, Organization } from '~/types/onec'
 import { InvoiceService } from '~/services/invoice'
 import { OrganizationService, SpecificationService, NomenclatureService } from '~/services'
 import { useToast } from 'primevue/usetoast'
+import { useQuery } from '@tanstack/vue-query'
 
 const props = defineProps<{
   invoice: Invoice | undefined
@@ -25,9 +26,18 @@ const specificationService = new SpecificationService()
 const nomenclatureService = new NomenclatureService()
 const invoiceService = new InvoiceService()
 
-const {data: organizations} = organizationService.list<Organization[]>()
-const {data: specifications} = specificationService.list<Specification[]>()
-const {data: nomenclatures} = nomenclatureService.list<Nomenclature[]>()
+const {data: organizations} = useQuery({
+  queryKey: ['organizations'],
+  queryFn: async () => await organizationService.list<Organization[]>()
+})
+const {data: specifications} = useQuery({
+  queryKey: ['specifications'],
+  queryFn: async () => await specificationService.list<Specification[]>()
+})
+const {data: nomenclatures} = useQuery({
+  queryKey: ['nomenclatures'],
+  queryFn: async () => await nomenclatureService.list<Nomenclature[]>()
+})
 
 const disabled = ref(true)
 const invoiceNomenclatures = ref(props.invoice?.nomenclatures || [])
