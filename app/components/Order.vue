@@ -9,6 +9,7 @@ import type { Nomenclature } from '~/types/onec'
 import type { FormSubmitEvent } from '@primevue/forms'
 import { CarService, DriverService, NomenclatureService } from '~/services'
 import { InvoiceService } from '~/services/invoice'
+import { useQuery } from '@tanstack/vue-query'
 
 const { order, invoice } = defineProps<{
   order: Order | {}
@@ -32,12 +33,21 @@ const driverService = new DriverService()
 const nomenclatureService = new NomenclatureService()
 const invoiceService = new InvoiceService()
 
-const {data: cars} = carService.list<Car[]>()
-const {data: drivers} = driverService.list<Driver[]>()
-const {data: nomenclatures} = nomenclatureService.list<Nomenclature[]>()
-
-const disabled = ref(true)
 const toast = useToast()
+const disabled = ref(true)
+
+const {data: cars} = useQuery({
+  queryKey: ['cars'],
+  queryFn: async () => await carService.list<Car[]>()
+})
+const {data: drivers} = useQuery({
+  queryKey: ['drivers'],
+  queryFn: async () => await driverService.list<Driver[]>()
+})
+const {data: nomenclatures} = useQuery({
+  queryKey: ['nomenclatures'],
+  queryFn: async () => await nomenclatureService.list<Nomenclature[]>()
+})
 
 const resolver = zodResolver(
   z.object({

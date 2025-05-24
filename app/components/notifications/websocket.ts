@@ -1,6 +1,6 @@
 import {Client} from "@/components/utils"
 import {useNotification} from "~/store/notifications";
-import { useNuxtApp } from '#app';
+
 
 export class NotificationSocket extends Client {
     constructor() {

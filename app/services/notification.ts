@@ -7,11 +7,13 @@ export class NotificationService extends ReadOnlyService {
     }
 
     async read(pk: number) {
-        return await this.$api.patch(`/notification/${pk}/`, {}, {}, false)
+        const response = await this.$api.patch(`/notification/${pk}/`, {}, {}, false)
+        return response.data
     }
 
     async readAll() {
-        return await this.$api.patch(`/notification/read/`, {}, {}, false)
+        const response = await this.$api.patch(`/notification/read/`, {}, {}, false)
+        return response.data
     }
 }
 

@@ -1,4 +1,3 @@
-import { useQuery, type UseQueryReturnType } from "@tanstack/vue-query";
 import axios, { type AxiosResponse, type AxiosRequestConfig, type AxiosError, type AxiosInstance } from "axios";
 import { token } from "~/composables";
 import { useUser } from "~/store/user";
@@ -56,13 +55,8 @@ export class Api {
     }
   }
 
-  get<T = any>(url: string, config: AxiosRequestConfig = {}, redirect: boolean=true): UseQueryReturnType<T, AxiosError<T, any> | null> {
-    const new_url = `${url}?${new URLSearchParams(config.params).toString()}`
-    const fetcher = async (): Promise<T> => {
-      const response = await this.request<any, T>('get', url, null, config, false, redirect)
-      return response.data
-    }
-    return useQuery({queryKey: [new_url], queryFn: fetcher, staleTime: 1000 * 60 * 5})
+  async get<R = any>(url: string, config: AxiosRequestConfig = {}, redirect: boolean=true): Promise<AxiosResponse<R>> {
+    return await this.request<any, R>('get', url, null, config, false, redirect)
   }
   async post<D = any, R = any>(url: string, data: D, config: AxiosRequestConfig = {}, toasted=true): Promise<AxiosResponse<R>> {
     return await this.request<D, R>('post', url, data, config, toasted, true)

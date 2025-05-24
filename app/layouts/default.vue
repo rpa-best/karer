@@ -15,6 +15,19 @@
 </template>
 <script setup lang="ts">
 import {useUser} from '@/store/user'
+import { UserService } from '~/services/user'
+import { useQuery } from '@tanstack/vue-query'
 
 const user = useUser()
+
+const user_service = new UserService()
+
+const {data: user_data} = useQuery({
+  queryKey: ['user'],
+  queryFn: async () => await user_service.me(),
+})
+
+watchEffect(() => {
+  user.user = user_data.value
+})
 </script>

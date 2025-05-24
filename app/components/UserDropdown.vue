@@ -32,16 +32,8 @@ import {useUser} from "@/store/user"
 import {LogOut, LogIn, CircleUserRound} from 'lucide-vue-next'
 import type { MenuItem } from 'primevue/menuitem'
 import type { PopoverMethods } from 'primevue/popover'
-import { UserService } from "~/services/user"
 
 const user = useUser()
-const user_service = new UserService()
-
-const {data: user_data} = user_service.me()
-
-watchEffect(() => {
-  user.user = user_data.value
-})
 
 const menu = ref<PopoverMethods | null>(null)
 

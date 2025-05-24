@@ -1,7 +1,6 @@
 import type { Api } from "~/plugins/03.axios"
 import type { DefaultQueryParams } from "~/types"
-import type { UseQueryReturnType } from "@tanstack/vue-query"
-import type { AxiosError } from "axios"
+
 
 export class ReadOnlyService {
     protected readonly $api: Api
@@ -23,12 +22,14 @@ export class ReadOnlyService {
         return url
     }
 
-    list<T = any>(params: DefaultQueryParams | null = null, url_params: Record<string, string | number> = {}): UseQueryReturnType<T, AxiosError<any, any> | null> {
-        return this.$api.get(`${this.getUrl(url_params)}/`, {params})
+    async list<T = any>(params: DefaultQueryParams | null = null, url_params: Record<string, string | number> = {}): Promise<T> {
+        const response = await this.$api.get(`${this.getUrl(url_params)}/`, {params})
+        return response.data
     }
 
-    get<T = any>(id: number | string, params: DefaultQueryParams | null = null, url_params: Record<string, string | number> = {}): UseQueryReturnType<T, AxiosError<any, any> | null> {
-        return this.$api.get(`${this.getUrl(url_params)}/${id}/`, {params})
+    async get<T = any>(id: number | string, params: DefaultQueryParams | null = null, url_params: Record<string, string | number> = {}): Promise<T> {
+        const response = await this.$api.get(`${this.getUrl(url_params)}/${id}/`, {params})
+        return response.data
     }
 }
 

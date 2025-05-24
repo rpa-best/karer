@@ -16,7 +16,7 @@ export const useUser = defineStore("user", {
         async auth(values: UserLogin) {
             const user_service = new UserService()
             const r = await user_service.auth(values)
-            token.value = r?.data
+            token.value = r
         },
         logout() {
             token.value.access = null
@@ -33,7 +33,7 @@ export const useUser = defineStore("user", {
             return this.user?.id
         },
         redirect() {
-            navigateTo(String(useRoute().query.next ?? '/'))
+            window.location.href = String(useRoute().query.next ?? '/')
         },
     }
 })

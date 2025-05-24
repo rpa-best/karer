@@ -3,6 +3,7 @@ import { SendHorizonal, Loader2, Check, X, RefreshCcw } from "lucide-vue-next";
 import { type FormSubmitEvent } from '@primevue/forms'
 import type { DriverComment } from "~/types/invoices";
 import { InvoiceService } from '~/services/invoice'
+import { useQuery } from "@tanstack/vue-query";
 
 const props = defineProps({
   order: {
@@ -17,7 +18,11 @@ const props = defineProps({
 
 const invoiceService = new InvoiceService()
 
-const {data: comments, isFetching, refetch} = invoiceService.order.driverComment.list<DriverComment[]>({}, {invoice_id: props.invoice.id, order_id: props.order.uuid})
+const {data: comments, isFetching, refetch} = useQuery({
+  queryKey: ['driver-comments', props.invoice.id, props.order.uuid],
+  queryFn: async () => await invoiceService.order.driverComment.list<DriverComment[]>({}, {invoice_id: props.invoice.id, order_id: props.order.uuid})
+})
+
 const chatContainer = ref<HTMLDivElement>()
 
 const send = async ({ values }: FormSubmitEvent<Record<string, any>>) => {

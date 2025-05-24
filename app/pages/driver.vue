@@ -3,14 +3,17 @@ import {Pen, Plus} from "lucide-vue-next"
 import type { Driver } from "~/types/driver"
 import type { DefaultQueryParams } from '~/types'
 import { DriverService } from '~/services'
-
+import { useQuery } from '@tanstack/vue-query'
 
 const filters = ref<DefaultQueryParams>({})
 const driver = ref<Driver | null>(null)
 const show_driver = ref(false)
 const driverService = new DriverService()
-const {data: drivers, isFetching, refetch} = driverService.list<Driver[]>(filters.value)
 
+const {data: drivers, isFetching, refetch} = useQuery({
+  queryKey: ['drivers', filters.value],
+  queryFn: async () => await driverService.list<Driver[]>(filters.value)
+})
 
 const rowClick = (data: Driver | null = null) => {
   show_driver.value = true

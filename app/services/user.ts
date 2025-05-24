@@ -8,11 +8,13 @@ export class UserService {
         this.$api = useNuxtApp().$api
     }
     
-    me() {
-        return this.$api.get<User>("/oauth/me/", {}, false)
+    async me() {
+        const response = await this.$api.get<User>("/oauth/me/", {}, false)
+        return response.data
     }
 
-    auth(values: UserLogin) {
-        return this.$api.post<UserLogin, Token>("/oauth/auth/", values, {}, false)
+    async auth(values: UserLogin) {
+        const response = await this.$api.post<UserLogin, Token>("/oauth/auth/", values, {}, false)
+        return response.data
     }
 }
