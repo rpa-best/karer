@@ -39,10 +39,14 @@ export class Client {
     }
 
     connect() {
-        this.socket = new WebSocket(this.url);
-        this.socket.onopen = this.onopen
-        this.socket.onmessage = this.onmessage
-        this.socket.onclose = this.onclose
-        this.socket.onerror = this.onerror
+        try {
+            this.socket = new WebSocket(this.url);
+            this.socket.onopen = this.onopen
+            this.socket.onmessage = this.onmessage
+            this.socket.onclose = this.onclose
+            this.socket.onerror = this.onerror
+        } catch (e) {
+            console.error(`Websocket connection failed: ${this.url}`);
+        }
     }
 }
