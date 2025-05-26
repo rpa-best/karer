@@ -13,6 +13,7 @@ services:
     volumes:
       - ./backend/:/app/
       - ./media/:/media/
+      - ./static/:/static/
 
   career_redis:
     container_name: career_redis

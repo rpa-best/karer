@@ -11,6 +11,8 @@ services:
       - ./backend/.env
     volumes:
       - ./backend/:/app/
+      - ./media/:/media/
+      - ./static/:/static/
   
   career_front:
     container_name: career_front
