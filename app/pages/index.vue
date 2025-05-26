@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
 import {Pen, Plus} from "lucide-vue-next"
 import type { DataTablePageEvent } from 'primevue/datatable';
 import { isManager, isLogist } from '~/permissions';
@@ -49,13 +48,13 @@ const expandedRowGroups = ref(null)
 const invoiceService = new InvoiceService()
 
 const {data: invites, isFetching, refetch} = useQuery({
-  queryKey: ['invoices', filters.value],
+  queryKey: computed(() => ['invoices', filters.value]),
   queryFn: async () => await invoiceService.list<{results?: Invoice[], count?: number}>(filters.value)
 })
 
 const organizationService = new OrganizationService()
 const {data: organizations} = useQuery({
-  queryKey: ['organizations'],
+  queryKey: computed(() => ['organizations']),
   queryFn: async () => await organizationService.list<Organization[]>()
 })
 
@@ -68,10 +67,6 @@ const onPage = async (e: DataTablePageEvent) => {
     filters.value.offset = e.first
     await refetch()
 }
-
-onMounted(async () => {
-    await refetch()
-})
 
 async function onFilter() {
     await refetch();

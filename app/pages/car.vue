@@ -11,7 +11,7 @@ const show_car = ref(false)
 const carService = new CarService()
 
 const {data: cars, isFetching, refetch} = useQuery({
-  queryKey: ['cars', filters.value],
+  queryKey: computed(() => ['cars', filters.value]),
   queryFn: async () => await carService.list<Car[]>(filters.value)
 })
 

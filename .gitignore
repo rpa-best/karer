@@ -163,6 +163,6 @@ cython_debug/
 
 .vscode
 .idea
-backend/static
+static
 media
 redis-data

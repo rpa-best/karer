@@ -1,12 +1,13 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as _UserAdmin
 from django.utils.translation import gettext_lazy as _
+from unfold.admin import ModelAdmin
 from .models import User
 from .forms import UserCreationForm, UserChangeForm
 
 
 @admin.register(User)
-class UserAdmin(_UserAdmin):
+class UserAdmin(ModelAdmin, _UserAdmin):
     fieldsets = (
         (None, {"fields": ("username", "email", "password")}),
         (_("Personal info"), {"fields": ("first_name", "last_name", "role")}),

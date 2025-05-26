@@ -45,11 +45,11 @@ if (!isLogist()) {
 }
 
 const {data: order} = useQuery({
-    queryKey: ['order', route.params.id],
+    queryKey: computed(() => ['order', route.params.id]),
     queryFn: async () => await orderService.get<Order>(route.params.id as string)
 })
 const {data: invoice} = useQuery({
-    queryKey: ['invoice', order.value?.invoice],
+    queryKey: computed(() => ['invoice', order.value?.invoice]),
     queryFn: async () => await invoiceService.get<Invoice>(order.value?.invoice as number)
 })
 

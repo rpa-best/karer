@@ -153,8 +153,8 @@ USE_TZ = True
 STATIC_URL = 'api/static/'
 MEDIA_URL = 'api/media/'
 
-MEDIA_ROOT = BASE_DIR / 'media'
-STATIC_ROOT = BASE_DIR / 'static'
+MEDIA_ROOT = BASE_DIR / '../media'
+STATIC_ROOT = BASE_DIR / '../static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -274,14 +274,6 @@ UNFOLD = {
     #     "dark": lambda request: static("logo-dark.svg"),  # dark mode
     # },
     "SITE_SYMBOL": "speed",  # symbol from icon set
-    "SITE_FAVICONS": [
-        {
-            "rel": "icon",
-            "sizes": "32x32",
-            "type": "image/svg+xml",
-            "href": lambda request: static("favicon.svg"),
-        },
-    ],
     "SHOW_HISTORY": True, # show/hide "History" button, default: True
     "SHOW_VIEW_ON_SITE": True, # show/hide "View on site" button, default: True
     "SHOW_BACK_BUTTON": True, # show/hide "Back" button on changeform in header, default: False

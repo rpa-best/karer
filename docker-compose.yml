@@ -6,12 +6,13 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
-    command: sh -c "uvicorn backend.asgi:application --host 0.0.0.0 --port 8000"
+    command: sh -c "uvicorn backend.asgi:application --host 0.0.0.0 --port 8000 --reload"
     restart: always
     env_file:
       - ./backend/.env
     volumes:
       - ./backend/:/app/
+      - ./media/:/media/
 
   career_redis:
     container_name: career_redis

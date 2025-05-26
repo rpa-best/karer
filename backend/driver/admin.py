@@ -1,3 +1,8 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 
-# Register your models here.
+from .models import Driver
+
+@admin.register(Driver)
+class DriverAdmin(ModelAdmin):
+    list_display = ('id', 'name', 'phone')

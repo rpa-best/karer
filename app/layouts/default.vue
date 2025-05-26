@@ -25,9 +25,9 @@ const user_service = new UserService()
 const {data: user_data} = useQuery({
   queryKey: ['user'],
   queryFn: async () => await user_service.me(),
-})
-
-watchEffect(() => {
-  user.user = user_data.value
+  select(data) {
+    user.user = data.value
+    return data
+  }
 })
 </script>

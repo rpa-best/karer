@@ -36,11 +36,13 @@ export class Api {
       const error = e as AxiosError<R>
       if (error.response?.status == 401) {
         if (token.value.refresh) {
-          const { data } = await this.api.post("/oauth/refresh/", {
+          const { data, status } = await this.api.post("/oauth/refresh/", {
             refresh: token.value.refresh,
           });
-          token.value = data
-          return await this.request(method, url, config.data, config, toasted, redirect)
+          if (status === 200) {
+            token.value = data
+            return await this.request(method, url, config.data, config, toasted, redirect)
+          }
         }
         if (redirect) {
           useUser().login()

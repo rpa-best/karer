@@ -16,15 +16,13 @@ const filters = ref<DefaultQueryParams>({
 const {data, isFetching, refetch} = useQuery({
   queryKey: ['notifications', filters.value],
   queryFn: async () => await notification.service.list<{results: Notification[], count: number, unread: number}>(filters.value),
+  select(data) {
+    notification.items = data.value
+    return data
+  }
 })
 
 const socket = new NotificationSocket()
-
-watchEffect(() => {
-  if (data.value) {
-    notification.items = data.value
-  }
-})
 
 const allCheck = async () => {
   if (notification.items?.unread) {
