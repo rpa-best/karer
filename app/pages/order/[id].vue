@@ -48,9 +48,11 @@ const {data: order} = useQuery({
     queryKey: computed(() => ['order', route.params.id]),
     queryFn: async () => await orderService.get<Order>(route.params.id as string)
 })
+
 const {data: invoice} = useQuery({
     queryKey: computed(() => ['invoice', order.value?.invoice]),
-    queryFn: async () => await invoiceService.get<Invoice>(order.value?.invoice as number)
+    queryFn: async () => await invoiceService.get<Invoice>(order.value?.invoice as number),
+    enabled: computed(() => !!order.value?.invoice)
 })
 
 const sendCareer = async () => {

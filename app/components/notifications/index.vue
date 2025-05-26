@@ -17,12 +17,10 @@ const {data, isFetching, refetch} = useQuery({
   queryKey: ['notifications', filters.value],
   queryFn: async () => await notification.service.list<{results: Notification[], count: number, unread: number}>(filters.value),
   select(data) {
-    notification.items = data.value
+    notification.items = data
     return data
   }
 })
-
-const socket = new NotificationSocket()
 
 const allCheck = async () => {
   if (notification.items?.unread) {
@@ -43,16 +41,7 @@ const select = async (item: Notification) => {
 const format = (value: string) => {
   return value
   // return formatDistanceToNow(new Date(value), { addSuffix: true, locale: ru })
-} 
-
-onMounted(() => {
-  socket.connect()
-})
-
-onUnmounted(() => {
-  socket.close()
-})
-
+}
 </script>
 
 <template>

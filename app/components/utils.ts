@@ -12,6 +12,7 @@ export class Client {
 
         this.url = new URL([protocol, `//`, backend.host, backend.pathname, url].join(''))
         this.url.searchParams.set("token", token.value?.access ?? '')
+        this.connect()
     }
 
     onerror(e: Event) {
