@@ -19,7 +19,7 @@ const props = defineProps({
 const invoiceService = new InvoiceService()
 
 const {data: comments, isFetching, refetch} = useQuery({
-  queryKey: ['driver-comments', props.invoice.id, props.order.uuid],
+  queryKey: computed(() => ['driver-comments', props.invoice.id, props.order.uuid]),
   queryFn: async () => await invoiceService.order.driverComment.list<DriverComment[]>({}, {invoice_id: props.invoice.id, order_id: props.order.uuid})
 })
 

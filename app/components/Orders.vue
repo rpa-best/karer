@@ -14,12 +14,12 @@ const filters = ref<OrderParams>({})
 const invoiceService = new InvoiceService()
 
 const {data: orders, isFetching, refetch} = useQuery({
-  queryKey: ['orders', props.invoice.id, filters.value],
+  queryKey: computed(() => ['orders', props.invoice.id, filters.value]),
   queryFn: async () => await invoiceService.order.list<Order[]>(filters.value, { invoice_id: props.invoice.id })
 })
 
 const {data: pivot} = useQuery({
-  queryKey: ['pivot', props.invoice.id, filters.value],
+  queryKey: computed(() => ['pivot', props.invoice.id, filters.value]),
   queryFn: async () => await invoiceService.fetchPivot<Pivot>(props.invoice.id, filters.value)
 })
 

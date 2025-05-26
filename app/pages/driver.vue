@@ -11,7 +11,7 @@ const show_driver = ref(false)
 const driverService = new DriverService()
 
 const {data: drivers, isFetching, refetch} = useQuery({
-  queryKey: ['drivers', filters.value],
+  queryKey: computed(() => ['drivers', filters.value]),
   queryFn: async () => await driverService.list<Driver[]>(filters.value)
 })
 

@@ -43,10 +43,9 @@ const items = computed((): MenuItem[] => [
     licon: user.user?.id ? LogOut : LogIn,
     command: () => {
       if (user.user?.id) {
-        user.logout()
-      } else {
-        user.login()
+        return user.logout()
       }
+      return user.login()
     }
   }
 ])
