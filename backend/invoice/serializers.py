@@ -1,5 +1,6 @@
 from django.db.transaction import atomic
 from django.db.models import Sum
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import ValidationError
@@ -7,6 +8,7 @@ from onec.models import Specification
 from car.serializers import CarSerializer
 from driver.serializers import DriverSerializer
 from onec.serializers import NomenclatureSerializer
+from onec.models import Balance
 from .models import Invoice, InvoiceNomenclature, Order, TYPE_LIMIT, TYPE_PREPAYMENT, TYPE_DEFERMENT_PAYMENT, DriverComment 
 
 
@@ -99,7 +101,13 @@ class OrderSerializer(serializers.ModelSerializer):
         read_only_fields = ['driver_comment']
 
     def validate(self, attrs: dict):
-        invoice = attrs.get('invoice')
+        attrs = self._validate_invoice_value(attrs)
+        attrs = self._validate_invoice_limit(attrs)
+        attrs = self._validate_invoice_payment_deferment(attrs)
+        return super().validate(attrs)
+    
+    def _validate_invoice_value(self, attrs: dict):
+        invoice: Invoice = attrs.get('invoice')
         if attrs.get('order') is not None:
             agg_invoice = get_object_or_404(
                 InvoiceNomenclature, invoice=invoice, nomenclature=attrs['nomenclature'])
@@ -109,7 +117,26 @@ class OrderSerializer(serializers.ModelSerializer):
             ).aggregate(norder=Sum('order'), nfact=Sum('fact'))
             if agg.get('order', 0) + attrs.get('order') > agg_invoice.value:
                 raise ValidationError("Потрепность больше чем указано в заказе")
-        return super().validate(attrs)
+        return attrs
+            
+    def _validate_invoice_limit(self, attrs: dict):
+        invoice: Invoice = attrs.get('invoice')
+        if attrs.get('price') is not None and invoice.specification.amount_limit:
+            balance = getattr(Balance.objects.filter(specification=invoice.specification).first(), 'balance', 0)
+            limit = invoice.specification.amount_limit if (invoice.specification.amount_limit - balance < 0) else balance
+            orders = Order.objects.filter(invoice=invoice)
+            orders_price = orders.aggregate(price=Sum('price'))['price'] or 0
+            if orders_price + attrs.get('price') > limit:
+                raise ValidationError("Сумма заказа больше чем указано в спецификации")
+        return attrs
+
+    def _validate_invoice_payment_deferment(self, attrs: dict):
+        invoice: Invoice = attrs.get('invoice')
+        if invoice.specification.payment_deferment:
+            first_order = Order.objects.filter(invoice=invoice).order_by('created_at').first()
+            if first_order and (timezone.now() - first_order.created_at).days > invoice.specification.payment_deferment:
+                raise ValidationError("Срок создание заказа просрочен")
+        return attrs
 
     def create(self, validated_data: dict):
         new_driver_comment = validated_data.pop('new_driver_comment', None)
