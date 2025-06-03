@@ -4,8 +4,8 @@ from invoice.models import Order
 
 
 class OrderFilter(filters.FilterSet):
-    updated_at__gte = filters.DateFilter(field_name='updated_at', lookup_expr='gte')
-    updated_at__lte = filters.DateFilter(field_name='updated_at', lookup_expr='lte')
+    updated_at__gte = filters.DateTimeFilter(field_name='updated_at', lookup_expr='gte')
+    updated_at__lte = filters.DateTimeFilter(field_name='updated_at', lookup_expr='lte')
 
     class Meta:
         model = Order
