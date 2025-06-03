@@ -2,7 +2,7 @@ from rest_framework.authentication import TokenAuthentication
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework.viewsets import ModelViewSet
 from invoice.models import Order
-
+from .filters import OrderFilter
 from .serializers import OrderShowSerializer, OrderPatchSerializer
 
 
@@ -15,6 +15,7 @@ class OrderView(ModelViewSet):
     http_method_names = ['get', 'patch']
     queryset = Order.objects.all()
     authentication_classes = [TokenAuthentication]
+    filterset_class = OrderFilter
 
     def get_serializer_class(self):
         if self.action in ["partial_update"]:
