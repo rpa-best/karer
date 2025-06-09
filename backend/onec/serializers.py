@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Nomenclature, Specification, Organization
+from .models import Nomenclature, Specification, Organization, Vehicle, Driver
 
 
 class NomenclatureSerializer(serializers.ModelSerializer):
@@ -27,3 +27,17 @@ class OrganizationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = "__all__"
+
+
+class CarSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Vehicle
+        fields = ["not_weight", "image"]
+
+
+class DriverSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Driver
+        fields = ["image"]

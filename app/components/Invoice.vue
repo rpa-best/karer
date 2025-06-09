@@ -31,12 +31,16 @@ const {data: organizations} = useQuery({
   queryFn: async () => await organizationService.list<Organization[]>()
 })
 const {data: specifications} = useQuery({
-  queryKey: ['specifications'],
-  queryFn: async () => await specificationService.list<Specification[]>()
+  queryKey: computed(() => ['specifications', props.invoice?.org]),
+  queryFn: async () => await specificationService.list<Specification[]>({org: props.invoice?.org}),
+  enabled: computed(() => !!props.invoice?.org)
 })
+
+const selectedSpecification = computed(() => specifications.value?.find((s: Specification) => s.uuid === props.invoice?.specification))
+
 const {data: nomenclatures} = useQuery({
   queryKey: ['nomenclatures'],
-  queryFn: async () => await nomenclatureService.list<Nomenclature[]>()
+  queryFn: async () => await nomenclatureService.list<Nomenclature[]>({id__in: selectedSpecification.value?.nomenclatures.join(',')}),
 })
 
 const disabled = ref(true)

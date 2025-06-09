@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {Pen, Plus} from "lucide-vue-next"
-import type { Car } from "~/types/car"
+import type { Car } from "~/types/onec"
 import { CarService } from "~/services"
 import type { DefaultQueryParams } from '~/types'
 import { useQuery } from '@tanstack/vue-query'
@@ -46,10 +46,9 @@ const onFilter = async () => {
         <Card>
             <template #content>
                 <DataTable size="large" :value="cars" lazy :loading="isFetching" rowHover>
-                    <Column field="number" header="Номер" style="font-weight: 600"></Column>
-                    <Column field="marka" header="Марка" style="font-weight: 600"></Column>
-                    <Column field="model" header="Модель" style="font-weight: 600"></Column>
-                    <Column field="vin" header="VIN-Номер" style="font-weight: 600"></Column>
+                    <Column field="reg_number" header="Номер" style="font-weight: 600"></Column>
+                    <Column field="brand" header="Марка" style="font-weight: 600"></Column>
+                    <Column field="name" header="Модель" style="font-weight: 600"></Column>
                     <column>
                       <template #body="{data}">
                         <Button @click="rowClick(data)" severity="help" rounded class="size-8 !p-2">

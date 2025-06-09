@@ -3,13 +3,13 @@ import { CRUDService, ReadOnlyService } from "./utils";
 
 export class CarService extends CRUDService {
     constructor() {
-        super('/car/')
+        super('/onec/car/')
     }
 }
 
 export class DriverService extends CRUDService {
     constructor() {
-        super('/driver/')
+        super('/onec/driver/')
     }
 }
 

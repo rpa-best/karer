@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { FileImage } from 'lucide-vue-next'
 import { ref } from 'vue'
-import type { Car } from '~/types/car'
+import type { Car } from '~/types/onec'
 import type { FormSubmitEvent } from '@primevue/forms'
 import { CarService } from '~/services'
 
@@ -46,8 +46,8 @@ const save = async ({ values }: FormSubmitEvent<Record<string, any>>) => {
                 formData.append(key, String(values[key as keyof Car]))
             }
         }
-        if (props.car?.id) {
-            await carService.update(props.car.id, formData)
+        if (props.car?.uuid) {
+            await carService.update(props.car.uuid, formData)
         } else {
             await carService.create(formData)
         }
@@ -72,33 +72,44 @@ const save = async ({ values }: FormSubmitEvent<Record<string, any>>) => {
                 <div class="grid grid-cols-2 gap-8">
                     <div class="col-span-2">
                         <FloatLabel>
-                            <InputText required id="number" style="width: 100%" name="number" :disabled="disabled" />
-                            <label for="number" style="font-size: 12px">Номер</label>
+                            <InputText required id="reg_number" style="width: 100%" name="reg_number" :disabled="true" />
+                            <label for="reg_number" style="font-size: 12px">Номер</label>
                         </FloatLabel>
                     </div>
                     <div class="col-span-1">
                         <FloatLabel>
-                            <InputText required id="marka" style="width: 100%" name="marka" :disabled="disabled" />
-                            <label for="marka" style="font-size: 12px">Марка</label>
+                            <InputText required id="brand" style="width: 100%" name="brand" :disabled="true" />
+                            <label for="brand" style="font-size: 12px">Марка</label>
                         </FloatLabel>
                     </div>
                     <div class="col-span-1">
                         <FloatLabel>
-                            <InputText required id="model" style="width: 100%" name="model" :disabled="disabled" />
-                            <label for="model" style="font-size: 12px">Модель</label>
+                            <InputText required id="name" style="width: 100%" name="name" :disabled="true" />
+                            <label for="name" style="font-size: 12px">Модель</label>
                         </FloatLabel>
                     </div>
                 </div>
             </div>
             <div class="col-span-3">
                 <FloatLabel>
-                    <InputText required id="vin" style="width: 100%" name="vin" :disabled="disabled" />
-                    <label for="vin" style="font-size: 12px">VIN-номер</label>
+                    <InputText required id="trailer_reg_number" style="width: 100%" name="trailer_reg_number" :disabled="true" />
+                    <label for="trailer_reg_number" style="font-size: 12px">Регистрационный номер прицепа</label>
+                </FloatLabel>
+            </div>
+            <div class="col-span-3">
+                <FloatLabel>
+                    <InputText required id="trailer_brand" style="width: 100%" name="trailer_brand" :disabled="true" />
+                    <label for="trailer_brand" style="font-size: 12px">Марка прицепа</label>
                 </FloatLabel>
             </div>
             <div class="col-span-3 flex align-items-center">
+                <Checkbox inputId="our_prorerty" id="our_prorerty" name="our_prorerty" :disabled="true" binary />
+                <label for="our_prorerty" class="ml-2">Наша собственность</label>
+            </div>
+
+            <div class="col-span-3 flex align-items-center">
                 <Checkbox inputId="not_weight" id="not_weight" name="not_weight" :disabled="disabled" binary />
-                <label for="weigh" class="ml-2">Не взвешивать</label>
+                <label for="not_weight" class="ml-2">Не взвешивать</label>
             </div>
         </div>
         <div class="flex flex-row gap-3 mt-2">
