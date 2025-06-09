@@ -59,8 +59,6 @@ INSTALLED_APPS = [
     'django_celery_results',
     'channels',
     'oauth',
-    'car',
-    'driver',
     'invoice',
     'onec',
     'notification',

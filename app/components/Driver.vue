@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { FileImage } from 'lucide-vue-next'
 import { ref } from 'vue'
-import type { Driver } from '~/types/driver'
+import type { Driver } from '~/types/onec'
 import type { FormSubmitEvent } from '@primevue/forms'
 import { DriverService } from '~/services'
 const props =defineProps<{
@@ -46,8 +46,8 @@ const save = async ({ values }: FormSubmitEvent<Record<string, any>>) => {
             }
             
         }
-        if (props.driver?.id) {
-            await driverService.update(props.driver.id, formData)
+        if (props.driver?.uuid) {
+            await driverService.update(props.driver.uuid, formData)
         } else {
             await driverService.create(formData)
         }
@@ -74,18 +74,43 @@ const save = async ({ values }: FormSubmitEvent<Record<string, any>>) => {
                 <div class="grid grid-cols-2 gap-8">
                     <div class="col-span-2">
                         <FloatLabel>
-                            <InputText required id="name" style="width: 100%" name="name" :disabled="disabled" />
+                            <InputText required id="name" style="width: 100%" name="name" :disabled="true" />
                             <label for="name" style="font-size: 12px">ФИО</label>
                         </FloatLabel>
                     </div>
                     <div class="col-span-2">
                         <FloatLabel>
-                            <InputText required id="phone" style="width: 100%" name="phone" :disabled="disabled" />
-                            <label for="phone" style="font-size: 12px">Номер телефона</label>
+                            <InputText required id="inn" style="width: 100%" name="inn" :disabled="true" />
+                            <label for="inn" style="font-size: 12px">Номер телефона</label>
                         </FloatLabel>
                     </div>
                 </div>
             </div>
+            <div class="col-span-2">
+                <FloatLabel>
+                    <InputText required id="phone_number" style="width: 100%" name="phone_number" :disabled="true" />
+                    <label for="phone_number" style="font-size: 12px">Номер телефона</label>
+                </FloatLabel>
+            </div>
+            <div class="col-span-2">
+                <FloatLabel>
+                    <InputText required id="job_title" style="width: 100%" name="job_title" :disabled="true" />
+                    <label for="job_title" style="font-size: 12px">Профессия</label>
+                </FloatLabel>
+            </div>
+            <div class="col-span-2">
+                <FloatLabel>
+                    <InputText required id="drivers_license_series" style="width: 100%" name="drivers_license_series" :disabled="true" />
+                    <label for="drivers_license_series" style="font-size: 12px">Серия права водителя</label>
+                </FloatLabel>
+            </div>
+            <div class="col-span-2">
+                <FloatLabel>
+                    <InputText required id="drivers_license_number" style="width: 100%" name="drivers_license_number" :disabled="true" />
+                    <label for="drivers_license_number" style="font-size: 12px">Номер права водителя</label>
+                </FloatLabel>
+            </div>
+
             <div class="col-span-3">
                 <FloatLabel>
                     <InputText required id="telegram_id" style="width: 100%" name="telegram_id" :disabled="disabled" />

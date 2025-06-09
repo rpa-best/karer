@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {Pen, Plus} from "lucide-vue-next"
-import type { Driver } from "~/types/driver"
+import type { Driver } from "~/types/onec"
 import type { DefaultQueryParams } from '~/types'
 import { DriverService } from '~/services'
 import { useQuery } from '@tanstack/vue-query'
@@ -45,9 +45,9 @@ const onFilter = async () => {
     <Card>
       <template #content>
         <DataTable size="large" :value="drivers" :loading="isFetching" lazy rowHover>
-          <Column field="id" header="ID" style="font-weight: 600"></Column>
+          <Column field="inn" header="ИНН" style="font-weight: 600"></Column>
           <Column field="name" header="ФИО" style="font-weight: 600"></Column>
-          <Column field="phone" header="Телефон" style="font-weight: 600"></Column>
+          <Column field="phone_number" header="Телефон" style="font-weight: 600"></Column>
           <column>
             <template #body="{data}">
               <Button @click="rowClick(data)" severity="help" rounded class="size-8 !p-2">

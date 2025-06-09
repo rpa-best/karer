@@ -22,8 +22,6 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/oauth/', include("oauth.urls")),
-    path('api/car/', include('car.urls')),
-    path('api/driver/', include('driver.urls')),
     path('api/invoice/', include('invoice.urls.invoice')),
     path('api/order/', include('invoice.urls.order')),
     path('api/onec/', include('onec.urls')),

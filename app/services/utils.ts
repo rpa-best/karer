@@ -22,7 +22,7 @@ export class ReadOnlyService {
         return url
     }
 
-    async list<T = any>(params: DefaultQueryParams | null = null, url_params: Record<string, string | number> = {}): Promise<T> {
+    async list<T = any>(params: Record<string, string | number | undefined> | null = null, url_params: Record<string, string | number> = {}): Promise<T> {
         const response = await this.$api.get(`${this.getUrl(url_params)}/`, {params})
         return response.data
     }
