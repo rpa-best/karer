@@ -10,9 +10,9 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('car', '0002_car_created_at_car_image'),
+        # ('car', '0002_car_created_at_car_image'),
         ('onec', '0001_initial'),
-        ('driver', '0002_driver_created_at_driver_image'),
+        # ('driver', '0002_driver_created_at_driver_image'),
     ]
 
     operations = [

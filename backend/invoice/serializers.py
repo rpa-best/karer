@@ -5,9 +5,7 @@ from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import ValidationError
 from onec.models import Specification
-from car.serializers import CarSerializer
-from driver.serializers import DriverSerializer
-from onec.serializers import NomenclatureSerializer
+from onec.serializers import NomenclatureSerializer, CarSerializer, DriverSerializer
 from onec.models import Balance
 from .models import Invoice, InvoiceNomenclature, Order, TYPE_LIMIT, TYPE_PREPAYMENT, TYPE_DEFERMENT_PAYMENT, DriverComment 
 
