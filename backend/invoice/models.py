@@ -44,8 +44,8 @@ class InvoiceNomenclature(models.Model):
 class Order(models.Model):
     uuid = models.UUIDField(default=uuid4, primary_key=True)
     invoice = models.ForeignKey(Invoice, models.CASCADE)
-    car = models.ForeignKey('car.Car', models.PROTECT)
-    driver = models.ForeignKey('driver.Driver', models.PROTECT)
+    car = models.ForeignKey('onec.Car', models.PROTECT, null=True)
+    driver = models.ForeignKey('onec.Driver', models.PROTECT, null=True)
     address = models.CharField(max_length=255)
     nomenclature = models.ForeignKey('onec.Nomenclature', models.PROTECT)
     per_price = models.FloatField()

@@ -2,7 +2,7 @@ import os
 import requests
 from django.conf import settings
 from celery import shared_task
-from .models import Organization, Specification, Nomenclature, Price, Balance, Vehicle, Driver
+from .models import Organization, Specification, Nomenclature, Price, Balance, Car, Driver
 
 
 HOST = os.getenv('ONEC_HOST', 'http://localhost:8000')
@@ -161,13 +161,13 @@ def _sync_cars(data):
             'trailer_brand': car_data['TRAILER_BRAND']
         }
         try:
-            car = Vehicle.objects.get(uuid=car_data['XML_ID'])
-            Vehicle.objects.filter(uuid=car_data['XML_ID']).update(**{
+            car = Car.objects.get(uuid=car_data['XML_ID'])
+            Car.objects.filter(uuid=car_data['XML_ID']).update(**{
                 key: value for key, value in defaults.items() if value is not None
             })
             created = False
-        except Vehicle.DoesNotExist:
-            car = Vehicle.objects.create(uuid=car_data['XML_ID'], **defaults)
+        except Car.DoesNotExist:
+            car = Car.objects.create(uuid=car_data['XML_ID'], **defaults)
             created = True
         print("Created" if created else "Updated", car)
 

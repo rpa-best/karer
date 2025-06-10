@@ -1,10 +1,8 @@
 from rest_framework import serializers
 
-from car.serializers import CarSerializer
-from driver.serializers import DriverSerializer
 from invoice.models import Order
 from invoice.serializers import InvoiceShowSerializer
-from onec.serializers import NomenclatureSerializer
+from onec.serializers import NomenclatureSerializer, CarSerializer, DriverSerializer
 
 
 class OrderShowSerializer(serializers.ModelSerializer):

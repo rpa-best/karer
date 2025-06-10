@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from oauth.permissions import IsLogistUserPermission
 from .serializers import OrganizationsSerializer, NomenclatureSerializer, SpecificationSerializer, CarSerializer, DriverSerializer
-from .models import Organization, Nomenclature, Specification, Vehicle, Driver
+from .models import Organization, Nomenclature, Specification, Car, Driver
 
 
 class OrganizationViewset(ReadOnlyModelViewSet):
@@ -22,7 +22,7 @@ class SpecificationViewset(ReadOnlyModelViewSet):
 class CarViewSet(ModelViewSet):
     http_method_names = ['head', 'get', 'post', 'patch']
     serializer_class = CarSerializer
-    queryset = Vehicle.objects.all().order_by('-created_at')
+    queryset = Car.objects.all().order_by('-created_at')
     search_fields = ['name', 'reg_number']
     permission_classes = [IsLogistUserPermission]
 

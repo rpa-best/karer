@@ -29,7 +29,7 @@ class Specification(models.Model):
     delivery_address = models.CharField(max_length=255, blank=True, null=True)
     payment_deferment = models.IntegerField(blank=True, null=True)
     amount_limit = models.FloatField(blank=True, null=True)
-    organization = models.ForeignKey(Organization, models.CASCADE)
+    organization = models.ForeignKey(Organization, models.CASCADE, null=True, blank=True)
     nomenclatures = models.ManyToManyField(Nomenclature, blank=True)
 
     def __str__(self):
@@ -57,7 +57,7 @@ class Balance(models.Model):
         return f"{self.specification}-----{self.balance}"
 
 
-class Vehicle(models.Model):
+class Car(models.Model):
     """Car"""
     uuid = models.UUIDField(default=uuid4, primary_key=True)
     name = models.CharField(max_length=255, blank=True, null=True)
