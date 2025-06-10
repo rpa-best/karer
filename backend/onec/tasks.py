@@ -56,7 +56,7 @@ def _sync_specifications(data):
     for spec_data in data.values():
         try:
             organization = Organization.objects.get(id=spec_data.get('ORGANIZATION_ID'))
-        except organization.DoesNotExist:
+        except Organization.DoesNotExist:
             print("Skipping specification update due to missing organization", spec_data)
             continue
         defaults={
