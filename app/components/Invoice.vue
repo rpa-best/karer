@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {Form} from '@primevue/forms'
+import {Form, type FormInstance } from '@primevue/forms'
 import {X} from 'lucide-vue-next'
 import {isManager} from "~/permissions"
 import { zodResolver } from '@primevue/forms/resolvers/zod'
@@ -20,6 +20,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   close: [flag?: boolean]
 }>()
+const form = ref<FormInstance>()
 const toast = useToast()
 const organizationService = new OrganizationService()
 const specificationService = new SpecificationService()
@@ -31,16 +32,21 @@ const {data: organizations} = useQuery({
   queryFn: async () => await organizationService.list<Organization[]>()
 })
 const {data: specifications} = useQuery({
-  queryKey: computed(() => ['specifications', props.invoice?.org]),
-  queryFn: async () => await specificationService.list<Specification[]>({org: props.invoice?.org}),
-  enabled: computed(() => !!props.invoice?.org)
+  queryKey: computed(() => ['specifications', form.value?.states.org.value]),
+  queryFn: async () => await specificationService.list<Specification[]>({organization: form.value?.states.org.value}),
+  enabled: computed(() => !!form.value?.states.org.value)
 })
 
-const selectedSpecification = computed(() => specifications.value?.find((s: Specification) => s.uuid === props.invoice?.specification))
+const selectedSpecification = computed(() => specifications.value?.find((s: Specification) => s.uuid === form.value?.states.specification.value))
 
 const {data: nomenclatures} = useQuery({
-  queryKey: ['nomenclatures'],
-  queryFn: async () => await nomenclatureService.list<Nomenclature[]>({id__in: selectedSpecification.value?.nomenclatures.join(',')}),
+  queryKey: computed(() => ['nomenclatures', selectedSpecification.value?.uuid]),
+  queryFn: async () => {
+    const ids = (selectedSpecification.value?.nomenclatures?.length && selectedSpecification.value?.nomenclatures?.length > 0) 
+    ? selectedSpecification.value?.nomenclatures : ['0']
+    return await nomenclatureService.list<Nomenclature[]>({id__in: ids.join(',')})
+  },
+  enabled: computed(() => !!selectedSpecification.value?.uuid)
 })
 
 const disabled = ref(true)
@@ -60,9 +66,9 @@ const nDisabled = computed(() => {
   return !['created', undefined, null].includes(props.invoice?.status) || !isManager()
 })
 
-async function mounted() {
-  disabled.value = false
-}
+onMounted(() => {
+  disabled.value = false 
+})
 
 function removeRow(index: number) {
   invoiceNomenclatures.value.splice(index, 1)
@@ -101,12 +107,11 @@ async function save({values, valid}: {values: any, valid: boolean}) {
   }
 }
 
-mounted()
 </script>
 
 <template>
   <loading :loading="disabled">
-    <Form v-slot="$form" :resolver="resolver" :initial-values="invoice" @submit="save" method="post" autocomplete="off">
+    <Form v-slot="$form" ref="form" :resolver="resolver" :initial-values="invoice" @submit="save" method="post" autocomplete="off">
       <div class="grid gap-8 grid-cols-3 mt-5">
         <div class="col-span-3">
           <FloatLabel>
@@ -151,7 +156,7 @@ mounted()
             <Column field="value" header="Потребность">
               <template #editor="{ data, field }">
                 <InputNumber :input-props="{autocomplete: 'off'}"
-                             :suffix="` ${nomenclatures?.find((v: Nomenclature) => v.uuid === data?.nomenclature)?.unit}`"
+                             :suffix="` ${nomenclatures?.find((v: Nomenclature) => v.uuid === data?.nomenclature)?.unit || ''}`"
                              :disabled="nDisabled" placeholder="Введите потребность" v-model="data[field]"/>
               </template>
             </Column>
