@@ -58,7 +58,6 @@ class Balance(models.Model):
 
 
 class Car(models.Model):
-    """Car"""
     uuid = models.UUIDField(default=uuid4, primary_key=True)
     name = models.CharField(max_length=255, blank=True, null=True)
     reg_number = models.CharField(max_length=255, blank=True, null=True)

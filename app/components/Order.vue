@@ -3,9 +3,7 @@ import { useToast } from 'primevue/usetoast'
 import z from 'zod'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import type { Order, Invoice, OrderForm } from '~/types/invoices'
-import type { Car } from '~/types/car'
-import type { Driver } from '~/types/driver'
-import type { Nomenclature } from '~/types/onec'
+import type { Nomenclature, Driver, Car } from '~/types/onec'
 import type { FormSubmitEvent } from '@primevue/forms'
 import { CarService, DriverService, NomenclatureService } from '~/services'
 import { InvoiceService } from '~/services/invoice'
@@ -23,8 +21,8 @@ const emit = defineEmits<{
 const myOrder = ref<OrderForm>({
   ...JSON.parse(JSON.stringify(order)),
   address: invoice?.address ?? (order as Order).address,
-  car: (order as Order).car ? (order as Order).car.id : null,
-  driver: (order as Order).driver ? (order as Order).driver.id : null,
+  car: (order as Order).car ? (order as Order).car.uuid : null,
+  driver: (order as Order).driver ? (order as Order).driver.uuid : null,
   nomenclature: (order as Order).nomenclature ? (order as Order).nomenclature.uuid : null
 })
 
@@ -51,15 +49,15 @@ const {data: nomenclatures} = useQuery({
 
 const resolver = zodResolver(
   z.object({
-    car: z.number(),
-    driver: z.number(), 
+    car: z.string(),
+    driver: z.string(), 
     address: z.string(),
     nomenclature: z.string(),
     additive: z.number(),
     order: z.number(),
     price: z.number(),
     per_price: z.number(),
-    comment: z.string().nullable(),
+    comment: z.string().nullable().optional(),
   })
 )
 
@@ -104,7 +102,7 @@ async function save({values, valid}: FormSubmitEvent) {
 }
 
 function getUnit(nomenclature: string) {
-  return nomenclatures.value?.find((n: Nomenclature) => n.uuid === nomenclature)?.unit
+  return nomenclatures.value?.find((n: Nomenclature) => n.uuid === nomenclature)?.unit || ''
 }
 </script>
 
@@ -115,14 +113,14 @@ function getUnit(nomenclature: string) {
         <div class="col-span-6">
           <FloatLabel>
             <Select emptyMessage="Пусто" required id="car" class="w-full" name="car" :disabled="myOrder.done"
-                    :options="cars" option-value="id" option-label="number"/>
+                    :options="cars" option-value="uuid" option-label="name"/>
             <label for="car" style="font-size: 12px">Машина</label>
           </FloatLabel>
         </div>
         <div class="col-span-6">
           <FloatLabel>
             <Select emptyMessage="Пусто" required id="driver" style="width: 100%" name="driver" :disabled="myOrder.done"
-                    :options="drivers" option-value="id" option-label="name"/>
+                    :options="drivers" option-value="uuid" option-label="name"/>
             <label for="driver" style="font-size: 12px">Водитель</label>
           </FloatLabel>
         </div>

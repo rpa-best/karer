@@ -2,7 +2,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from oauth.permissions import IsLogistUserPermission
 from .serializers import OrganizationsSerializer, NomenclatureSerializer, SpecificationSerializer, CarSerializer, DriverSerializer
 from .models import Organization, Nomenclature, Specification, Car, Driver
-
+from .filters import NomenclatureFilter, SpecificationFilter
 
 class OrganizationViewset(ReadOnlyModelViewSet):
     serializer_class = OrganizationsSerializer
@@ -12,11 +12,13 @@ class OrganizationViewset(ReadOnlyModelViewSet):
 class NomenclatureViewset(ReadOnlyModelViewSet):
     queryset = Nomenclature.objects.all()
     serializer_class = NomenclatureSerializer
+    filterset_class = NomenclatureFilter
 
 
 class SpecificationViewset(ReadOnlyModelViewSet):
     serializer_class = SpecificationSerializer
     queryset = Specification.objects.all()
+    filterset_class = SpecificationFilter
 
 
 class CarViewSet(ModelViewSet):
