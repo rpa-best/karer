@@ -1,4 +1,5 @@
 from django.db.models import Subquery, OuterRef, Sum
+from django.utils import timezone
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
@@ -7,7 +8,7 @@ from rest_framework.decorators import action
 from contrib.expressions import SumSubquery
 from onec.models import Nomenclature, Price
 from onec.serializers import NomenclatureSerializer
-from career.tasks import send_to_career
+from career.tasks import send_order_career
 from oauth.permissions import IsLogistUserPermission, IsManagerUserPermission
 
 from .. import serializers, filters
@@ -72,7 +73,7 @@ class OrderViewset(ModelViewSet):
     @action(detail=True, methods=['post'])
     def send_career(self, request, *args, **kwargs):
         order: Order = self.get_object()
-        send_to_career.delay(order.pk)
+        send_order_career.delay(order.pk)
         return Response({'message': 'Заказ отправлен в Career'})
 
 
@@ -97,13 +98,15 @@ class AvailableNomenclatureViewset(ReadOnlyModelViewSet):
     serializer_class = NomenclatureSerializer
 
     def get_queryset(self):
+        now = timezone.now()
         nids = InvoiceNomenclature.objects.filter(invoice_id=self.kwargs.get('invoice_id')).values_list('nomenclature_id', flat=True)
         return Nomenclature.objects.filter(uuid__in=nids).annotate(
             per_price=Subquery(
                 Price.objects.filter(
                     nomenclature_id=OuterRef('uuid'),
-                    specification_id=Subquery(Invoice.objects.filter(id=self.kwargs.get('invoice_id')).values('specification_id')[:1])
-                ).values('price')[:1]
+                    specification_id=Subquery(Invoice.objects.filter(id=self.kwargs.get('invoice_id')).values('specification_id')[:1]),
+                    date__lte=now
+                ).order_by('date').values('price')[:1]
             )
         )
 

@@ -27,7 +27,7 @@ def _send_notifications(order_id, users, message, severity):
 
 
 @shared_task
-def send_to_career(order_id, delete=False):
+def send_order_career(order_id, delete=False):
     from invoice.serializers import OrderShowSerializer
     from invoice.models import Order
 

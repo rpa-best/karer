@@ -4,9 +4,18 @@ from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
-from career.tasks import send_to_career
+from onec.tasks import send_order_onec
+from career.tasks import send_order_career
 from .constants import *
 from .tasks import send_driver_comment
+
+
+class DeliveryType(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
 
 
 class Invoice(models.Model):
@@ -57,6 +66,8 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     comment = models.TextField(blank=True, null=True)
+    desc = models.TextField(blank=True, null=True)
+    delivery = models.ForeignKey(DeliveryType, models.PROTECT, null=True, blank=True)
 
     def __str__(self) -> str:
         return  f"{self.invoice} - {self.nomenclature}"
@@ -80,9 +91,10 @@ def update_invoice_status_process(sender, instance: Order, **kwargs):
     if instance.invoice.status == STATUS_CREATED:
         instance.invoice.status = STATUS_PROCESS
         instance.invoice.save()
-    send_to_career.delay(instance.pk)
+    send_order_career.delay(instance.pk)
+    send_order_onec.delay(instance.pk)
 
 
 receiver(post_delete, sender=Order, dispatch_uid="delete_order")
 def delete_order(sender, instance: Order, **kwargs):
-    send_to_career.delay(instance.pk, delete=True)
+    send_order_career.delay(instance.pk, delete=True)

@@ -31,6 +31,39 @@ def _request():
     return response.json()
 
 
+@shared_task
+def send_order_onec(order_id):
+    from invoice.models import Order
+    
+    if settings.DEBUG: return {}
+    url = HOST + "/accounting_copy/hs/career/invoice"
+
+    order = Order.objects.get(id=order_id)
+    data = {
+        "XML_ID": str(order.uuid),
+        "DATE": str(order.created_at),
+        "SPECIFICATION_ID": str(order.invoice.specification_id),
+        "SHIPPER_ID": None,
+        "CONSIGNEE_ID": str(order.invoice.org_id),
+        "CARRIER_ID": None,
+        "PACKAGE": order.desc,
+        "DELIVERY": str(order.delivery_id),
+        "COMMENT": order.comment,
+        "DRIVER_ID": order.driver_id,
+        "VEHICLE_ID": order.car_id,
+        "DOCUMENTS": None,
+        "TRANS_INFO": None,
+        "ITEMS": [{
+            "ITEM_ID": order.nomenclature_id,
+            "QUANTITY": order.fact,
+        }]
+    }
+    response = requests.post(url, json=data, auth=(USERNAME, PASSWORD))
+    if not response.ok:
+        raise Exception(f"Failed to sync data from {url}: {response.status_code}")
+    return response
+
+
 def _sync_organizations(data):
     for org_data in data.values():
         defaults={
@@ -112,11 +145,10 @@ def _sync_prices(data):
             continue
 
         defaults={
-            'date': price_data['DATE'],
             'price': price_data['PRICE'],
         }
         try:
-            price = Price.objects.get(nomenclature=nomenclature, specification=specification)
+            price = Price.objects.get(nomenclature=nomenclature, specification=specification, date=price_data['DATE'])
             Price.objects.filter(nomenclature=nomenclature, specification=specification).update(**{
                 key: value for key, value in defaults.items() if value is not None
             })

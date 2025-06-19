@@ -4,11 +4,11 @@ from .models import Nomenclature, Specification
 
 
 class NomenclatureFilter(filters.FilterSet):
-    uuid__in = filters.BaseInFilter()
+    uuid = filters.BaseInFilter()
 
     class Meta:
         model = Nomenclature
-        fields = ['uuid__in']
+        fields = ['uuid']
 
 
 class SpecificationFilter(filters.FilterSet):
