@@ -121,7 +121,7 @@ class OrderSerializer(serializers.ModelSerializer):
         invoice: Invoice = attrs.get('invoice')
         if attrs.get('price') is not None and invoice.specification.amount_limit:
             balance = getattr(Balance.objects.filter(specification=invoice.specification).first(), 'balance', 0)
-            limit = invoice.specification.amount_limit if (invoice.specification.amount_limit - balance < 0) else balance
+            limit = invoice.specification.amount_limit if (invoice.specification.amount_limit - balance > 0) else balance
             orders = Order.objects.filter(invoice=invoice)
             orders_price = orders.aggregate(price=Sum('price'))['price'] or 0
             if orders_price + attrs.get('price') > limit:

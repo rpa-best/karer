@@ -46,7 +46,7 @@ class Price(models.Model):
         return f"{self.nomenclature} ({self.specification})"
     
     class Meta:
-        unique_together = (('nomenclature', 'specification'),)
+        unique_together = (('nomenclature', 'specification', 'date'),)
 
 
 class Balance(models.Model):
@@ -89,3 +89,7 @@ class Driver(models.Model):
 
     def __str__(self):
         return self.name
+
+    def send_comment(self, text):
+        # If error return: ConnectionError
+        pass
