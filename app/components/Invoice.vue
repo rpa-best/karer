@@ -44,7 +44,7 @@ const {data: nomenclatures} = useQuery({
   queryFn: async () => {
     const ids = (selectedSpecification.value?.nomenclatures?.length && selectedSpecification.value?.nomenclatures?.length > 0) 
     ? selectedSpecification.value?.nomenclatures : ['0']
-    return await nomenclatureService.list<Nomenclature[]>({id__in: ids.join(',')})
+    return await nomenclatureService.list<Nomenclature[]>({uuid: ids.join(',')})
   },
   enabled: computed(() => !!selectedSpecification.value?.uuid)
 })

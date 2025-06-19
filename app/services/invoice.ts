@@ -1,5 +1,5 @@
 import type { InvoiceParams } from "~/types/invoices";
-import { CRUDService } from "./utils";
+import { CRUDService, ReadOnlyService } from "./utils";
 
 
 class DriverCommentService extends CRUDService {
@@ -23,12 +23,19 @@ class OrderService extends CRUDService {
 }
 
 
+class AvailableNomenclatureService extends ReadOnlyService {
+    constructor() {
+        super('/invoice/{invoice_id}/available_nomenclature/')
+    }
+}
+
+
 export class InvoiceService extends CRUDService {
-    order: OrderService
+    order = new OrderService()
+    nomenclature = new AvailableNomenclatureService()
     
     constructor() {
         super('/invoice/')
-        this.order = new OrderService()
     }
 
     async fetchPivot<T = any>(invoice_id: number, params: InvoiceParams | null = null): Promise<T> {

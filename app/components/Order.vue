@@ -43,8 +43,8 @@ const {data: drivers} = useQuery({
   queryFn: async () => await driverService.list<Driver[]>()
 })
 const {data: nomenclatures} = useQuery({
-  queryKey: ['nomenclatures'],
-  queryFn: async () => await nomenclatureService.list<Nomenclature[]>()
+  queryKey: computed(() => ['nomenclatures', invoice.id]),
+  queryFn: async () => await invoiceService.nomenclature.list<Nomenclature[]>({}, {invoice_id: invoice.id})
 })
 
 const resolver = zodResolver(
@@ -53,7 +53,7 @@ const resolver = zodResolver(
     driver: z.string(), 
     address: z.string(),
     nomenclature: z.string(),
-    additive: z.number(),
+    additive: z.number().nullable().optional(),
     order: z.number(),
     price: z.number(),
     per_price: z.number(),
@@ -113,14 +113,15 @@ function getUnit(nomenclature: string) {
         <div class="col-span-6">
           <FloatLabel>
             <Select emptyMessage="Пусто" required id="car" class="w-full" name="car" :disabled="myOrder.done"
-                    :options="cars" option-value="uuid" option-label="name"/>
+                    :options="cars" option-value="uuid" :option-label="(v: Car) => `${v.name} (${v.reg_number})`" filter>
+            </Select>
             <label for="car" style="font-size: 12px">Машина</label>
           </FloatLabel>
         </div>
         <div class="col-span-6">
           <FloatLabel>
             <Select emptyMessage="Пусто" required id="driver" style="width: 100%" name="driver" :disabled="myOrder.done"
-                    :options="drivers" option-value="uuid" option-label="name"/>
+                    :options="drivers" filter option-value="uuid" option-label="name"/>
             <label for="driver" style="font-size: 12px">Водитель</label>
           </FloatLabel>
         </div>
@@ -141,14 +142,6 @@ function getUnit(nomenclature: string) {
 
         <div class="lg:col-span-2 col-span-6">
           <FloatLabel>
-            <InputNumber required 
-                         :suffix="` ${getUnit($form.nomenclature?.value)}`"
-                         id="additive" style="width: 100%" name="additive" :disabled="myOrder.done"/>
-            <label for="additive" style="font-size: 12px">Добавка</label>
-          </FloatLabel>
-        </div>
-        <div class="lg:col-span-2 col-span-6">
-          <FloatLabel>
             <InputNumber required
                          @update:model-value="(value: number) => $form.price.value = $form.per_price?.value * ($form.fact?.value ? $form.fact.value : value)"
                          :suffix="` ${getUnit($form.nomenclature?.value)}`"
@@ -156,6 +149,16 @@ function getUnit(nomenclature: string) {
             <label for="order" style="font-size: 12px">Количество на отгрузку</label>
           </FloatLabel>
         </div>
+
+        <div class="lg:col-span-2 col-span-6">
+          <FloatLabel>
+            <InputNumber 
+                         :suffix="` ${getUnit($form.nomenclature?.value)}`"
+                         id="additive" style="width: 100%" name="additive" :disabled="myOrder.done"/>
+            <label for="additive" style="font-size: 12px">Добавка</label>
+          </FloatLabel>
+        </div>
+        
         <div class="lg:col-span-2 col-span-6">
           <FloatLabel>
             <InputNumber required 

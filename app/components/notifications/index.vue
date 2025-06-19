@@ -14,7 +14,7 @@ const filters = ref<DefaultQueryParams>({
 })
 
 const {data, isFetching, refetch} = useQuery({
-  queryKey: ['notifications', filters.value],
+  queryKey: computed(() => ['notifications', filters.value]),
   queryFn: async () => await notification.service.list<{results: Notification[], count: number, unread: number}>(filters.value),
   select(data) {
     notification.items = data
@@ -45,7 +45,7 @@ const format = (value: string) => {
 </script>
 
 <template>
-  <button id="notifications" @click="open = true" class="w-full h-fit md:w-auto px-4 relative md:px-2 flex flex-row items-center outline-none bg-transparent p-2.5 md:rounded-full rounded-lg text-gray-600  hover:bg-gray-100">
+  <button id="notifications" @click="open = true; refetch()" class="w-full h-fit md:w-auto px-4 relative md:px-2 flex flex-row items-center outline-none bg-transparent p-2.5 md:rounded-full rounded-lg text-gray-600  hover:bg-gray-100">
 
     <OverlayBadge v-if="notification.items?.unread" :value="notification.items?.unread" severity="danger" size="small">
       <Bell />
