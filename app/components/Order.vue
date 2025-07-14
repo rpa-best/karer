@@ -5,7 +5,7 @@ import { zodResolver } from '@primevue/forms/resolvers/zod'
 import type { Order, Invoice, OrderForm } from '~/types/invoices'
 import type { Nomenclature, Driver, Car } from '~/types/onec'
 import type { FormSubmitEvent } from '@primevue/forms'
-import { CarService, DriverService, NomenclatureService } from '~/services'
+import { CarService, DriverService } from '~/services'
 import { InvoiceService } from '~/services/invoice'
 import { useQuery } from '@tanstack/vue-query'
 
@@ -28,7 +28,6 @@ const myOrder = ref<OrderForm>({
 
 const carService = new CarService()
 const driverService = new DriverService()
-const nomenclatureService = new NomenclatureService()
 const invoiceService = new InvoiceService()
 
 const toast = useToast()
@@ -127,7 +126,7 @@ function getUnit(nomenclature: string) {
         </div>
         <div class="col-span-6">
           <FloatLabel>
-            <InputText required id="address" style="width: 100%" name="address" :disabled="!!$form.address?.value"/>
+            <Textarea required id="address" style="width: 100%" name="address" :disabled="!!$form.address?.value"/>
             <label for="address" style="font-size: 12px">Адрес поставки</label>
           </FloatLabel>
         </div>

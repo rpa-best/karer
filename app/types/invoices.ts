@@ -1,7 +1,5 @@
 import type { DefaultQueryParams } from "."
-import type { Car } from "./car"
-import type { Driver } from "./driver"
-import type { Nomenclature } from "./onec"
+import type { Nomenclature, Driver, Car } from "./onec"
 
 export interface InvoiceNomenclature {
     created_at: string
