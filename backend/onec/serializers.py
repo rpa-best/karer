@@ -34,7 +34,6 @@ class CarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Car
         fields = "__all__"
-        write_only_fields = ["not_weight", "image"]
 
 
 class DriverSerializer(serializers.ModelSerializer):
@@ -42,4 +41,3 @@ class DriverSerializer(serializers.ModelSerializer):
     class Meta:
         model = Driver
         fields = "__all__"
-        write_only_fields = ["telegram_id", "image"]
