@@ -5,6 +5,8 @@ import type { Invoice, Order, Pivot, OrderParams } from "~/types/invoices"
 import { InvoiceService } from "~/services/invoice"
 import { useConfirm } from "primevue/useconfirm";
 import { useQuery } from "@tanstack/vue-query";
+import { useSpecification } from "~/hooks/onec/specification";
+import { useOrganization } from "~/hooks/onec/organization";
 
 const props = defineProps<{
   invoice: Invoice
@@ -22,6 +24,9 @@ const {data: pivot} = useQuery({
   queryKey: computed(() => ['pivot', props.invoice.id, filters.value]),
   queryFn: async () => await invoiceService.fetchPivot<Pivot>(props.invoice.id, filters.value)
 })
+
+const {data: specification} = useSpecification(props.invoice.specification)
+const {data: org} = useOrganization(props.invoice.org)
 
 const confirm = useConfirm()
 const order = ref<Order | {}>({})
@@ -139,6 +144,7 @@ function select_order(event: Event, data: Order) {
 
 <template>
   <Loading :loading="isFetching">
+    <h2 class="font-semibold mb-3">{{org?.name}}, {{ specification?.name }}</h2>
     <div class="flex justify-between align-items-center flex-wrap">
       <h2 class="text-2xl font-bold">
         Заказы:
