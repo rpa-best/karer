@@ -91,10 +91,11 @@ def update_invoice_status_process(sender, instance: Order, **kwargs):
     if instance.invoice.status == STATUS_CREATED:
         instance.invoice.status = STATUS_PROCESS
         instance.invoice.save()
-    send_order_career.delay(instance.pk)
+    # send_order_career.delay(instance.pk)
     send_order_onec.delay(instance.pk)
 
 
 receiver(post_delete, sender=Order, dispatch_uid="delete_order")
 def delete_order(sender, instance: Order, **kwargs):
-    send_order_career.delay(instance.pk, delete=True)
+    # send_order_career.delay(instance.pk, delete=True)
+    pass
