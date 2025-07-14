@@ -74,13 +74,13 @@ const save = async ({ values }: FormSubmitEvent<Record<string, any>>) => {
                 <div class="grid grid-cols-2 gap-8">
                     <div class="col-span-2">
                         <FloatLabel>
-                            <InputText required id="name" style="width: 100%" name="name" :disabled="true" />
+                            <InputText required id="name" style="width: 100%" name="name" :disabled="disabled" />
                             <label for="name" style="font-size: 12px">ФИО</label>
                         </FloatLabel>
                     </div>
                     <div class="col-span-2">
                         <FloatLabel>
-                            <InputText required id="inn" style="width: 100%" name="inn" :disabled="true" />
+                            <InputText required id="inn" style="width: 100%" name="inn" :disabled="disabled" />
                             <label for="inn" style="font-size: 12px">Номер телефона</label>
                         </FloatLabel>
                     </div>
@@ -88,25 +88,25 @@ const save = async ({ values }: FormSubmitEvent<Record<string, any>>) => {
             </div>
             <div class="col-span-2">
                 <FloatLabel>
-                    <InputText required id="phone_number" style="width: 100%" name="phone_number" :disabled="true" />
+                    <InputText required id="phone_number" style="width: 100%" name="phone_number" :disabled="disabled" />
                     <label for="phone_number" style="font-size: 12px">Номер телефона</label>
                 </FloatLabel>
             </div>
             <div class="col-span-2">
                 <FloatLabel>
-                    <InputText required id="job_title" style="width: 100%" name="job_title" :disabled="true" />
+                    <InputText required id="job_title" style="width: 100%" name="job_title" :disabled="disabled" />
                     <label for="job_title" style="font-size: 12px">Профессия</label>
                 </FloatLabel>
             </div>
             <div class="col-span-2">
                 <FloatLabel>
-                    <InputText required id="drivers_license_series" style="width: 100%" name="drivers_license_series" :disabled="true" />
+                    <InputText required id="drivers_license_series" style="width: 100%" name="drivers_license_series" :disabled="disabled" />
                     <label for="drivers_license_series" style="font-size: 12px">Серия права водителя</label>
                 </FloatLabel>
             </div>
             <div class="col-span-2">
                 <FloatLabel>
-                    <InputText required id="drivers_license_number" style="width: 100%" name="drivers_license_number" :disabled="true" />
+                    <InputText required id="drivers_license_number" style="width: 100%" name="drivers_license_number" :disabled="disabled" />
                     <label for="drivers_license_number" style="font-size: 12px">Номер права водителя</label>
                 </FloatLabel>
             </div>
