@@ -72,19 +72,19 @@ const save = async ({ values }: FormSubmitEvent<Record<string, any>>) => {
                 <div class="grid grid-cols-2 gap-8">
                     <div class="col-span-2">
                         <FloatLabel>
-                            <InputText required id="reg_number" style="width: 100%" name="reg_number" :disabled="true" />
+                            <InputText required id="reg_number" style="width: 100%" name="reg_number" :disabled="disabled" />
                             <label for="reg_number" style="font-size: 12px">Номер</label>
                         </FloatLabel>
                     </div>
                     <div class="col-span-1">
                         <FloatLabel>
-                            <InputText required id="brand" style="width: 100%" name="brand" :disabled="true" />
+                            <InputText required id="brand" style="width: 100%" name="brand" :disabled="disabled" />
                             <label for="brand" style="font-size: 12px">Марка</label>
                         </FloatLabel>
                     </div>
                     <div class="col-span-1">
                         <FloatLabel>
-                            <InputText required id="name" style="width: 100%" name="name" :disabled="true" />
+                            <InputText required id="name" style="width: 100%" name="name" :disabled="disabled" />
                             <label for="name" style="font-size: 12px">Модель</label>
                         </FloatLabel>
                     </div>
@@ -92,18 +92,18 @@ const save = async ({ values }: FormSubmitEvent<Record<string, any>>) => {
             </div>
             <div class="col-span-3">
                 <FloatLabel>
-                    <InputText required id="trailer_reg_number" style="width: 100%" name="trailer_reg_number" :disabled="true" />
+                    <InputText required id="trailer_reg_number" style="width: 100%" name="trailer_reg_number" :disabled="disabled" />
                     <label for="trailer_reg_number" style="font-size: 12px">Регистрационный номер прицепа</label>
                 </FloatLabel>
             </div>
             <div class="col-span-3">
                 <FloatLabel>
-                    <InputText required id="trailer_brand" style="width: 100%" name="trailer_brand" :disabled="true" />
+                    <InputText required id="trailer_brand" style="width: 100%" name="trailer_brand" :disabled="disabled" />
                     <label for="trailer_brand" style="font-size: 12px">Марка прицепа</label>
                 </FloatLabel>
             </div>
             <div class="col-span-3 flex align-items-center">
-                <Checkbox inputId="our_prorerty" id="our_prorerty" name="our_prorerty" :disabled="true" binary />
+                <Checkbox inputId="our_prorerty" id="our_prorerty" name="our_prorerty" :disabled="disabled" binary />
                 <label for="our_prorerty" class="ml-2">Наша собственность</label>
             </div>
 
