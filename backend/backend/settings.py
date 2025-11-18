@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'django_celery_results',
     'channels',
+    'backend',
     'oauth',
     'invoice',
     'onec',
