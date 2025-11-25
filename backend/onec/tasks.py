@@ -23,7 +23,7 @@ def sync_db():
 
 def _request():
     if settings.DEBUG: return {}
-    url = HOST + "/accounting_copy/hs/career/data"
+    url = HOST + "/accounting/hs/career/data"
     response = requests.get(url, auth=(USERNAME, PASSWORD))
     if not response.ok:
         raise Exception(f"Failed to sync data from {url}: {response.status_code}")
