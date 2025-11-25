@@ -11,7 +11,7 @@ PASSWORD = os.getenv('ONEC_PASSWORD')
 
 @shared_task
 def sync_db():
-    data = _request()
+    data, status = _request()
     _sync_nomenclatures(data.get('ITEMS', {}))
     _sync_organizations(data.get('ORGANIZATIONS', {}))
     _sync_specifications(data.get('SPECIFICATIONS', {}))
@@ -19,6 +19,7 @@ def sync_db():
     _sync_balances(data.get('BALANCES', {}))
     _sync_cars(data.get('VEHICLES', {}))
     _sync_drivers(data.get('DRIVERS', {}))
+    return status, data
 
 
 def _request():
@@ -28,7 +29,7 @@ def _request():
     if not response.ok:
         raise Exception(f"Failed to sync data from {url}: {response.status_code}")
 
-    return response.json()
+    return response.json(), response.status_code
 
 
 @shared_task
