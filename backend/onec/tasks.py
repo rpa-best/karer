@@ -2,7 +2,7 @@ import os
 import requests
 from django.conf import settings
 from celery import shared_task
-from .models import Organization, Specification, Nomenclature, Price, Balance, Car, Driver
+from .models import Organization, Specification, Nomenclature, Price, Balance, Car, Driver, Sender
 
 
 HOST = os.getenv('ONEC_HOST', 'http://localhost:8000')
@@ -11,19 +11,22 @@ PASSWORD = os.getenv('ONEC_PASSWORD')
 
 @shared_task
 def sync_db():
-    data, status = _request()
-    _sync_nomenclatures(data.get('ITEMS', {}))
-    _sync_organizations(data.get('ORGANIZATIONS', {}))
-    _sync_specifications(data.get('SPECIFICATIONS', {}))
-    _sync_prices(data.get('PRICE', {}))
-    _sync_balances(data.get('BALANCES', {}))
-    _sync_cars(data.get('VEHICLES', {}))
-    _sync_drivers(data.get('DRIVERS', {}))
-    return status, data
+    results = {}
+    for sender in Sender.objects.all():
+        data, status = _request(sender.url)
+        _sync_nomenclatures(data.get('ITEMS', {}))
+        _sync_organizations(data.get('ORGANIZATIONS', {}))
+        _sync_specifications(data.get('SPECIFICATIONS', {}))
+        _sync_prices(data.get('PRICE', {}))
+        _sync_balances(data.get('BALANCES', {}))
+        _sync_cars(data.get('VEHICLES', {}))
+        _sync_drivers(data.get('DRIVERS', {}))
+        results[sender.name] = status
+    return results
 
 
-def _request():
-    url = HOST + "/accounting/hs/career/data"
+def _request(url: str):
+    url = HOST + url
     response = requests.get(url, auth=(USERNAME, PASSWORD))
     if not response.ok:
         raise Exception(f"Failed to sync data from {url}: {response.status_code}")

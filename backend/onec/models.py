@@ -2,6 +2,14 @@ from uuid import uuid4
 from django.db import models
 
 
+class Sender(models.Model):
+    name = models.CharField(max_length=255)
+    url = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
+
 class Nomenclature(models.Model):
     uuid = models.UUIDField(default=uuid4, primary_key=True)
     name = models.CharField(max_length=255)
@@ -12,6 +20,7 @@ class Nomenclature(models.Model):
 
 
 class Organization(models.Model):
+    sender = models.ForeignKey('onec.Sender', models.PROTECT)
     uuid = models.UUIDField(default=uuid4, primary_key=True)
     name = models.CharField(max_length=255)
     fullname = models.CharField(max_length=255)

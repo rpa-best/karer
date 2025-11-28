@@ -1,6 +1,11 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
-from .models import Organization, Specification, Nomenclature, Price, Balance
+from .models import Organization, Specification, Nomenclature, Price, Balance, Sender
+
+
+@admin.register(Sender)
+class SenderAdmin(ModelAdmin):
+    list_display = ['name', 'url']
 
 
 @admin.register(Organization)

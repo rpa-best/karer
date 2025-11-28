@@ -9,7 +9,7 @@ import type { Invoice } from '~/types/invoices'
 import type { InvoiceNomenclature } from '~/types/invoices'
 import type { Specification, Nomenclature, Organization } from '~/types/onec'
 import { InvoiceService } from '~/services/invoice'
-import { OrganizationService, SpecificationService, NomenclatureService } from '~/services'
+import { OrganizationService, SpecificationService, NomenclatureService, SenderService } from '~/services'
 import { useToast } from 'primevue/usetoast'
 import { useQuery } from '@tanstack/vue-query'
 
@@ -26,11 +26,18 @@ const organizationService = new OrganizationService()
 const specificationService = new SpecificationService()
 const nomenclatureService = new NomenclatureService()
 const invoiceService = new InvoiceService()
+const senderService = new SenderService()
+
+const {data: senders} = useQuery({
+  queryKey: ['senders'],
+  queryFn: async () => await senderService.list<{id: number, name: string}[]>()
+})
 
 const {data: organizations} = useQuery({
-  queryKey: ['organizations'],
-  queryFn: async () => await organizationService.list<Organization[]>()
+  queryKey: computed(() => ['organizations', form.value?.states.sender.value]), 
+  queryFn: async () => await organizationService.list<Organization[]>({sender: form.value?.states.sender.value})
 })
+
 const {data: specifications} = useQuery({
   queryKey: computed(() => ['specifications', form.value?.states.org.value]),
   queryFn: async () => await specificationService.list<Specification[]>({organization: form.value?.states.org.value}),
@@ -55,6 +62,7 @@ const editingRows = ref<InvoiceNomenclature[]>([])
 
 const resolver = zodResolver(
   z.object({
+    number: z.string(),
     org: z.string(),
     specification: z.string(), 
     address: z.string(),
@@ -113,6 +121,13 @@ async function save({values, valid}: {values: any, valid: boolean}) {
   <loading :loading="disabled">
     <Form v-slot="$form" ref="form" :resolver="resolver" :initial-values="invoice" @submit="save" method="post" autocomplete="off">
       <div class="grid gap-8 grid-cols-3 mt-5">
+        <div class="col-span-3">
+          <FloatLabel>
+            <Select emptyMessage="Пусто" required id="sender" class="w-full" name="sender" :disabled="nDisabled"
+                    :options="senders" option-value="id" option-label="name"/>
+            <label for="org" class="text-sm">Грузоотправитель</label>
+          </FloatLabel>
+        </div>
         <div class="col-span-3">
           <FloatLabel>
             <Select emptyMessage="Пусто" required id="org" class="w-full" name="org" :disabled="nDisabled"

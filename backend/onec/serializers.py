@@ -1,6 +1,13 @@
 from rest_framework import serializers
 
-from .models import Nomenclature, Specification, Organization, Car, Driver
+from .models import Nomenclature, Specification, Organization, Car, Driver, Sender
+
+
+class SenderSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Sender
+        fields = ['id', 'name']
 
 
 class NomenclatureSerializer(serializers.ModelSerializer):
