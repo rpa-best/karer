@@ -130,7 +130,7 @@ async function save({values, valid}: {values: any, valid: boolean}) {
         </div>
         <div class="col-span-3">
           <FloatLabel>
-            <Select emptyMessage="Пусто" required id="org" class="w-full" name="org" :disabled="nDisabled"
+            <Select filter emptyMessage="Пусто" required id="org" class="w-full" name="org" :disabled="nDisabled"
                     :options="organizations" option-value="uuid" option-label="name"/>
             <label for="org" class="text-sm">Грузополучатель</label>
           </FloatLabel>
