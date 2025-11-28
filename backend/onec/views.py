@@ -12,8 +12,10 @@ class SenderViewset(ReadOnlyModelViewSet):
 
 class OrganizationViewset(ReadOnlyModelViewSet):
     serializer_class = OrganizationsSerializer
-    queryset = Organization.objects.all()
     filterset_class = OrganizationFilters
+
+    def get_queryset(self):
+        return Organization.objects.filter(specification__isnull=False)
 
 
 class NomenclatureViewset(ReadOnlyModelViewSet):
