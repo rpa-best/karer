@@ -15,7 +15,7 @@ def sync_db():
     for sender in Sender.objects.all():
         data, status = _request(sender.url)
         _sync_nomenclatures(data.get('ITEMS', {}))
-        _sync_organizations(data.get('ORGANIZATIONS', {}))
+        _sync_organizations(data.get('ORGANIZATIONS', {}), sender.id)
         _sync_specifications(data.get('SPECIFICATIONS', {}))
         _sync_prices(data.get('PRICE', {}))
         _sync_balances(data.get('BALANCES', {}))
@@ -67,9 +67,10 @@ def send_order_onec(order_id):
     return response
 
 
-def _sync_organizations(data):
+def _sync_organizations(data, sender_id):
     for org_data in data.values():
         defaults={
+            "sender_id": sender_id,
             'name': org_data.get('NAME'),
             'fullname': org_data.get('FULLNAME'),
             'inn': org_data.get('INN'),
