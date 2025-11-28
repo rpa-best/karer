@@ -62,7 +62,6 @@ const editingRows = ref<InvoiceNomenclature[]>([])
 
 const resolver = zodResolver(
   z.object({
-    number: z.string(),
     org: z.string(),
     specification: z.string(), 
     address: z.string(),
