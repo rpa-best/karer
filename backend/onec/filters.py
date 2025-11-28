@@ -1,6 +1,13 @@
 import django_filters.rest_framework as filters
 
-from .models import Nomenclature, Specification
+from .models import Nomenclature, Specification, Organization
+
+
+class OrganizationFilters(filters.FilterSet):
+
+    class Meta:
+        model = Organization
+        fields = ['sender']
 
 
 class NomenclatureFilter(filters.FilterSet):

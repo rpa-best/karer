@@ -19,6 +19,12 @@ export class NomenclatureService extends ReadOnlyService {
     }
 }
 
+export class SenderService extends ReadOnlyService {
+    constructor() {
+        super('/onec/sender/')
+    }
+}
+
 export class OrganizationService extends ReadOnlyService {
     constructor() {
         super('/onec/organization/')
