@@ -158,7 +158,7 @@ def _sync_prices(data):
             })
             created = False
         except Price.DoesNotExist:
-            price = Price.objects.create(nomenclature=nomenclature, specification=specification, **defaults)
+            price = Price.objects.create(nomenclature=nomenclature, specification=specification, date=price_data['DATE'], **defaults)
             created = True
         print("Created" if created else "Updated", price)
 
