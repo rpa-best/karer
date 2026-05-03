@@ -27,13 +27,16 @@ export const useUser = defineStore("user", {
             navigateTo(this.loginUrl())
         },
         loginUrl() {
-            return `/login?next=${useRequestURL().href}`
+            const next = useRoute().fullPath || '/'
+            return `/login?next=${encodeURIComponent(next)}`
         },
         isAuth() {
             return this.user?.id
         },
         redirect() {
-            window.location.href = String(useRoute().query.next ?? '/')
+            const rawNext = String(useRoute().query.next ?? '/')
+            const next = decodeURIComponent(rawNext)
+            navigateTo(next.startsWith('/') ? next : '/')
         },
     }
 })
