@@ -11,7 +11,7 @@ class AuthEmailSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         user = User.objects.filter(**{self.username_field: attrs[self.username_field]}).first()
-        if not user.check_password(attrs["password"]):
+        if not user or not user.check_password(attrs["password"]):
             raise exceptions.AuthenticationFailed(
                 self.error_messages["no_active_account"],
                 "no_active_account",

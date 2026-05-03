@@ -1,18 +1,31 @@
 version: '3.3'
 
 services:
+  career_postgres:
+    container_name: career_postgres
+    image: postgres:15-alpine
+    env_file:
+      - ./backend/.env
+    volumes:
+      - "./postgres-data:/var/lib/postgresql/data"
+    restart: always
+
   career_backend:
     container_name: career_backend
     build: ./backend
     ports:
       - "127.0.0.1:7999:8000"
-    command: sh -c "uvicorn backend.asgi:application --host 0.0.0.0 --port 8000"
+    command: sh -c "python manage.py migrate && uvicorn backend.asgi:application --host 0.0.0.0 --port 8000"
     env_file:
       - ./backend/.env
     volumes:
       - ./backend/:/app/
       - ./media/:/media/
       - ./static/:/static/
+    depends_on:
+      - career_postgres
+      - career_redis
+    restart: always
   
   career_front:
     container_name: career_front
@@ -21,12 +34,16 @@ services:
       - "4000:4000"
     env_file:
       - ./app/.env
+    depends_on:
+      - career_backend
+    restart: always
 
   career_redis:
     container_name: career_redis
     image: redis:alpine
     volumes:
       - "./redis-data:/data"
+    restart: always
 
   career_celery:
     container_name: career_celery
@@ -38,7 +55,9 @@ services:
     env_file:
       - ./backend/.env
     depends_on:
+      - career_postgres
       - career_redis
+    restart: always
 
   career_celery_beat:
     container_name: career_celery_beat
@@ -48,6 +67,8 @@ services:
       - ./backend/:/app/
       - ./media/:/media/
     env_file:
-      - ./app/.env
+      - ./backend/.env
     depends_on:
+      - career_postgres
       - career_redis
+    restart: always

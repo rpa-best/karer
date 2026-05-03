@@ -15,7 +15,7 @@
                 <template #buttons="{disabled}">
                     <div class="flex md:flex-row flex-col gap-3 mt-2">
                         <Button v-if="!order.done" @click="deleteOrder" class="w-full" severity="danger">Удалить</Button>
-                        <Button v-if="!order.done" @click="sendCareer" class="w-full" severity="warn">Отправить в карерь</Button>
+                        <Button v-if="!order.done" @click="sendCareer" class="w-full" severity="warn">Отправить в карьер</Button>
                         <Button v-if="!order.done" :disabled="disabled" :loading="disabled" type="submit" class="w-full">Сохранить</Button>
                     </div>
                 </template>

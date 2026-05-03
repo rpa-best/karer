@@ -15,7 +15,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      NUXT_APP_BACKEND_HOST: process.env.NUXT_APP_BACKEND_HOST,
+      NUXT_APP_BACKEND_HOST: process.env.NUXT_APP_BACKEND_HOST || "http://localhost:8000/api",
       VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY,
     }
   },  

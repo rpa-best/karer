@@ -1,6 +1,29 @@
 version: '3.3'
 
 services:
+  career_frontend:
+    container_name: career_frontend
+    build: ./app
+    ports:
+      - "4000:4000"
+    restart: always
+    env_file:
+      - ./app/.env
+    depends_on:
+      - career_backend
+
+  career_postgres:
+    container_name: career_postgres
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: career
+      POSTGRES_USER: career
+      POSTGRES_PASSWORD: career
+    volumes:
+      - "./postgres-data:/var/lib/postgresql/data"
+    ports:
+      - "5432:5432"
+
   career_backend:
     container_name: career_backend
     build: ./backend
@@ -14,6 +37,9 @@ services:
       - ./backend/:/app/
       - ./media/:/media/
       - ./static/:/static/
+    depends_on:
+      - career_postgres
+      - career_redis
 
   career_redis:
     container_name: career_redis
@@ -32,6 +58,7 @@ services:
     env_file:
       - ./backend/.env
     depends_on:
+      - career_postgres
       - career_redis
 
   career_celery_beat:
@@ -43,6 +70,7 @@ services:
       - ./media/:/media/
     restart: always
     env_file:
-      - ./app/.env
+      - ./backend/.env
     depends_on:
+      - career_postgres
       - career_redis

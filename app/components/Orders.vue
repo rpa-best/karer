@@ -79,14 +79,14 @@ const menuItems = ref([
         }
       },
       {
-        label: 'Чат с водителям',
+        label: 'Чат с водителем',
         licon: MessageCircle,
         command: () => {
           show_driver_comment.value = true
         }
       },
       {
-        label: 'Отпроавить карерь',
+        label: 'Отправить в карьер',
         licon: Send,
         command: () => {
           if (order.value) {
@@ -296,7 +296,7 @@ function select_order(event: Event, data: Order) {
     </template>
   </Menu>
 
-  <Dialog v-model:visible="show_driver_comment" modal header="Чат с водителям"
+  <Dialog v-model:visible="show_driver_comment" modal header="Чат с водителем"
     :style="{ 'max-width': '700px', width: '100%' }">
     <DriverComment v-if="order" :order="order" :invoice="invoice"
       @close="order = {}; show_driver_comment = false" />
