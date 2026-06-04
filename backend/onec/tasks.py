@@ -1,9 +1,14 @@
 import os
 import requests
+import logging
+import json
+
 from django.conf import settings
 from celery import shared_task
 from .models import Organization, Specification, Nomenclature, Price, Balance, Car, Driver, Sender
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 HOST = os.getenv('ONEC_HOST', 'http://localhost:8000')
 USERNAME = os.getenv('ONEC_USERNAME')
@@ -34,14 +39,14 @@ def _request(url: str):
     return response.json(), response.status_code
 
 
-@shared_task
+#@shared_task
 def send_order_onec(order_id):
     from invoice.models import Order
     
     if settings.DEBUG: return {}
     url = HOST + "/accounting_copy/hs/career/invoice"
 
-    order = Order.objects.get(id=order_id)
+    order = Order.objects.get(uuid=order_id)
     data = {
         "XML_ID": str(order.uuid),
         "DATE": str(order.created_at),
@@ -50,20 +55,21 @@ def send_order_onec(order_id):
         "CONSIGNEE_ID": str(order.invoice.org_id),
         "CARRIER_ID": None,
         "PACKAGE": order.desc,
-        "DELIVERY": str(order.delivery_id),
+        "DELIVERY": order.delivery_id,
         "COMMENT": order.comment,
-        "DRIVER_ID": order.driver_id,
-        "VEHICLE_ID": order.car_id,
+        "DRIVER_ID": str(order.driver_id),
+        "VEHICLE_ID": str(order.car_id),
         "DOCUMENTS": None,
         "TRANS_INFO": None,
         "ITEMS": [{
-            "ITEM_ID": order.nomenclature_id,
+            "ITEM_ID": str(order.nomenclature_id),
             "QUANTITY": order.fact,
         }]
     }
-    response = requests.post(url, json=data, auth=(USERNAME, PASSWORD))
+    json_data = json.dumps(data)
+    response = requests.post(url, json=json_data, auth=(USERNAME, PASSWORD))
     if not response.ok:
-        raise Exception(f"Failed to sync data from {url}: {response.status_code}")
+        raise Exception(f"Failed to sync data from {url}: {response.status_code}\nData:{json_data}\nAnswer:{response.text}")
     return response
 
 

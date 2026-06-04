@@ -5,7 +5,7 @@ from .. import serializers
 from oauth.permissions import IsLogistUserPermission
 
 class OrderViewSet(ModelViewSet):
-    http_method_names = ['get', 'head', 'patch', 'delete']
+    http_method_names = ['get', 'head', 'patch', 'delete', 'post']
     search_fields = ['car__number', 'address']
     ordering = ['-created_at']
     permission_classes = [IsLogistUserPermission]
@@ -26,3 +26,9 @@ class OrderViewSet(ModelViewSet):
     def update(self, request, *args, **kwargs):
         request.data.update(invoice=self.kwargs.get('invoice_id'))
         return super().update(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        data['invoice'] = self.kwargs.get('invoice_id')
+        request._full_data = data
+        return super().create(request, *args, **kwargs)
