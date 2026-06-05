@@ -92,8 +92,6 @@ def update_invoice_status_process(sender, instance: Order, **kwargs):
         instance.invoice.status = STATUS_PROCESS
         instance.invoice.save()
     # send_order_career.delay(instance.pk)
-    #send_order_onec.delay(instance.pk)
-    send_order_onec(instance.pk)
 
 
 receiver(post_delete, sender=Order, dispatch_uid="delete_order")
