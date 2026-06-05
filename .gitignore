@@ -165,4 +165,4 @@ cython_debug/
 .idea
 static
 media
-redis-data
+redis-datapostgres-data
