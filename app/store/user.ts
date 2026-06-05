@@ -21,14 +21,16 @@ export const useUser = defineStore("user", {
         logout() {
             token.value.access = null
             token.value.refresh = null
-            navigateTo('/login')
+            const localePath = useLocalePath()
+            navigateTo(localePath('/login'))
         },
         login() {
             navigateTo(this.loginUrl())
         },
         loginUrl() {
+            const localePath = useLocalePath()
             const next = useRoute().fullPath || '/'
-            return `/login?next=${encodeURIComponent(next)}`
+            return `${localePath('/login')}?next=${encodeURIComponent(next)}`
         },
         isAuth() {
             return this.user?.id
