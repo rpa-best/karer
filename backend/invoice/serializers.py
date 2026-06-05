@@ -6,7 +6,6 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import ValidationError
 from onec.models import Specification
 from onec.serializers import NomenclatureSerializer, CarSerializer, DriverSerializer
-from onec.models import Balance
 from .models import Invoice, InvoiceNomenclature, Order, TYPE_LIMIT, TYPE_PREPAYMENT, TYPE_DEFERMENT_PAYMENT, DriverComment 
 
 
@@ -109,23 +108,28 @@ class OrderSerializer(serializers.ModelSerializer):
         if attrs.get('order') is not None:
             agg_invoice = get_object_or_404(
                 InvoiceNomenclature, invoice=invoice, nomenclature=attrs['nomenclature'])
-            agg = Order.objects.filter(
-                invoice=invoice,
-                nomenclature=attrs['nomenclature']
-            ).aggregate(norder=Sum('order'), nfact=Sum('fact'))
-            if agg.get('order', 0) + attrs.get('order') > agg_invoice.value:
-                raise ValidationError("Потрепность больше чем указано в заказе")
+            qs = Order.objects.filter(invoice=invoice, nomenclature=attrs['nomenclature'])
+            if self.instance:
+                qs = qs.exclude(pk=self.instance.pk)
+            existing = qs.aggregate(norder=Sum('order'))['norder'] or 0
+            if existing + attrs['order'] > agg_invoice.value:
+                raise ValidationError(
+                    f"Объём превышает лимит по заказу: {existing + attrs['order']} > {agg_invoice.value}"
+                )
         return attrs
-            
+
     def _validate_invoice_limit(self, attrs: dict):
         invoice: Invoice = attrs.get('invoice')
-        if attrs.get('price') is not None and invoice.specification.amount_limit:
-            balance = getattr(Balance.objects.filter(specification=invoice.specification).first(), 'balance', 0)
-            limit = invoice.specification.amount_limit if (invoice.specification.amount_limit - balance > 0) else balance
-            orders = Order.objects.filter(invoice=invoice)
-            orders_price = orders.aggregate(price=Sum('price'))['price'] or 0
-            if orders_price + attrs.get('price') > limit:
-                raise ValidationError("Сумма заказа больше чем указано в спецификации")
+        limit = invoice.specification.amount_limit
+        if attrs.get('price') is not None and limit:
+            qs = Order.objects.filter(invoice=invoice)
+            if self.instance:
+                qs = qs.exclude(pk=self.instance.pk)
+            orders_price = qs.aggregate(price=Sum('price'))['price'] or 0
+            if orders_price + attrs['price'] > limit:
+                raise ValidationError(
+                    f"Сумма заявок превышает лимит спецификации: {orders_price + attrs['price']} > {limit}"
+                )
         return attrs
 
     def _validate_invoice_payment_deferment(self, attrs: dict):
