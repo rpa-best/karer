@@ -23,10 +23,11 @@ export interface Invoice {
 }
 
 export interface InvoiceParams extends DefaultQueryParams {
-    status?: 'all' |'created' | 'process' | 'done' | 'canceled' | undefined  
+    status?: 'all' |'created' | 'process' | 'done' | 'canceled' | undefined
     type?: 'prepayment' | 'deferment_payment' | 'limit' | undefined
     org?: string | undefined
     specification?: string | undefined
+    sender?: number | undefined
 }
 
 export interface DriverComment {

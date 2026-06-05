@@ -42,11 +42,13 @@ def _request(url: str):
 #@shared_task
 def send_order_onec(order_id):
     from invoice.models import Order
-    
-    if settings.DEBUG: return {}
-    url = HOST + "/accounting_copy/hs/career/invoice"
 
-    order = Order.objects.get(uuid=order_id)
+    if settings.DEBUG: return {}
+
+    order = Order.objects.select_related('invoice__org__sender').get(uuid=order_id)
+    sender = order.invoice.org.sender
+    invoice_path = sender.url.rsplit('/', 1)[0] + '/invoice'
+    url = HOST + invoice_path
     data = {
         "XML_ID": str(order.uuid),
         "DATE": str(order.created_at),
@@ -66,10 +68,9 @@ def send_order_onec(order_id):
             "QUANTITY": order.fact,
         }]
     }
-    json_data = json.dumps(data)
-    response = requests.post(url, json=json_data, auth=(USERNAME, PASSWORD))
+    response = requests.post(url, json=data, auth=(USERNAME, PASSWORD))
     if not response.ok:
-        raise Exception(f"Failed to sync data from {url}: {response.status_code}\nData:{json_data}\nAnswer:{response.text}")
+        raise Exception(f"Failed to sync data from {url}: {response.status_code}\nData:{json.dumps(data)}\nAnswer:{response.text}")
     return response
 
 

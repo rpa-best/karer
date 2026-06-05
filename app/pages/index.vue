@@ -4,8 +4,8 @@ import type { DataTablePageEvent } from 'primevue/datatable';
 import { isManager, isLogist } from '~/permissions';
 import type { Invoice, InvoiceParams } from '~/types/invoices';
 import { InvoiceService } from '~/services/invoice';
-import type { Organization } from '~/types/onec';
-import { OrganizationService } from '~/services';
+import type { Organization, Sender } from '~/types/onec';
+import { OrganizationService, SenderService } from '~/services';
 import { useQuery } from '@tanstack/vue-query';
 
 const statuses: {[key: string]: {color: string, label: string}} = {
@@ -58,6 +58,23 @@ const {data: organizations} = useQuery({
   queryFn: async () => await organizationService.list<Organization[]>()
 })
 
+const senderService = new SenderService()
+const {data: senders} = useQuery({
+  queryKey: ['senders'],
+  queryFn: async () => await senderService.list<Sender[]>()
+})
+
+const filteredOrganizations = computed(() =>
+  filters.value.sender
+    ? organizations.value?.filter(org => org.sender === filters.value.sender)
+    : organizations.value
+)
+
+function onSenderChange() {
+  filters.value.org = undefined
+  refetch()
+}
+
 const rowClick = (data: Invoice | undefined = undefined) => {
     show_invoice.value = true
     invoice.value = data
@@ -76,7 +93,11 @@ async function onFilter() {
 <template>
     <Loading :loading="isFetching">
         <div class="flex justify-between align-items-center flex-wrap">
-            <h2 class="mb-3 text-3xl font-bold">Заявки</h2>
+            <div class="flex items-center gap-3 mb-3">
+                <h2 class="text-3xl font-bold">Заявки</h2>
+                <Select v-model="filters.sender" :options="senders" option-label="name" option-value="id"
+                    show-clear placeholder="Все источники" @value-change="onSenderChange" class="w-44" />
+            </div>
             <div class="flex md:flex-nowrap flex-wrap">
                 <div class="md:mr-3 mb-3 w-full">
                     <IconField class="w-full">
@@ -86,7 +107,7 @@ async function onFilter() {
                         </InputIcon>
                     </IconField>
                 </div>
-                <Select @value-change="onFilter" show-clear v-model="filters.org" :options="organizations" optionLabel="name"
+                <Select @value-change="onFilter" show-clear v-model="filters.org" :options="filteredOrganizations" optionLabel="name"
                     option-value="uuid" filter placeholder="Выберите организацию" class="w-full md:mr-3 mb-3" />
                 <Button v-if="isManager()" class="mb-3 w-full" @click="() => rowClick()">
                     <Plus />

@@ -5,10 +5,11 @@ from invoice.models import Invoice
 
 class InvoiceFilter(filters.FilterSet):
     status = filters.BaseInFilter(method='filter_status')
+    sender = filters.NumberFilter(field_name='org__sender_id')
 
     class Meta:
         model = Invoice
-        fields = ['org', 'status', 'specification', 'type']
+        fields = ['org', 'status', 'specification', 'type', 'sender']
 
     def filter_status(self, queryset, name, value: list):
         if not value or 'all' in value:

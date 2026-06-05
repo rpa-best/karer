@@ -1,10 +1,16 @@
 
+export interface Sender {
+    id: number
+    name: string
+}
+
 export interface Organization {
     uuid: string
     name: string
     fullname: string
     inn: string
     kpp: string
+    sender: number
 }
 
 
