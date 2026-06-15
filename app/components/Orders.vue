@@ -175,7 +175,11 @@ function select_order(event: Event, data: Order) {
         </template>
       </Column>
       <Column field="created_at" header="Дата"></Column>
-      <Column field="car.number" header="Авто"></Column>
+      <Column field="car" header="Авто">
+        <template #body="{ data }">
+          <span v-if="data.car">{{ data.car.name }} ({{ data.car.reg_number }})</span>
+        </template>
+      </Column>
       <Column field="driver.name" header="Водитель"></Column>
       <Column field="nomenclature.name" header="Номенклатура" class="text-nowrap"></Column>
       <Column v-if="order_columns.includes('address')" field="address" header="Адрес поставки"></Column>
