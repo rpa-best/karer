@@ -168,7 +168,8 @@ function select_order(event: Event, data: Order) {
         </Button>
       </div>
     </div>
-    <DataTable size="large" :value="orders" :loading="isFetching" rowHover responsive-layout="scroll">
+    <DataTable size="large" :value="orders" :loading="isFetching" rowHover responsive-layout="scroll"
+      style="cursor: pointer" @row-click="(e) => rowClick(e.data)">
       <Column field="uuid" header="Номер" class="text-nowrap" v-if="order_columns.includes('uuid')">
         <template #body="{ data }">
           <NuxtLink class="text-nowrap text-primary font-semibold" :to="`/orders/${data.uuid}`">{{ data.uuid }}</NuxtLink>
@@ -225,7 +226,7 @@ function select_order(event: Event, data: Order) {
               <Check />
             </Button>
             <div v-else class="flex gap-2">
-              <Button @click="(e: Event) => select_order(e, data)" aria-haspopup="true" aria-controls="overlay_menu"
+              <Button @click.stop="(e: Event) => select_order(e, data)" aria-haspopup="true" aria-controls="overlay_menu"
                 rounded class="size-8 !p-2">
                 <EllipsisVertical />
               </Button>
