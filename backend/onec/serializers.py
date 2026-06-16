@@ -43,8 +43,18 @@ class CarSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+_ONEC_DRIVER_FIELDS = {'name', 'inn', 'phone_number', 'job_title',
+                       'drivers_license_series', 'drivers_license_number', 'sender'}
+
+
 class DriverSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Driver
         fields = "__all__"
+
+    def update(self, instance, validated_data):
+        if instance.sender_id:
+            for field in _ONEC_DRIVER_FIELDS:
+                validated_data.pop(field, None)
+        return super().update(instance, validated_data)
