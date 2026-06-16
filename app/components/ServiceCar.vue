@@ -37,6 +37,16 @@ const selectImage = () => {
     imageRef.value.choose()
 }
 
+// Только цифры и английские буквы, автоматически в верхний регистр
+const sanitizeRegNumber = (e: Event) => {
+    const input = e.target as HTMLInputElement
+    input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '')
+}
+
+const blockInvalidRegKey = (e: KeyboardEvent) => {
+    if (e.key.length === 1 && !/[A-Za-z0-9]/.test(e.key)) e.preventDefault()
+}
+
 const save = async ({ values }: FormSubmitEvent<Record<string, any>>) => {
     disabled.value = true
     try {
@@ -90,35 +100,24 @@ const remove = async () => {
 
             <div class="col-span-2 flex flex-col gap-5 mt-2">
                 <FloatLabel>
-                    <InputText id="reg_number" style="width: 100%" name="reg_number" :disabled="disabled" />
+                    <InputText
+                        id="reg_number"
+                        style="width: 100%"
+                        name="reg_number"
+                        :disabled="disabled"
+                        @keydown="blockInvalidRegKey"
+                        @input="sanitizeRegNumber"
+                    />
                     <label for="reg_number" style="font-size: 12px">Гос. номер</label>
                 </FloatLabel>
-                <div class="grid grid-cols-2 gap-4">
-                    <FloatLabel>
-                        <InputText id="brand" style="width: 100%" name="brand" :disabled="disabled" />
-                        <label for="brand" style="font-size: 12px">Марка</label>
-                    </FloatLabel>
-                    <FloatLabel>
-                        <InputText id="name" style="width: 100%" name="name" :disabled="disabled" />
-                        <label for="name" style="font-size: 12px">Модель</label>
-                    </FloatLabel>
-                </div>
                 <FloatLabel>
-                    <InputText id="trailer_reg_number" style="width: 100%" name="trailer_reg_number" :disabled="disabled" />
-                    <label for="trailer_reg_number" style="font-size: 12px">Номер прицепа</label>
+                    <InputText id="brand" style="width: 100%" name="brand" :disabled="disabled" />
+                    <label for="brand" style="font-size: 12px">Марка</label>
                 </FloatLabel>
                 <FloatLabel>
-                    <InputText id="trailer_brand" style="width: 100%" name="trailer_brand" :disabled="disabled" />
-                    <label for="trailer_brand" style="font-size: 12px">Марка прицепа</label>
+                    <InputText id="name" style="width: 100%" name="name" :disabled="disabled" />
+                    <label for="name" style="font-size: 12px">Модель</label>
                 </FloatLabel>
-                <div class="flex items-center gap-2">
-                    <Checkbox inputId="our_prorerty" name="our_prorerty" :disabled="disabled" binary />
-                    <label for="our_prorerty">Наша собственность</label>
-                </div>
-                <div class="flex items-center gap-2">
-                    <Checkbox inputId="not_weight" name="not_weight" :disabled="disabled" binary />
-                    <label for="not_weight">Не взвешивать</label>
-                </div>
             </div>
         </div>
 
