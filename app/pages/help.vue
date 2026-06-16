@@ -35,13 +35,15 @@ import {
                       <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-white text-sm font-bold"
                             style="background: linear-gradient(135deg, #00d8a5, #8cd66a)">1</span>
                       <div>
-                        <p class="font-semibold mb-1">Создание накладной</p>
+                        <p class="font-semibold mb-1">Создание заявки</p>
                         <p class="text-sm text-muted-foreground">Нажмите кнопку <strong>«Создать заявку»</strong> в правом верхнем углу страницы.</p>
                         <ul class="text-sm text-muted-foreground mt-2 list-disc list-inside space-y-1">
-                          <li>Выберите <strong>организацию</strong> из списка</li>
+                          <li>Выберите <strong>от какой компании грузить</strong> (грузоотправитель)</li>
+                          <li>Выберите <strong>организацию</strong> (контрагента) из списка</li>
                           <li>Выберите <strong>спецификацию</strong> (договор с условиями)</li>
-                          <li>Укажите <strong>условие оплаты</strong>: Предоплата, Отсрочка платежа или Лимит</li>
-                          <li>Укажите <strong>адрес доставки</strong></li>
+                          <li><strong>Адрес доставки</strong> подтянется автоматически из спецификации</li>
+                          <li>Напишите <strong>комментарий для логиста</strong> (если нужно, поле может быть пустым)</li>
+                          <li>Добавьте <strong>номенклатуру</strong> и укажите потребность</li>
                         </ul>
                       </div>
                     </div>
@@ -57,9 +59,9 @@ import {
                         <p class="font-semibold mb-1">Фильтрация списка заявок</p>
                         <p class="text-sm text-muted-foreground">Используйте фильтры вверху страницы:</p>
                         <ul class="text-sm text-muted-foreground mt-2 list-disc list-inside space-y-1">
-                          <li><strong>Источник</strong> (Ресурс / Неруд-Трейд) — фильтрует по базе 1С</li>
+                          <li><strong>Источник</strong> (Ресурс / Неруд-Трейд)</li>
                           <li><strong>Организация</strong> — выбор конкретного контрагента</li>
-                          <li><strong>Поиск</strong> — по номеру накладной</li>
+                          <li><strong>Поиск</strong> — по номеру заявки</li>
                           <li><strong>Статус</strong>: Все заявки / Открытые / История отгрузок</li>
                         </ul>
                       </div>
@@ -73,9 +75,9 @@ import {
                       <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-white text-sm font-bold"
                             style="background: linear-gradient(135deg, #00d8a5, #8cd66a)">3</span>
                       <div>
-                        <p class="font-semibold mb-1">Редактирование накладной</p>
+                        <p class="font-semibold mb-1">Редактирование заявки</p>
                         <p class="text-sm text-muted-foreground">
-                          Нажмите кнопку <strong>карандаш</strong> в строке нужной заявки. Откроется форма редактирования с теми же полями.
+                          Нажмите кнопку <strong>карандаш</strong> в строке нужной заявки. Откроется форма редактирования с теми же полями. <em>Сейчас все поля закрыты для редактирования.</em>
                         </p>
                       </div>
                     </div>
@@ -88,14 +90,14 @@ import {
                       <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-white text-sm font-bold"
                             style="background: linear-gradient(135deg, #00d8a5, #8cd66a)">4</span>
                       <div>
-                        <p class="font-semibold mb-1">Статусы накладных</p>
+                        <p class="font-semibold mb-1">Статусы заявок</p>
                         <div class="flex flex-wrap gap-2 mt-2">
                           <Tag value="Принято" severity="info"/>
                           <Tag value="В обработке" severity="warn"/>
                           <Tag value="Успешно" severity="success"/>
                           <Tag value="Отклонено" severity="danger"/>
                         </div>
-                        <p class="text-sm text-muted-foreground mt-2">Статус обновляется логистом по мере работы с заказами.</p>
+                        <p class="text-sm text-muted-foreground mt-2">Статус обновляется автоматически по мере работы с заказами.</p>
                       </div>
                     </div>
                   </template>
