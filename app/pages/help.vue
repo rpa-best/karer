@@ -184,9 +184,9 @@ import {
                       <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-white text-sm font-bold"
                             style="background: linear-gradient(135deg, #00d8a5, #8cd66a)">1</span>
                       <div>
-                        <p class="font-semibold mb-1">Раскрыть накладную</p>
+                        <p class="font-semibold mb-1">Раскрыть заявку</p>
                         <p class="text-sm text-muted-foreground">
-                          На странице <strong>«Заявки»</strong> нажмите на стрелку <strong>▶</strong> слева от строки накладной — развернётся список заказов по ней.
+                          На странице <strong>«Заявки»</strong> нажмите на стрелку <strong>▶</strong> слева от номера заявки — развернётся список заказов по ней.
                         </p>
                       </div>
                     </div>
@@ -200,13 +200,16 @@ import {
                             style="background: linear-gradient(135deg, #00d8a5, #8cd66a)">2</span>
                       <div>
                         <p class="font-semibold mb-1">Создание заказа</p>
-                        <p class="text-sm text-muted-foreground">Нажмите <strong>«Добавить заказ»</strong> внутри накладной. Заполните форму:</p>
+                        <p class="text-sm text-muted-foreground">Нажмите <strong>«Добавить заказ»</strong> внутри заявки. Заполните форму:</p>
                         <ul class="text-sm text-muted-foreground mt-2 list-disc list-inside space-y-1">
-                          <li><strong>Машина</strong> — показываются только машины из той же базы 1С, что и организация накладной</li>
-                          <li><strong>Водитель</strong> — аналогично, только из нужной базы</li>
-                          <li><strong>Номенклатура</strong> — материал для отгрузки (из спецификации)</li>
+                          <li><strong>Машина</strong> — из той же базы 1С, что и выбранный менеджером грузоотправитель («Ресурс» / «Неруд-Трейд»)</li>
+                          <li><strong>Водитель</strong> — из той же базы 1С, что и грузоотправитель</li>
+                          <li><strong>Номенклатура</strong> — из той же базы 1С, что и грузоотправитель</li>
                           <li><strong>Количество на отгрузку</strong></li>
-                          <li><strong>Адрес поставки</strong></li>
+                          <li><strong>Добавка</strong> — количество, которое нужно дополнительно погрузить, но не учитывать в накладной</li>
+                          <li><strong>Адрес поставки</strong> — подтягивается автоматически из спецификации</li>
+                          <li><strong>Факт</strong> — заполняется автоматически после отгрузки заказа карьер-сервером</li>
+                          <li>Система показывает <strong>цену на единицу</strong> и <strong>предполагаемую общую стоимость</strong></li>
                           <li><strong>Комментарий</strong> — при необходимости</li>
                         </ul>
                       </div>
@@ -224,7 +227,7 @@ import {
                         <div class="flex flex-col gap-2 mt-2 text-sm text-muted-foreground">
                           <div class="flex items-start gap-2">
                             <CheckCircle class="text-green-500 flex-shrink-0 mt-0.5" :size="16"/>
-                            <span>Заказ создан — ожидает назначения на карьер-сервере</span>
+                            <span>Заказ создан — формируется пустая <strong>накладная диспетчера</strong> для этого заказа</span>
                           </div>
                           <div class="flex items-start gap-2">
                             <CheckCircle class="text-green-500 flex-shrink-0 mt-0.5" :size="16"/>
@@ -232,11 +235,11 @@ import {
                           </div>
                           <div class="flex items-start gap-2">
                             <CheckCircle class="text-green-500 flex-shrink-0 mt-0.5" :size="16"/>
-                            <span>После отгрузки карьер-сервер присылает <strong>факт</strong> — фактический объём</span>
+                            <span>Карьер присылает <strong>факт</strong> — фактический объём при отгрузке</span>
                           </div>
                           <div class="flex items-start gap-2">
                             <CheckCircle class="text-green-500 flex-shrink-0 mt-0.5" :size="16"/>
-                            <span>Заказ помечается <strong>«Отгружен»</strong>, данные автоматически уходят в 1С</span>
+                            <span>Заказ помечается <strong>«Отгружен»</strong>, обновляется накладная диспетчера в 1С</span>
                           </div>
                         </div>
                       </div>
@@ -294,7 +297,7 @@ import {
                           Нажмите карандаш. <strong>Данные из 1С</strong> (ФИО, ИНН, телефон, права) — только для просмотра, изменить их нельзя. Доступно для редактирования:
                         </p>
                         <ul class="text-sm text-muted-foreground mt-2 list-disc list-inside space-y-1">
-                          <li><strong>Telegram ID</strong> — для связи с водителем через карьер-сервер</li>
+                          <li><strong>Telegram ID</strong> — для связи с водителем по мессенджеру (в разработке)</li>
                           <li><strong>Фото</strong></li>
                         </ul>
                       </div>
