@@ -37,8 +37,8 @@ const disabled = ref(true)
 const {data: org} = useOrganization(invoice.org)
 
 const {data: cars} = useQuery({
-  queryKey: ['cars'],
-  queryFn: async () => await carService.list<Car[]>()
+  queryKey: computed(() => ['cars', org.value?.sender]),
+  queryFn: async () => await carService.list<Car[]>(org.value?.sender ? { sender: org.value.sender } : {})
 })
 const {data: drivers} = useQuery({
   queryKey: computed(() => ['drivers', org.value?.sender]),
