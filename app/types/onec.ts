@@ -60,6 +60,7 @@ export interface Car {
     trailer_reg_number: string
     trailer_brand: string
 
+    sender: number
     not_weight: boolean
     created_at: string
     image: string

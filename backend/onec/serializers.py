@@ -36,11 +36,21 @@ class OrganizationsSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+_ONEC_CAR_FIELDS = {'name', 'reg_number', 'brand', 'our_prorerty',
+                    'trailer_reg_number', 'trailer_brand', 'sender'}
+
+
 class CarSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Car
         fields = "__all__"
+
+    def update(self, instance, validated_data):
+        if instance.sender_id:
+            for field in _ONEC_CAR_FIELDS:
+                validated_data.pop(field, None)
+        return super().update(instance, validated_data)
 
 
 _ONEC_DRIVER_FIELDS = {'name', 'inn', 'phone_number', 'job_title',
