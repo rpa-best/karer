@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Nomenclature, Specification, Organization, Car, Driver, Sender
+from .models import Nomenclature, Specification, Organization, Car, Driver, Sender, ServiceCar
 
 
 class SenderSerializer(serializers.ModelSerializer):
@@ -68,3 +68,10 @@ class DriverSerializer(serializers.ModelSerializer):
             for field in _ONEC_DRIVER_FIELDS:
                 validated_data.pop(field, None)
         return super().update(instance, validated_data)
+
+
+class ServiceCarSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ServiceCar
+        fields = "__all__"

@@ -18,6 +18,16 @@ class IsLogistUserPermission(IsAuthenticated):
 
     def has_permission(self, request, view):
         return request.user.role == ROLE_LOGIST and super().has_permission(request, view)
-    
+
+    def has_object_permission(self, request, view, obj):
+        return self.has_permission(request, view)
+
+
+class IsManagerOrLogistPermission(IsAuthenticated):
+    message = _('User has not manager or logist permission')
+
+    def has_permission(self, request, view):
+        return request.user.role in (ROLE_MANAGER, ROLE_LOGIST) and super().has_permission(request, view)
+
     def has_object_permission(self, request, view, obj):
         return self.has_permission(request, view)

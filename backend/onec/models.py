@@ -104,3 +104,19 @@ class Driver(models.Model):
     def send_comment(self, text):
         # If error return: ConnectionError
         pass
+
+
+class ServiceCar(models.Model):
+    uuid = models.UUIDField(default=uuid4, primary_key=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    reg_number = models.CharField(max_length=255, blank=True, null=True)
+    brand = models.CharField(max_length=255, blank=True, null=True)
+    our_prorerty = models.BooleanField(default=False)
+    trailer_reg_number = models.CharField(max_length=255, blank=True, null=True)
+    trailer_brand = models.CharField(max_length=255, blank=True, null=True)
+    not_weight = models.BooleanField(default=False, help_text='Не взвешивать')
+    created_at = models.DateTimeField(auto_now_add=True)
+    image = models.ImageField(blank=True, null=True, upload_to='service_car')
+
+    def __str__(self):
+        return self.name or str(self.uuid)

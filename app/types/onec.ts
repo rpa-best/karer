@@ -51,6 +51,19 @@ export interface Driver {
 }
 
 
+export interface ServiceCar {
+    uuid: string
+    name: string
+    reg_number: string
+    brand: string
+    our_prorerty: boolean
+    trailer_reg_number: string
+    trailer_brand: string
+    not_weight: boolean
+    created_at: string
+    image: string
+}
+
 export interface Car {
     uuid: number
     name: string

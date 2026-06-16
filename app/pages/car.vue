@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Pen, Plus, ChevronDown } from "lucide-vue-next"
+import { Pen, ChevronDown } from "lucide-vue-next"
 import type { Car, Sender } from "~/types/onec"
 import { CarService, SenderService } from '~/services'
 import { useQuery } from '@tanstack/vue-query'
@@ -106,10 +106,6 @@ function leave(el: Element, done: () => void) {
             <i class="pi pi-search cursor-pointer" @click="onSearch"/>
           </InputIcon>
         </IconField>
-        <Button class="mb-3 w-full" @click="() => rowClick()">
-          <Plus/>
-          Добавить автомобиль
-        </Button>
       </div>
     </div>
 

@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
-from oauth.permissions import IsLogistUserPermission
-from .serializers import OrganizationsSerializer, NomenclatureSerializer, SpecificationSerializer, CarSerializer, DriverSerializer, SenderSerializer
-from .models import Organization, Nomenclature, Specification, Car, Driver, Sender
+from oauth.permissions import IsLogistUserPermission, IsManagerOrLogistPermission
+from .serializers import OrganizationsSerializer, NomenclatureSerializer, SpecificationSerializer, CarSerializer, DriverSerializer, SenderSerializer, ServiceCarSerializer
+from .models import Organization, Nomenclature, Specification, Car, Driver, Sender, ServiceCar
 from .filters import NomenclatureFilter, SpecificationFilter, OrganizationFilters, DriverFilter, CarFilter
 
 
@@ -46,3 +46,10 @@ class DriverViewset(ModelViewSet):
     search_fields = ['name', 'telegram_id', 'phone_number']
     filterset_class = DriverFilter
     permission_classes = [IsLogistUserPermission]
+
+
+class ServiceCarViewSet(ModelViewSet):
+    serializer_class = ServiceCarSerializer
+    queryset = ServiceCar.objects.all().order_by('-created_at')
+    search_fields = ['name', 'reg_number', 'brand']
+    permission_classes = [IsManagerOrLogistPermission]

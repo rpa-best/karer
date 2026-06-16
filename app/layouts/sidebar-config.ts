@@ -1,5 +1,5 @@
 import {isManager, isLogist} from "~/permissions";
-import { BookText, Users, Truck } from "lucide-vue-next";
+import { BookText, Users, Truck, CarFront } from "lucide-vue-next";
 import type { SidebarItem } from '~/types';
 
 
@@ -25,5 +25,14 @@ export default (): SidebarItem[] => {
             licon: Truck,
         })
     }
+
+    if (isManager() || isLogist()) {
+        sidebar.push({
+            title: 'Служебные авто',
+            url: '/service-car',
+            licon: CarFront,
+        })
+    }
+
     return sidebar
 }

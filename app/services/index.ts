@@ -37,6 +37,12 @@ export class SpecificationService extends ReadOnlyService {
     }
 }
 
+export class ServiceCarService extends CRUDService {
+    constructor() {
+        super('/onec/service-car/')
+    }
+}
+
 export class OrderService extends ReadOnlyService {
     constructor() {
         super('/order/')
