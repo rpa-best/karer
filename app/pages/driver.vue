@@ -40,10 +40,10 @@ const onFilter = async () => {
 
 <template>
   <Loading :loading="isFetching">
-    <div class="flex justify-between align-items-center flex-wrap">
-      <h2 style="font-size: 24px; font-weight: bold" class="mb-3">Водители</h2>
-      <div class="flex gap-3 md:flex-nowrap flex-wrap md:w-auto w-full">
-        <div class="flex items-center gap-3 flex-wrap">
+    <div class="flex justify-between align-items-center flex-wrap mb-2">
+      <div>
+        <h2 style="font-size: 24px; font-weight: bold" class="mb-2">Водители</h2>
+        <div class="flex items-center gap-4">
           <div v-for="sender in senders" :key="sender.id" class="flex items-center gap-1">
             <RadioButton v-model="selectedSender" :inputId="`sender_${sender.id}`" :value="sender.id" />
             <label :for="`sender_${sender.id}`" class="cursor-pointer">{{ sender.name }}</label>
@@ -53,6 +53,8 @@ const onFilter = async () => {
             <label for="sender_all" class="cursor-pointer">Все</label>
           </div>
         </div>
+      </div>
+      <div class="flex gap-3 md:flex-nowrap flex-wrap md:w-auto w-full mt-2">
         <IconField class="w-full">
           <InputText placeholder="Поиск" v-model="filters.search" @keydown.enter="onFilter" class="w-full"/>
           <InputIcon>
