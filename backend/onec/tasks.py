@@ -51,18 +51,18 @@ def send_order_onec(order_id):
     url = HOST + invoice_path
     data = {
         "XML_ID": str(order.uuid),
-        "DATE": str(order.created_at),
+        "DATE": order.created_at.strftime('%Y-%m-%dT%H:%M:%S.%f'),
         "SPECIFICATION_ID": str(order.invoice.specification_id),
-        "SHIPPER_ID": None,
+        "SHIPPER_ID": "",
         "CONSIGNEE_ID": str(order.invoice.org_id),
-        "CARRIER_ID": None,
+        "CARRIER_ID": "",
         "PACKAGE": order.desc,
         "DELIVERY": order.delivery_id,
         "COMMENT": order.comment,
         "DRIVER_ID": str(order.driver_id),
         "VEHICLE_ID": str(order.car_id),
-        "DOCUMENTS": None,
-        "TRANS_INFO": None,
+        "DOCUMENTS": "",
+        "TRANS_INFO": "",
         "ITEMS": [{
             "ITEM_ID": str(order.nomenclature_id),
             "QUANTITY": order.fact,
