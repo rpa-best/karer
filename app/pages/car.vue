@@ -1,68 +1,185 @@
 <script setup lang="ts">
-import {Pen, Plus} from "lucide-vue-next"
-import type { Car } from "~/types/onec"
-import { CarService } from "~/services"
-import type { DefaultQueryParams } from '~/types'
+import { Pen, Plus, ChevronDown } from "lucide-vue-next"
+import type { Car, Sender } from "~/types/onec"
+import { CarService, SenderService } from '~/services'
 import { useQuery } from '@tanstack/vue-query'
 
-const filters = ref<DefaultQueryParams>({})
 const car = ref<Car | null>(null)
 const show_car = ref(false)
 const carService = new CarService()
+const senderService = new SenderService()
 
-const {data: cars, isFetching, refetch} = useQuery({
-  queryKey: computed(() => ['cars', filters.value]),
-  queryFn: async () => await carService.list<Car[]>(filters.value)
+const searchQuery = ref('')
+
+const { data: senders } = useQuery({
+  queryKey: ['senders'],
+  queryFn: async () => await senderService.list<Sender[]>()
 })
 
-const rowClick = (data: Car | null) => {
-    show_car.value = true
-    car.value = data
+const expandedSenders = reactive<Record<number, boolean>>({})
+const carsBySender = reactive<Record<number, Car[]>>({})
+const fetchingSender = reactive<Record<number, boolean>>({})
+
+async function fetchSenderCars(senderId: number) {
+  fetchingSender[senderId] = true
+  try {
+    carsBySender[senderId] = await carService.list<Car[]>({
+      sender: senderId,
+      search: searchQuery.value || undefined
+    })
+  } finally {
+    fetchingSender[senderId] = false
+  }
 }
 
-const onFilter = async () => {
-    await refetch()
+function toggleSection(senderId: number) {
+  expandedSenders[senderId] = !expandedSenders[senderId]
+  if (expandedSenders[senderId] && !carsBySender[senderId]) {
+    fetchSenderCars(senderId)
+  }
 }
 
+async function onSearch() {
+  for (const [id, expanded] of Object.entries(expandedSenders)) {
+    if (expanded) await fetchSenderCars(Number(id))
+  }
+}
+
+async function onCarClose(flag: boolean) {
+  car.value = null
+  show_car.value = false
+  if (flag) {
+    for (const [id, expanded] of Object.entries(expandedSenders)) {
+      if (expanded) await fetchSenderCars(Number(id))
+    }
+  }
+}
+
+const rowClick = (data: Car | null = null) => {
+  show_car.value = true
+  car.value = data
+}
+
+function beforeEnter(el: Element) {
+  const e = el as HTMLElement
+  e.style.height = '0'
+  e.style.opacity = '0'
+  e.style.overflow = 'hidden'
+}
+function enter(el: Element, done: () => void) {
+  const e = el as HTMLElement
+  requestAnimationFrame(() => {
+    e.style.transition = 'height 0.35s ease, opacity 0.3s ease'
+    e.style.height = e.scrollHeight + 'px'
+    e.style.opacity = '1'
+    e.addEventListener('transitionend', () => {
+      e.style.height = 'auto'
+      e.style.overflow = ''
+      done()
+    }, { once: true })
+  })
+}
+function beforeLeave(el: Element) {
+  const e = el as HTMLElement
+  e.style.height = e.scrollHeight + 'px'
+  e.style.overflow = 'hidden'
+}
+function leave(el: Element, done: () => void) {
+  const e = el as HTMLElement
+  requestAnimationFrame(() => {
+    e.style.transition = 'height 0.3s ease, opacity 0.25s ease'
+    e.style.height = '0'
+    e.style.opacity = '0'
+    e.addEventListener('transitionend', done, { once: true })
+  })
+}
 </script>
 
 <template>
-    <Loading :loading="isFetching">
-        <div class="flex justify-between align-items-center flex-wrap">
-            <h2 style="font-size: 24px; font-weight: bold" class="mb-3">Автомобили</h2>
-            <div class="flex md:flex-nowrap gap-3 flex-wrap md:w-auto w-full">
-                <IconField class="w-full mb-3">
-                    <InputText placeholder="Поиск" v-model="filters.search" @keydown.enter="onFilter" class="w-full" />
-                    <InputIcon>
-                        <i class="pi pi-search cursor-pointer" @click="onFilter" />
-                    </InputIcon>
-                </IconField>
-                <Button class="mb-3 w-full" @click="() => rowClick(null)">
-                    <Plus />
-                    Добавить автомобиль
-                </Button>
-            </div>
-        </div>
-        <Card>
-            <template #content>
-                <DataTable size="large" :value="cars" lazy :loading="isFetching" rowHover>
-                    <Column field="reg_number" header="Номер" style="font-weight: 600"></Column>
-                    <Column field="brand" header="Марка" style="font-weight: 600"></Column>
-                    <Column field="name" header="Модель" style="font-weight: 600"></Column>
-                    <column>
-                      <template #body="{data}">
-                        <Button @click="rowClick(data)" severity="help" rounded class="size-8 !p-2">
-                          <Pen />
-                        </Button>
-                      </template>
-                    </column>
-                    <template #empty> <p class="text-center"> Машины не найдены. </p></template>
-                </DataTable>
-            </template>
-        </Card>
-    </Loading>
-    <Dialog v-model:visible="show_car" @close="car = null" modal header="Изменить автомобиль" :style="{ 'max-width': '500px', width: '100%' }">
-        <Car v-if="show_car" :car="car" @close="(flag: boolean) => {car = null; show_car=false; flag ? refetch() : null}" />
-    </Dialog>
-</template>
+  <div>
+    <div class="flex justify-between items-center flex-wrap mb-6">
+      <h2 class="text-3xl font-bold">Автомобили</h2>
+      <div class="flex gap-3 md:flex-nowrap flex-wrap md:w-auto w-full mt-2">
+        <IconField class="w-full">
+          <InputText placeholder="Поиск" v-model="searchQuery" @keydown.enter="onSearch" class="w-full"/>
+          <InputIcon>
+            <i class="pi pi-search cursor-pointer" @click="onSearch"/>
+          </InputIcon>
+        </IconField>
+        <Button class="mb-3 w-full" @click="() => rowClick()">
+          <Plus/>
+          Добавить автомобиль
+        </Button>
+      </div>
+    </div>
 
+    <div class="flex flex-col gap-4">
+      <div v-for="sender in senders" :key="sender.id">
+        <div
+          @click="toggleSection(sender.id)"
+          class="flex items-center justify-between px-5 py-4 rounded-xl cursor-pointer select-none text-white shadow-lg"
+          style="background: linear-gradient(135deg, #00d8a5 0%, #8cd66a 100%)"
+        >
+          <div class="flex items-center gap-3">
+            <span class="text-lg font-bold tracking-wide">{{ sender.name }}</span>
+            <span
+              v-if="carsBySender[sender.id]"
+              class="text-sm font-semibold px-2.5 py-0.5 rounded-full"
+              style="background: rgba(255,255,255,0.25)"
+            >
+              {{ carsBySender[sender.id].length }}
+            </span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i v-if="fetchingSender[sender.id]" class="pi pi-spin pi-spinner text-white/80 text-sm"></i>
+            <ChevronDown
+              :size="20"
+              class="transition-transform duration-300 ease-in-out"
+              :style="{ transform: expandedSenders[sender.id] ? 'rotate(180deg)' : 'rotate(0deg)' }"
+            />
+          </div>
+        </div>
+
+        <Transition
+          :css="false"
+          @before-enter="beforeEnter"
+          @enter="enter"
+          @before-leave="beforeLeave"
+          @leave="leave"
+        >
+          <div v-if="expandedSenders[sender.id]" class="mt-2">
+            <Card>
+              <template #content>
+                <DataTable
+                  size="large"
+                  :value="carsBySender[sender.id]"
+                  :loading="fetchingSender[sender.id]"
+                  rowHover
+                >
+                  <Column field="reg_number" header="Номер" style="font-weight: 600"></Column>
+                  <Column field="brand" header="Марка" style="font-weight: 600"></Column>
+                  <Column field="name" header="Модель" style="font-weight: 600"></Column>
+                  <Column>
+                    <template #body="{data}">
+                      <Button @click.stop="rowClick(data)" severity="help" rounded class="size-8 !p-2">
+                        <Pen/>
+                      </Button>
+                    </template>
+                  </Column>
+                  <template #empty>
+                    <p class="text-center">Машины не найдены.</p>
+                  </template>
+                </DataTable>
+              </template>
+            </Card>
+          </div>
+        </Transition>
+      </div>
+    </div>
+  </div>
+
+  <Dialog v-model:visible="show_car" @close="car=null" modal header="Изменить автомобиль"
+          :style="{ 'max-width': '500px', width: '100%'}">
+    <Car v-if="show_car" :car="car" @close="onCarClose"/>
+  </Dialog>
+</template>
