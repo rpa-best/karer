@@ -2,7 +2,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from oauth.permissions import IsLogistUserPermission
 from .serializers import OrganizationsSerializer, NomenclatureSerializer, SpecificationSerializer, CarSerializer, DriverSerializer, SenderSerializer
 from .models import Organization, Nomenclature, Specification, Car, Driver, Sender
-from .filters import NomenclatureFilter, SpecificationFilter, OrganizationFilters
+from .filters import NomenclatureFilter, SpecificationFilter, OrganizationFilters, DriverFilter
 
 
 class SenderViewset(ReadOnlyModelViewSet):
@@ -43,4 +43,5 @@ class DriverViewset(ModelViewSet):
     serializer_class = DriverSerializer
     queryset = Driver.objects.all()
     search_fields = ['name', 'telegram_id', 'phone_number']
+    filterset_class = DriverFilter
     permission_classes = [IsLogistUserPermission]

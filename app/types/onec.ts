@@ -44,6 +44,7 @@ export interface Driver {
     drivers_license_series: string
     drivers_license_number: string
 
+    sender: number
     telegram_id: string
     created_at: string
     image: string

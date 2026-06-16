@@ -1,6 +1,6 @@
 import django_filters.rest_framework as filters
 
-from .models import Nomenclature, Specification, Organization
+from .models import Nomenclature, Specification, Organization, Driver
 
 
 class OrganizationFilters(filters.FilterSet):
@@ -23,3 +23,10 @@ class SpecificationFilter(filters.FilterSet):
     class Meta:
         model = Specification
         fields = ['organization']
+
+
+class DriverFilter(filters.FilterSet):
+
+    class Meta:
+        model = Driver
+        fields = ['sender']

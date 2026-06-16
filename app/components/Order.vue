@@ -8,6 +8,7 @@ import type { FormSubmitEvent } from '@primevue/forms'
 import { CarService, DriverService } from '~/services'
 import { InvoiceService } from '~/services/invoice'
 import { useQuery } from '@tanstack/vue-query'
+import { useOrganization } from '~/hooks/onec/organization'
 
 const { order, invoice } = defineProps<{
   order: Order | {}
@@ -33,13 +34,15 @@ const invoiceService = new InvoiceService()
 const toast = useToast()
 const disabled = ref(true)
 
+const {data: org} = useOrganization(invoice.org)
+
 const {data: cars} = useQuery({
   queryKey: ['cars'],
   queryFn: async () => await carService.list<Car[]>()
 })
 const {data: drivers} = useQuery({
-  queryKey: ['drivers'],
-  queryFn: async () => await driverService.list<Driver[]>()
+  queryKey: computed(() => ['drivers', org.value?.sender]),
+  queryFn: async () => await driverService.list<Driver[]>(org.value?.sender ? { sender: org.value.sender } : {})
 })
 const {data: nomenclatures} = useQuery({
   queryKey: computed(() => ['nomenclatures', invoice.id]),
