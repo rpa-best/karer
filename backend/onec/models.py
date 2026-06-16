@@ -67,6 +67,7 @@ class Balance(models.Model):
 
 
 class Car(models.Model):
+    sender = models.ForeignKey('onec.Sender', models.SET_NULL, null=True, blank=True)
     uuid = models.UUIDField(default=uuid4, primary_key=True)
     name = models.CharField(max_length=255, blank=True, null=True)
     reg_number = models.CharField(max_length=255, blank=True, null=True)

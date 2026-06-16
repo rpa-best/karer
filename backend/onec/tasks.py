@@ -24,7 +24,7 @@ def sync_db():
         _sync_specifications(data.get('SPECIFICATIONS', {}))
         _sync_prices(data.get('PRICE', {}))
         _sync_balances(data.get('BALANCES', {}))
-        _sync_cars(data.get('VEHICLES', {}))
+        _sync_cars(data.get('VEHICLES', {}), sender.id)
         _sync_drivers(data.get('DRIVERS', {}), sender.id)
         results[sender.name] = status
     return results
@@ -193,7 +193,7 @@ def _sync_balances(data):
         print("Created" if created else "Updated", balance)
 
 
-def _sync_cars(data):
+def _sync_cars(data, sender_id):
     for car_data in data.values():
         defaults={
             'name': car_data['NAME'],
@@ -201,7 +201,8 @@ def _sync_cars(data):
             'brand': car_data['BRAND'],
             'our_prorerty': car_data['OUR_PROPERTY'],
             'trailer_reg_number': car_data['TRAILER_REG_NUMBER'],
-            'trailer_brand': car_data['TRAILER_BRAND']
+            'trailer_brand': car_data['TRAILER_BRAND'],
+            'sender_id': sender_id,
         }
         try:
             car = Car.objects.get(uuid=car_data['XML_ID'])
