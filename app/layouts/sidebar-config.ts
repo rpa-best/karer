@@ -1,5 +1,5 @@
 import {isManager, isLogist} from "~/permissions";
-import { BookText, Users, Truck, CarFront } from "lucide-vue-next";
+import { BookText, Users, Truck, CarFront, HelpCircle } from "lucide-vue-next";
 import type { SidebarItem } from '~/types';
 
 
@@ -31,6 +31,10 @@ export default (): SidebarItem[] => {
             title: 'Служебные авто',
             url: '/service-car',
             licon: CarFront,
+        }, {
+            title: 'Инструкция',
+            url: '/help',
+            licon: HelpCircle,
         })
     }
 
