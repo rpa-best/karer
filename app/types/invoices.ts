@@ -5,6 +5,7 @@ export interface InvoiceNomenclature {
     created_at: string
     nomenclature: string | null
     value: number
+    volume_coefficient: number
     invoice: number | undefined
 }
 
@@ -45,9 +46,11 @@ export interface Order {
     invoice: number
     address: string
     per_price: number
+    price: number
     additive: number
     order: number
     fact: number
+    volume_coefficient: number | null
     done: boolean
     comment: string
     created_at: string
@@ -62,9 +65,11 @@ export interface OrderForm {
     invoice: number
     address: string
     per_price: number
+    price: number
     additive: number
     order: number
     fact: number
+    volume_coefficient: number | null
     comment: string
     done: boolean
 }

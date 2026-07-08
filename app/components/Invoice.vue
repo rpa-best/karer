@@ -86,7 +86,8 @@ function addRow() {
     created_at: new Date().toISOString(),
     invoice: props.invoice?.id,
     nomenclature: null,
-    value: 0
+    value: 0,
+    volume_coefficient: 1
   }
   invoiceNomenclatures.value.push(newN)
   editingRows.value.push(newN)
@@ -172,6 +173,15 @@ async function save({values, valid}: {values: any, valid: boolean}) {
                 <InputNumber :input-props="{autocomplete: 'off'}"
                              :suffix="` ${nomenclatures?.find((v: Nomenclature) => v.uuid === data?.nomenclature)?.unit || ''}`"
                              :disabled="nDisabled" placeholder="Введите потребность" v-model="data[field]"/>
+              </template>
+            </Column>
+            <Column field="volume_coefficient" header="Коэф. объёма">
+              <template #editor="{ data, field }">
+                <InputNumber :input-props="{autocomplete: 'off'}" :max-fraction-digits="10"
+                             :disabled="nDisabled" placeholder="Коэф. (кг→м³)" v-model="data[field]"/>
+              </template>
+              <template #body="{ data }">
+                <span class="text-sm">{{ data.volume_coefficient ?? 1 }}</span>
               </template>
             </Column>
             <Column v-if="!nDisabled" bodyStyle="text-align:center">

@@ -24,7 +24,8 @@ const myOrder = ref<OrderForm>({
   address: invoice?.address ?? (order as Order).address,
   car: (order as Order).car ? (order as Order).car.uuid : null,
   driver: (order as Order).driver ? (order as Order).driver.uuid : null,
-  nomenclature: (order as Order).nomenclature ? (order as Order).nomenclature.uuid : null
+  nomenclature: (order as Order).nomenclature ? (order as Order).nomenclature.uuid : null,
+  volume_coefficient: (order as Order).volume_coefficient ?? null,
 })
 
 const carService = new CarService()
@@ -52,13 +53,14 @@ const {data: nomenclatures} = useQuery({
 const resolver = zodResolver(
   z.object({
     car: z.string(),
-    driver: z.string(), 
+    driver: z.string(),
     address: z.string(),
     nomenclature: z.string(),
     additive: z.number().nullable().optional(),
     order: z.number(),
     price: z.number(),
     per_price: z.number(),
+    volume_coefficient: z.number().nullable().optional(),
     comment: z.string().nullable().optional(),
   })
 )
@@ -73,7 +75,7 @@ function select_nomenclature({value}: {value: any}, form: any) {
     if (!nomenclature.per_price) {
       toast.add({severity: 'warn', summary: 'Ошибка', detail: 'У номенклатуры не указана цена', life: 3000})
       form.per_price.value = null
-      form.price.value = null 
+      form.price.value = null
       form.per_price.invalid = true
       form.price.invalid = true
       return
@@ -82,7 +84,19 @@ function select_nomenclature({value}: {value: any}, form: any) {
     form.price.invalid = false
     form.per_price.value = nomenclature.per_price
     form.price.value = nomenclature.per_price * (form.fact.value ? form.fact.value : form.order.value || 0)
+    const invoiceNom = invoice.nomenclatures?.find((n: any) => n.nomenclature === value)
+    if (invoiceNom?.volume_coefficient != null) {
+      form.volume_coefficient.value = invoiceNom.volume_coefficient
+    }
   }
+}
+
+function factVolume(form: any): string {
+  const f = form.fact?.value
+  const c = form.volume_coefficient?.value
+  if (!f) return ''
+  const m3 = f * (c || 1)
+  return `${f} кг / ${parseFloat(m3.toFixed(6))} м³`
 }
 
 async function save({values, valid}: FormSubmitEvent) {
@@ -163,15 +177,30 @@ function getUnit(nomenclature: string) {
         
         <div class="lg:col-span-2 col-span-6">
           <FloatLabel>
-            <InputNumber required 
-                         :suffix="` ${getUnit($form.nomenclature?.value)}`"
+            <InputNumber required
+                         :suffix="` кг`"
                          id="fact" style="width: 100%" name="fact" :disabled="true"/>
-            <label for="fact" style="font-size: 12px">Факт</label>
+            <label for="fact" style="font-size: 12px">Факт (кг)</label>
+          </FloatLabel>
+        </div>
+        <div class="lg:col-span-2 col-span-6">
+          <FloatLabel>
+            <InputNumber :model-value="$form.fact?.value && $form.volume_coefficient?.value ? parseFloat(($form.fact.value * ($form.volume_coefficient.value || 1)).toFixed(6)) : $form.fact?.value || undefined"
+                         suffix=" м³"
+                         id="fact_m3" style="width: 100%" :disabled="true"/>
+            <label for="fact_m3" style="font-size: 12px">Объём (м³)</label>
+          </FloatLabel>
+        </div>
+        <div class="lg:col-span-2 col-span-6">
+          <FloatLabel>
+            <InputNumber :max-fraction-digits="10"
+                         id="volume_coefficient" style="width: 100%" name="volume_coefficient" :disabled="myOrder.done"/>
+            <label for="volume_coefficient" style="font-size: 12px">Коэф. объёма</label>
           </FloatLabel>
         </div>
         <div class="col-span-3">
           <FloatLabel>
-            <InputNumber 
+            <InputNumber
                 suffix=" ₽"
                 required id="per_price" style="width: 100%" name="per_price" :disabled="true"/>
             <label for="per_price" style="font-size: 12px">Стоимость за ед.</label>
@@ -179,7 +208,7 @@ function getUnit(nomenclature: string) {
         </div>
         <div class="col-span-3">
           <FloatLabel>
-            <InputNumber 
+            <InputNumber
                 suffix=" ₽"
                 required id="price" style="width: 100%" name="price" :disabled="true"/>
             <label for="price" style="font-size: 12px">Сумма</label>

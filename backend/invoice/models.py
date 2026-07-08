@@ -40,6 +40,7 @@ class InvoiceNomenclature(models.Model):
     invoice = models.ForeignKey(Invoice, models.CASCADE)
     nomenclature = models.ForeignKey('onec.Nomenclature', models.PROTECT)
     value = models.FloatField()
+    volume_coefficient = models.FloatField(default=1.0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -61,6 +62,7 @@ class Order(models.Model):
     price = models.FloatField()
     additive = models.FloatField(help_text='Добавка', blank=True, null=True)
     order = models.FloatField(help_text='Заказ')
+    volume_coefficient = models.FloatField(null=True, blank=True)
     fact = models.FloatField(blank=True, null=True)
     done = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

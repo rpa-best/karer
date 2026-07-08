@@ -30,5 +30,6 @@ class OrderView(ModelViewSet):
     def perform_update(self, serializer):
         instance = serializer.save()
         instance.done = True
-        instance.save(update_fields=['done'])
+        instance.price = instance.fact * instance.per_price
+        instance.save(update_fields=['done', 'price'])
         send_order_onec(instance.pk)
