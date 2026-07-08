@@ -156,7 +156,7 @@ function getUnit(nomenclature: string) {
           </FloatLabel>
         </div>
 
-        <div class="lg:col-span-2 col-span-6">
+        <div class="lg:col-span-3 col-span-6">
           <FloatLabel>
             <InputNumber required
                          @update:model-value="(value: number) => $form.price.value = $form.per_price?.value * ($form.fact?.value ? $form.fact.value : value)"
@@ -166,26 +166,26 @@ function getUnit(nomenclature: string) {
           </FloatLabel>
         </div>
 
-        <div class="lg:col-span-2 col-span-6">
+        <div class="lg:col-span-3 col-span-6">
           <FloatLabel>
-            <InputNumber 
+            <InputNumber
                          :suffix="` ${getUnit($form.nomenclature?.value)}`"
                          id="additive" style="width: 100%" name="additive" :disabled="myOrder.done"/>
             <label for="additive" style="font-size: 12px">Добавка</label>
           </FloatLabel>
         </div>
-        
+
         <div class="lg:col-span-2 col-span-6">
           <FloatLabel>
             <InputNumber required
-                         :suffix="` кг`"
+                         suffix=" кг"
                          id="fact" style="width: 100%" name="fact" :disabled="true"/>
             <label for="fact" style="font-size: 12px">Факт (кг)</label>
           </FloatLabel>
         </div>
         <div class="lg:col-span-2 col-span-6">
           <FloatLabel>
-            <InputNumber :model-value="$form.fact?.value && $form.volume_coefficient?.value ? parseFloat(($form.fact.value * ($form.volume_coefficient.value || 1)).toFixed(6)) : $form.fact?.value || undefined"
+            <InputNumber :model-value="$form.fact?.value ? parseFloat(($form.fact.value * ($form.volume_coefficient?.value || 1)).toFixed(6)) : undefined"
                          suffix=" м³"
                          id="fact_m3" style="width: 100%" :disabled="true"/>
             <label for="fact_m3" style="font-size: 12px">Объём (м³)</label>
