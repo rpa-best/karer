@@ -17,10 +17,12 @@ export const useUser = defineStore("user", {
             const user_service = new UserService()
             const r = await user_service.auth(values)
             token.value = r
+            this.user = await user_service.me()
         },
         logout() {
             token.value.access = null
             token.value.refresh = null
+            this.user = undefined
             const localePath = useLocalePath()
             navigateTo(localePath('/login'))
         },
