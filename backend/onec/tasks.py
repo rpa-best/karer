@@ -65,7 +65,7 @@ def send_order_onec(order_id):
         "TRANS_INFO": "",
         "ITEMS": [{
             "ITEM_ID": str(order.nomenclature_id),
-            "QUANTITY": round(order.fact * (order.volume_coefficient or 1), 6),
+            "QUANTITY": round(order.fact / order.volume_coefficient, 6) if order.volume_coefficient else order.fact,
         }]
     }
     response = requests.post(url, json=data, auth=(USERNAME, PASSWORD))

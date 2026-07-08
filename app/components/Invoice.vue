@@ -175,10 +175,10 @@ async function save({values, valid}: {values: any, valid: boolean}) {
                              :disabled="nDisabled" placeholder="Введите потребность" v-model="data[field]"/>
               </template>
             </Column>
-            <Column field="volume_coefficient" header="Коэф. объёма">
+            <Column field="volume_coefficient" header="Плотность (кг/м³)">
               <template #editor="{ data, field }">
-                <InputNumber :input-props="{autocomplete: 'off'}" :max-fraction-digits="10"
-                             :disabled="nDisabled" placeholder="Коэф. (кг→м³)" v-model="data[field]"/>
+                <InputNumber :input-props="{autocomplete: 'off'}" :max-fraction-digits="6"
+                             :disabled="nDisabled" placeholder="Плотность кг/м³" v-model="data[field]"/>
               </template>
               <template #body="{ data }">
                 <span class="text-sm">{{ data.volume_coefficient ?? 1 }}</span>

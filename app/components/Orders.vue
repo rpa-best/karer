@@ -209,7 +209,7 @@ function select_order(event: Event, data: Order) {
           <span v-if="data.fact" class="text-nowrap">
             {{ data.fact }} кг
             <span v-if="data.volume_coefficient" class="text-muted-foreground">
-              / {{ parseFloat((data.fact * data.volume_coefficient).toFixed(6)) }} м³
+              / {{ parseFloat((data.fact / data.volume_coefficient).toFixed(6)) }} м³
             </span>
           </span>
         </template>

@@ -185,7 +185,7 @@ function getUnit(nomenclature: string) {
         </div>
         <div class="lg:col-span-2 col-span-6">
           <FloatLabel>
-            <InputNumber :model-value="$form.fact?.value ? parseFloat(($form.fact.value * ($form.volume_coefficient?.value || 1)).toFixed(6)) : undefined"
+            <InputNumber :model-value="$form.fact?.value && $form.volume_coefficient?.value ? parseFloat(($form.fact.value / $form.volume_coefficient.value).toFixed(6)) : undefined"
                          suffix=" м³"
                          id="fact_m3" style="width: 100%" :disabled="true"/>
             <label for="fact_m3" style="font-size: 12px">Объём (м³)</label>
@@ -193,9 +193,9 @@ function getUnit(nomenclature: string) {
         </div>
         <div class="lg:col-span-2 col-span-6">
           <FloatLabel>
-            <InputNumber :max-fraction-digits="10"
+            <InputNumber :max-fraction-digits="6"
                          id="volume_coefficient" style="width: 100%" name="volume_coefficient" :disabled="myOrder.done"/>
-            <label for="volume_coefficient" style="font-size: 12px">Коэф. объёма</label>
+            <label for="volume_coefficient" style="font-size: 12px">Плотность (кг/м³)</label>
           </FloatLabel>
         </div>
         <div class="col-span-3">
