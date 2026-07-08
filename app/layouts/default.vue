@@ -17,14 +17,16 @@
 import {useUser} from '@/store/user'
 import { UserService } from '~/services/user'
 import { useQuery } from '@tanstack/vue-query'
+import { token } from '~/composables'
 
 const user = useUser()
 
 const user_service = new UserService()
 
 useQuery({
-  queryKey: ['user'],
+  queryKey: computed(() => ['user', token.value.access]),
   queryFn: async () => await user_service.me(),
+  enabled: computed(() => !!token.value.access),
   select(data) {
     user.user = data
     return data
