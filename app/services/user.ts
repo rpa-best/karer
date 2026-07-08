@@ -14,7 +14,7 @@ export class UserService {
     }
 
     async auth(values: UserLogin) {
-        const response = await this.$api.post<UserLogin, Token>("/oauth/auth/", values, {}, false)
+        const response = await this.$api.post<UserLogin, Token>("/oauth/auth/?by=username", values, {}, false)
         return response.data
     }
 }
