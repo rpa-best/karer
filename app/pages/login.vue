@@ -17,8 +17,8 @@
       <!--      </div>-->
       <Loading :loading="loading" class="!max-h-[100px]">
         <Form @submit="auth" method="post">
-          <label for="email" class="text-surface-900 dark:text-surface-0 font-medium mb-2 block">Почта</label>
-          <InputText id="email" name="email" type="email" placeholder="Введите почту" class="w-full mb-4" required/>
+          <label for="email" class="text-surface-900 dark:text-surface-0 font-medium mb-2 block">Логин</label>
+          <InputText id="email" name="email" type="text" placeholder="Введите логин" class="w-full mb-4" required/>
 
           <label for="password" class="text-surface-900 dark:text-surface-0 font-medium mb-2 block">Пароль</label>
           <Password id="password" name="password" type="password" placeholder="Введите пароль" class="w-full mb-4" fluid :feedback="false" required/>
